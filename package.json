@@ -1,0 +1,16 @@
+{
+  "name": "@1hive/brightid-faucet",
+  "version": "1.0.0",
+  "description": "",
+  "dependencies": {},
+  "devDependencies": {
+    "@nomiclabs/buidler": "^1.3.8",
+    "@nomiclabs/buidler-truffle5": "^1.3.4",
+    "@nomiclabs/buidler-web3": "^1.3.4",
+    "@openzeppelin/contracts": "^3.1.0",
+    "bn.js": "^5.1.2"
+  },
+  "scripts": {
+    "test": "buidler test --network buidlerevm"
+  }
+}
