@@ -86,7 +86,7 @@ contract BrightIdFaucet {
     function _isVerifiedUnique(bytes32 _brightIdContext, address[] memory _addrs, uint8 _v, bytes32 _r, bytes32 _s)
         internal view returns (bool)
     {
-        bytes32 signedMessage = keccak256(abi.encodePacked(_brightIdContext, addrs));
+        bytes32 signedMessage = keccak256(abi.encodePacked(_brightIdContext, _addrs));
         address verifierAddress = ecrecover(signedMessage, _v, _r, _s);
         bool correctVerifier = brightIdVerifier == verifierAddress;
         bool correctContext = brightIdContext == _brightIdContext;
