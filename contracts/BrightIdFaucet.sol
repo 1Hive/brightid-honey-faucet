@@ -3,11 +3,14 @@ pragma solidity ^0.6.11;
 // Log messages to console with `console.log("Message", "Other Message")` like JS
 import "@nomiclabs/buidler/console.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/math/SafeMath.sol";
 
 contract BrightIdFaucet {
+     using SafeMath for uint256;
 
     uint256 public constant ONE_HUNDRED_PERCENT = 1e18;
 
+    bytes32 public context;
     ERC20 public token;
     uint256 public periodLength;
     uint256 public percentPerPeriod;
@@ -20,25 +23,31 @@ contract BrightIdFaucet {
         uint256 latestClaimPeriod;
     }
 
-    constructor(ERC20 _token, uint256 _periodLength, uint256 _percentPerPeriod) public {
+    constructor(ERC20 _token, uint256 _periodLength, uint256 _percentPerPeriod, bytes32 _context) public {
         token = _token;
         periodLength = _periodLength;
         percentPerPeriod = _percentPerPeriod;
+        context = _context;
         firstPeriodStart = now;
     }
 
     function register() public {
-        claimers[msg.sender].registeredForPeriod = getCurrentPeriod() + 1;
+        // TODO: check brightId node valid signature
+        uint256 nextPeriod = getCurrentPeriod() + 1;
+        claimers[msg.sender].registeredForPeriod = nextPeriod;
+        periodsRegisteredUserCounts[nextPeriod]++;
     }
 
     function claim() public {
         Claimer storage claimer = claimers[msg.sender];
         uint256 currentPeriod = getCurrentPeriod();
-        if (claimer.registeredForPeriod == currentPeriod && claimer.latestClaimPeriod < currentPeriod /** && unique according to BrightID */) {
-            token.transfer(msg.sender, getPeriodPayout(getCurrentPeriod()));
+
+        if (_canClaim(claimer, currentPeriod)) {
+            token.transfer(msg.sender, getPeriodPayout(currentPeriod));
+            claimer.latestClaimPeriod = currentPeriod;
         }
-        claimer.registeredForPeriod = getCurrentPeriod() + 1;
-        // Update periodsRegisteredUserCounts
+
+        register();
     }
 
     function getCurrentPeriod() public view returns (uint256) {
@@ -46,8 +55,18 @@ contract BrightIdFaucet {
     }
 
     function getPeriodPayout(uint256 _periodNumber) public view returns (uint256) {
-        // Use periodsRegisteredUserCounts, this contracts balance of the token
-        // and percentPerPeriod to determine the payout
-        return 0;
+        uint256 periodRegisteredUserCount = periodsRegisteredUserCounts[_periodNumber];
+        uint256 tokenBalance = token.balanceOf(address(this));
+
+        uint256 totalAvailable = tokenBalance.mul(percentPerPeriod).div(ONE_HUNDRED_PERCENT);
+
+        return totalAvailable.div(periodRegisteredUserCount);
+    }
+
+    function _canClaim(Claimer storage claimer, uint256 currentPeriod) internal view returns (bool) {
+        bool userRegisteredCurrentPeriod = currentPeriod > 0 && claimer.registeredForPeriod == currentPeriod;
+        bool userClaimedCurrentPeriod = claimer.latestClaimPeriod >= currentPeriod;
+
+        return userRegisteredCurrentPeriod && !userClaimedCurrentPeriod;  /** && unique according to BrightID (isUniqueHuman call) */
     }
 }
