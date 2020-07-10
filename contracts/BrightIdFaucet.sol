@@ -9,6 +9,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 contract BrightIdFaucet is Ownable {
      using SafeMath for uint256;
 
+    string private constant ERROR_ADDRESS_VOIDED = "ADDRESS_VOIDED";
     string private constant ERROR_FAUCET_BALANCE_IS_ZERO = "FAUCET_BALANCE_IS_ZERO";
     string private constant ERROR_INCORRECT_VERIFICATION = "INCORRECT_VERIFICATION";
     string private constant ERROR_INVALID_PERIOD_LENGTH = "INVALID_PERIOD_LENGTH";
@@ -20,6 +21,7 @@ contract BrightIdFaucet is Ownable {
     struct Claimer {
         uint256 registeredForPeriod;
         uint256 latestClaimPeriod;
+        bool addressVoid;
     }
 
     struct Period {
@@ -78,6 +80,7 @@ contract BrightIdFaucet is Ownable {
         uint256 nextPeriod = getCurrentPeriod() + 1;
         claimers[msg.sender].registeredForPeriod = nextPeriod;
         periods[nextPeriod].registeredUsersCount++;
+        _voidUserHistory(_addrs);
 
         emit Register(msg.sender, nextPeriod);
     }
@@ -86,6 +89,8 @@ contract BrightIdFaucet is Ownable {
     // the previous period if eligible with this function.
     function claim() public {
         Claimer storage claimer = claimers[msg.sender];
+        require(!claimer.addressVoid, ERROR_ADDRESS_VOIDED);
+
         uint256 currentPeriod = getCurrentPeriod();
 
         if (_canClaim(claimer, currentPeriod)) {
@@ -134,10 +139,26 @@ contract BrightIdFaucet is Ownable {
     {
         bytes32 signedMessage = keccak256(abi.encodePacked(_brightIdContext, _addrs));
         address verifierAddress = ecrecover(signedMessage, _v, _r, _s);
+
         bool correctVerifier = brightIdVerifier == verifierAddress;
         bool correctContext = brightIdContext == _brightIdContext;
         // bool correctTimestamp = timestamp = now +/- 1 day // Within a day of now to account for block wait times? Can think of alternative?
 
         return correctVerifier && correctContext; // && correctTimestamp;
+    }
+
+    function _voidUserHistory(address[] memory _addrs) internal {
+        if (_addrs.length <= 1) {
+            return;
+        }
+
+        // Void all previously used addresses to prevent users
+        // from registering with old addresses after they registered with their newest verified address.
+        uint256 index = 1;
+        while (!claimers[_addrs[index]].addressVoid) {
+            claimers[_addrs[index]].addressVoid = true;
+
+            index++;
+        }
     }
 }
