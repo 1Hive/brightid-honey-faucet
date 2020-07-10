@@ -42,6 +42,9 @@ contract BrightIdFaucet is Ownable {
     event Register(address sender, uint256 periodNumber);
 
     constructor(ERC20 _token, uint256 _periodLength, uint256 _percentPerPeriod, bytes32 _brightIdContext, address _brightIdVerifier) public {
+        require(_periodLength > 0, ERROR_INVALID_PERIOD_LENGTH);
+        require(_percentPerPeriod < ONE_HUNDRED_PERCENT, ERROR_INVALID_PERIOD_PERCENTAGE);
+
         token = _token;
         periodLength = _periodLength;
         percentPerPeriod = _percentPerPeriod;
