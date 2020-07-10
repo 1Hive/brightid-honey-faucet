@@ -4,11 +4,28 @@ pragma solidity ^0.6.11;
 import "@nomiclabs/buidler/console.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract BrightIdFaucet {
+contract BrightIdFaucet is Ownable {
      using SafeMath for uint256;
 
+    string private constant ERROR_FAUCET_BALANCE_IS_ZERO = "FAUCET_BALANCE_IS_ZERO";
+    string private constant ERROR_INCORRECT_VERIFICATION = "INCORRECT_VERIFICATION";
+    string private constant ERROR_INVALID_PERIOD_LENGTH = "INVALID_PERIOD_LENGTH";
+    string private constant ERROR_INVALID_PERIOD_PERCENTAGE = "INVALID_PERIOD_PERCENTAGE";
+    string private constant ERROR_SENDER_NOT_VERIFIED = "SENDER_NOT_VERIFIED";
+
     uint256 public constant ONE_HUNDRED_PERCENT = 1e18;
+
+    struct Claimer {
+        uint256 registeredForPeriod;
+        uint256 latestClaimPeriod;
+    }
+
+    struct Period {
+        uint256 registeredUsersCount;
+        uint256 balance;
+    }
 
     ERC20 public token;
     uint256 public periodLength;
@@ -17,15 +34,17 @@ contract BrightIdFaucet {
     address public brightIdVerifier;
     uint256 public firstPeriodStart;
     mapping (address => Claimer) public claimers;
-    mapping (uint256 => uint256) public periodsRegisteredUserCounts;
+    mapping (uint256 => Period) public periods;
 
-    struct Claimer {
-        uint256 registeredForPeriod;
-        uint256 latestClaimPeriod;
-    }
+    event SetPeriodSettings(uint256 periodLength, uint256 percentPerPeriod);
+    event SetBrightIdSettings(bytes32 brightIdContext, address brightIdVerifier);
+    event Claim(address claimer, uint256 periodNumber, uint256 amount);
+    event Register(address sender, uint256 periodNumber);
 
-    // TODO: Add setters for these things, not sure the best way, since we're not an AragonApp...
     constructor(ERC20 _token, uint256 _periodLength, uint256 _percentPerPeriod, bytes32 _brightIdContext, address _brightIdVerifier) public {
+        require(_periodLength > 0, ERROR_INVALID_PERIOD_LENGTH);
+        require(_percentPerPeriod < ONE_HUNDRED_PERCENT, ERROR_INVALID_PERIOD_PERCENTAGE);
+
         token = _token;
         periodLength = _periodLength;
         percentPerPeriod = _percentPerPeriod;
@@ -34,16 +53,33 @@ contract BrightIdFaucet {
         firstPeriodStart = now;
     }
 
+    function setPeriodSettings(uint256 _periodLength, uint256 _percentPerPeriod) public onlyOwner {
+        require(_periodLength > 0, ERROR_INVALID_PERIOD_LENGTH);
+        require(_percentPerPeriod < ONE_HUNDRED_PERCENT, ERROR_INVALID_PERIOD_PERCENTAGE);
+
+        periodLength = _periodLength;
+        percentPerPeriod = _percentPerPeriod;
+        emit SetPeriodSettings(_periodLength, _percentPerPeriod);
+    }
+
+    function setBrightIdSettings(bytes32 _brightIdContext, address _brightIdVerifier) public onlyOwner {
+        brightIdContext = _brightIdContext;
+        brightIdVerifier = _brightIdVerifier;
+        emit SetBrightIdSettings(_brightIdContext, _brightIdVerifier);
+    }
+ 
     // If you have previously registered then you will claim here and register for the next period.
     function claimAndOrRegister(bytes32 _brightIdContext, address[] memory _addrs, uint8 _v, bytes32 _r, bytes32 _s) public {
-        require(_isVerifiedUnique(_brightIdContext, _addrs, _v, _r, _s), "Incorrect verification");
-        require(msg.sender == _addrs[0], "Sender not verified account");
+        require(_isVerifiedUnique(_brightIdContext, _addrs, _v, _r, _s), ERROR_INCORRECT_VERIFICATION);
+        require(msg.sender == _addrs[0], ERROR_SENDER_NOT_VERIFIED);
 
         claim();
 
         uint256 nextPeriod = getCurrentPeriod() + 1;
         claimers[msg.sender].registeredForPeriod = nextPeriod;
-        periodsRegisteredUserCounts[nextPeriod]++;
+        periods[nextPeriod].registeredUsersCount++;
+
+        emit Register(msg.sender, nextPeriod);
     }
 
     // If for some reason you cannot register again, lost uniqueness or brightID nodes down, you can still claim for
@@ -53,8 +89,21 @@ contract BrightIdFaucet {
         uint256 currentPeriod = getCurrentPeriod();
 
         if (_canClaim(claimer, currentPeriod)) {
-            token.transfer(msg.sender, getPeriodPayout(currentPeriod));
+            Period storage period = periods[currentPeriod];
+
+            // Save balance so every claimer gets the same payout amount.
+            if (period.balance == 0) {
+                uint256 faucetBalance = token.balanceOf(address(this));
+                require(faucetBalance > 0, ERROR_FAUCET_BALANCE_IS_ZERO);
+                period.balance = faucetBalance;
+            }
+
+            uint256 amount = getPeriodPayout(currentPeriod);
+            token.transfer(msg.sender, amount);
+
             claimer.latestClaimPeriod = currentPeriod;
+
+            emit Claim(msg.sender, currentPeriod, amount);
         }
     }
 
@@ -62,24 +111,21 @@ contract BrightIdFaucet {
         return (now - firstPeriodStart) / periodLength;
     }
 
-    // TODO: Store the tokenBalance used in this calculation if its the first call in a period
-    //      Then use that value for subsequent calculations within the same period. This way every claimer in a period
-    //      receives the same amount and there isn't a rush to claim at the start of a period.
     function getPeriodPayout(uint256 _periodNumber) public view returns (uint256) {
+        Period storage period = periods[_periodNumber];
+        uint256 periodBalance = period.balance == 0 ? token.balanceOf(address(this)) : period.balance;
+        uint256 periodRegisteredUsersCount = period.registeredUsersCount;
 
-        uint256 periodRegisteredUserCount = periodsRegisteredUserCounts[_periodNumber];
-        uint256 tokenBalance = token.balanceOf(address(this));
+        uint256 totalAvailable = periodBalance.mul(percentPerPeriod).div(ONE_HUNDRED_PERCENT);
 
-        uint256 totalAvailable = tokenBalance.mul(percentPerPeriod).div(ONE_HUNDRED_PERCENT);
-
-        return totalAvailable.div(periodRegisteredUserCount);
+        return totalAvailable.div(periodRegisteredUsersCount);
     }
 
     function _canClaim(Claimer storage claimer, uint256 currentPeriod) internal view returns (bool) {
         bool userRegisteredCurrentPeriod = currentPeriod > 0 && claimer.registeredForPeriod == currentPeriod;
         bool userYetToClaimCurrentPeriod = claimer.latestClaimPeriod < currentPeriod;
 
-        return userRegisteredCurrentPeriod && userYetToClaimCurrentPeriod;  /** && unique according to BrightID (isUniqueHuman call) */
+        return userRegisteredCurrentPeriod && userYetToClaimCurrentPeriod;
     }
 
     // TODO: This should also accept a timestamp but the nodes do not currently provide one, once they do we can add it.
@@ -90,7 +136,7 @@ contract BrightIdFaucet {
         address verifierAddress = ecrecover(signedMessage, _v, _r, _s);
         bool correctVerifier = brightIdVerifier == verifierAddress;
         bool correctContext = brightIdContext == _brightIdContext;
-//        bool correctTimestamp = timestamp = now +/- 1 day // Within a day of now to account for block wait times? Can think of alternative?
+        // bool correctTimestamp = timestamp = now +/- 1 day // Within a day of now to account for block wait times? Can think of alternative?
 
         return correctVerifier && correctContext; // && correctTimestamp;
     }
