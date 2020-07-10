@@ -148,15 +148,15 @@ contract BrightIdFaucet is Ownable {
     }
 
     function _voidUserHistory(address[] memory _addrs) internal {
-        if (_address.length <= 1) {
+        if (_addrs.length <= 1) {
             return;
         }
 
         // Void all previously used addresses to prevent users
         // from registering with old addresses after they registered with their newest verified address.
         uint256 index = 1;
-        while (!claimers[_address[index]].addressVoid) {
-            claimers[temp].addressVoid = true;
+        while (!claimers[_addrs[index]].addressVoid) {
+            claimers[_addrs[index]].addressVoid = true;
 
             index++;
         }
