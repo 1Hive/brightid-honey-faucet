@@ -9,7 +9,10 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 contract BrightIdFaucet is Ownable {
      using SafeMath for uint256;
 
+    string private constant ERROR_FAUCET_BALANCE_IS_ZERO = "FAUCET_BALANCE_IS_ZERO";
     string private constant ERROR_INCORRECT_VERIFICATION = "INCORRECT_VERIFICATION";
+    string private constant ERROR_INVALID_PERIOD_LENGTH = "INVALID_PERIOD_LENGTH";
+    string private constant ERROR_INVALID_PERIOD_PERCENTAGE = "INVALID_PERIOD_PERCENTAGE";
     string private constant ERROR_SENDER_NOT_VERIFIED = "SENDER_NOT_VERIFIED";
 
     uint256 public constant ONE_HUNDRED_PERCENT = 1e18;
@@ -21,7 +24,6 @@ contract BrightIdFaucet is Ownable {
 
     struct Period {
         uint256 registeredUsersCount;
-        uint256 claimsCount;
         uint256 balance;
     }
 
@@ -34,7 +36,6 @@ contract BrightIdFaucet is Ownable {
     mapping (address => Claimer) public claimers;
     mapping (uint256 => Period) public periods;
 
-    event SetToken(address token);
     event SetPeriodSettings(uint256 periodLength, uint256 percentPerPeriod);
     event SetBrightIdSettings(bytes32 brightIdContext, address brightIdVerifier);
     event Claim(address claimer, uint256 periodNumber, uint256 amount);
@@ -49,12 +50,10 @@ contract BrightIdFaucet is Ownable {
         firstPeriodStart = now;
     }
 
-    function setToken(ERC20 _token) public onlyOwner {
-        token = _token;
-        emit SetToken(address(_token));
-    }
-
     function setPeriodSettings(uint256 _periodLength, uint256 _percentPerPeriod) public onlyOwner {
+        require(_periodLength > 0, ERROR_INVALID_PERIOD_LENGTH);
+        require(_percentPerPeriod < ONE_HUNDRED_PERCENT, ERROR_INVALID_PERIOD_PERCENTAGE);
+
         periodLength = _periodLength;
         percentPerPeriod = _percentPerPeriod;
         emit SetPeriodSettings(_periodLength, _percentPerPeriod);
@@ -90,15 +89,16 @@ contract BrightIdFaucet is Ownable {
             Period storage period = periods[currentPeriod];
 
             // Save balance so every claimer gets the same payout amount.
-            if (period.claimsCount == 0) {
-                period.balance = token.balanceOf(address(this));
+            if (period.balance == 0) {
+                uint256 faucetBalance = token.balanceOf(address(this));
+                require(faucetBalance > 0, ERROR_FAUCET_BALANCE_IS_ZERO);
+                period.balance = faucetBalance;
             }
 
             uint256 amount = getPeriodPayout(currentPeriod);
             token.transfer(msg.sender, amount);
 
             claimer.latestClaimPeriod = currentPeriod;
-            period.claimsCount++;
 
             emit Claim(msg.sender, currentPeriod, amount);
         }
@@ -109,8 +109,8 @@ contract BrightIdFaucet is Ownable {
     }
 
     function getPeriodPayout(uint256 _periodNumber) public view returns (uint256) {
-        Period memory period = periods[_periodNumber];
-        uint256 periodBalance = period.claimsCount == 0 ? token.balanceOf(address(this)) : period.balance;
+        Period storage period = periods[_periodNumber];
+        uint256 periodBalance = period.balance == 0 ? token.balanceOf(address(this)) : period.balance;
         uint256 periodRegisteredUsersCount = period.registeredUsersCount;
 
         uint256 totalAvailable = periodBalance.mul(percentPerPeriod).div(ONE_HUNDRED_PERCENT);
