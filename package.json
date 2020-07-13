@@ -11,6 +11,7 @@
     "bn.js": "^5.1.2"
   },
   "scripts": {
-    "test": "buidler test --network buidlerevm"
+    "test": "buidler test --network buidlerevm",
+    "compile": "buidler compile"
   }
 }
