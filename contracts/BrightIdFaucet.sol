@@ -18,8 +18,6 @@ contract BrightIdFaucet is Ownable {
     string private constant ERROR_SENDER_NOT_VERIFIED = "SENDER_NOT_VERIFIED";
 
     uint256 public constant ONE_HUNDRED_PERCENT = 1e18;
-    uint256 public constant MINIMUM_ETH_BALANCE = 5e17; // If claimers have less than this minimum at the moment of claiming tokens, 
-                                                        // a portion of them will be sold in exchange for ETH in order to satisfy the minimum requirement.
 
     struct Claimer {
         uint256 registeredForPeriod;
@@ -33,6 +31,8 @@ contract BrightIdFaucet is Ownable {
     }
 
     ERC20 public token;
+    uint256 minimumEthBalance;  // If claimers have less than this minimum at the moment of claiming tokens,
+                                // a portion of them will be sold in exchange for ETH in order to satisfy the minimum requirement.
     UniswapExchange uniswapExchange;
     uint256 public periodLength;
     uint256 public percentPerPeriod;
@@ -44,23 +44,41 @@ contract BrightIdFaucet is Ownable {
 
     event SetPeriodSettings(uint256 periodLength, uint256 percentPerPeriod);
     event SetBrightIdSettings(bytes32 brightIdContext, address brightIdVerifier);
+    event SetMinimumEthBalance(uint256 miniumBalance);
     event Claim(address claimer, uint256 periodNumber, uint256 amount);
     event Register(address sender, uint256 periodNumber);
 
-    constructor(ERC20 _token, uint256 _periodLength, uint256 _percentPerPeriod, bytes32 _brightIdContext, address _brightIdVerifier, UniswapExchange _uniswapExchange) public {
+    constructor(
+        ERC20 _token,
+        uint256 _periodLength,
+        uint256 _percentPerPeriod,
+        bytes32 _brightIdContext,
+        address _brightIdVerifier,
+        UniswapExchange _uniswapExchange,
+        uint256 _minimumEthBalance
+    )
+        public
+    {
         require(_periodLength > 0, ERROR_INVALID_PERIOD_LENGTH);
         require(_percentPerPeriod < ONE_HUNDRED_PERCENT, ERROR_INVALID_PERIOD_PERCENTAGE);
 
         token = _token;
-        uniswapExchange = _uniswapExchange;
         periodLength = _periodLength;
         percentPerPeriod = _percentPerPeriod;
         brightIdContext = _brightIdContext;
         brightIdVerifier = _brightIdVerifier;
         firstPeriodStart = now;
 
+        uniswapExchange = _uniswapExchange;
+        minimumEthBalance = _minimumEthBalance;
         // Approve uniswap exchange to transfer an unlimited amount of tokens on facuet's behalf.
         token.approve(address(uniswapExchange), uint256(-1));
+    }
+
+    function setMinimumEthBalance(uint256 _miniumBalance) public onlyOwner {
+        minimumEthBalance = _miniumBalance;
+
+        emit SetMinimumEthBalance(_miniumBalance);
     }
 
     function setPeriodSettings(uint256 _periodLength, uint256 _percentPerPeriod) public onlyOwner {
@@ -115,8 +133,8 @@ contract BrightIdFaucet is Ownable {
             uint256 tokensSold = 0;
 
             // Sell tokens in exchange fot ETH if the claimer's balance is less than 0.5 ETH
-            if (msg.sender.balance < MINIMUM_ETH_BALANCE) {
-                uint256 amountToBuy = MINIMUM_ETH_BALANCE.sub(msg.sender.balance);
+            if (msg.sender.balance < minimumEthBalance) {
+                uint256 amountToBuy = minimumEthBalance.sub(msg.sender.balance);
                 tokensSold = uniswapExchange.tokenToEthTransferOutput(amountToBuy, claimerPayout, block.timestamp, msg.sender);
             }
 
