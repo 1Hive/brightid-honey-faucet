@@ -1,4 +1,4 @@
-export const BRIGHTID_CONTEXT = 'honeyfaucet'
+export const BRIGHTID_CONTEXT = '1hive'
 
 export const NODE_URL = 'http:%2f%2fnode.brightid.org'
 
