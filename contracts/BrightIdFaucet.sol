@@ -32,7 +32,7 @@ contract BrightIdFaucet is Ownable {
 
     ERC20 public token;
     uint256 minimumEthBalance;  // If claimers have less than this minimum at the moment of claiming tokens,
-                                // a portion of them will be sold in exchange for ETH in order to satisfy the minimum requirement.
+                                // a portion of them will be sold in exchange for ETH/xDAI in order to satisfy the minimum requirement.
     UniswapExchange uniswapExchange;
     uint256 public periodLength;
     uint256 public percentPerPeriod;
@@ -71,14 +71,12 @@ contract BrightIdFaucet is Ownable {
 
         uniswapExchange = _uniswapExchange;
         minimumEthBalance = _minimumEthBalance;
-        // Approve uniswap exchange to transfer an unlimited amount of tokens on facuet's behalf.
-        token.approve(address(uniswapExchange), uint256(-1));
     }
 
-    function setMinimumEthBalance(uint256 _miniumBalance) public onlyOwner {
-        minimumEthBalance = _miniumBalance;
+    function setMinimumEthBalance(uint256 _minimumEthBalance) public onlyOwner {
+        minimumEthBalance = _minimumEthBalance;
 
-        emit SetMinimumEthBalance(_miniumBalance);
+        emit SetMinimumEthBalance(_minimumEthBalance);
     }
 
     function setPeriodSettings(uint256 _periodLength, uint256 _percentPerPeriod) public onlyOwner {
@@ -97,11 +95,11 @@ contract BrightIdFaucet is Ownable {
     }
  
     // If you have previously registered then you will claim here and register for the next period.
-    function claimAndOrRegister(bytes32 _brightIdContext, address[] memory _addrs, uint8 _v, bytes32 _r, bytes32 _s) public {
+    function claimAndOrRegister(bytes32 _brightIdContext, address[] memory _addrs, uint8 _v, bytes32 _r, bytes32 _s, uint256 _transferWindow) public {
         require(_isVerifiedUnique(_brightIdContext, _addrs, _v, _r, _s), ERROR_INCORRECT_VERIFICATION);
         require(msg.sender == _addrs[0], ERROR_SENDER_NOT_VERIFIED);
 
-        claim();
+        claim(_transferWindow);
 
         uint256 nextPeriod = getCurrentPeriod() + 1;
         claimers[msg.sender].registeredForPeriod = nextPeriod;
@@ -113,7 +111,7 @@ contract BrightIdFaucet is Ownable {
 
     // If for some reason you cannot register again, lost uniqueness or brightID nodes down, you can still claim for
     // the previous period if eligible with this function.
-    function claim() public {
+    function claim(uint256 _transferWindow) public {
         Claimer storage claimer = claimers[msg.sender];
         require(!claimer.addressVoid, ERROR_ADDRESS_VOIDED);
 
@@ -134,8 +132,20 @@ contract BrightIdFaucet is Ownable {
 
             // Sell tokens in exchange fot ETH if the claimer's balance is less than 0.5 ETH
             if (msg.sender.balance < minimumEthBalance) {
+
+                uint256 exchangeAllowance = token.allowance(address(this), address(uniswapExchange));
+                if (exchangeAllowance < claimerPayout) {
+                    // Some ERC20 tokens fail if allowance is not 0 when approving tokens
+                    if (exchangeAllowance > 0) {
+                        token.approve(address(uniswapExchange), 0);
+                    }
+
+                    // Approve uniswap exchange to transfer an unlimited amount of tokens on facuet's behalf.
+                    token.approve(address(uniswapExchange), claimerPayout);
+                }
+
                 uint256 amountToBuy = minimumEthBalance.sub(msg.sender.balance);
-                tokensSold = uniswapExchange.tokenToEthTransferOutput(amountToBuy, claimerPayout, block.timestamp, msg.sender);
+                tokensSold = uniswapExchange.tokenToEthTransferOutput(amountToBuy, claimerPayout, block.timestamp.add(_transferWindow), msg.sender);
             }
 
             uint256 totalPayout = claimerPayout.sub(tokensSold);
