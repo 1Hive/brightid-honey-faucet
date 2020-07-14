@@ -130,7 +130,7 @@ contract BrightIdFaucet is Ownable {
             uint256 claimerPayout = getPeriodPayout(currentPeriod);
             uint256 tokensSold = 0;
 
-            // Sell tokens in exchange fot ETH if the claimer's balance is less than 0.5 ETH
+            // Sell tokens in exchange fot ETH/xDAI if the claimer's balance is less than 0.5 ETH/xDAI
             if (msg.sender.balance < minimumEthBalance) {
 
                 uint256 exchangeAllowance = token.allowance(address(this), address(uniswapExchange));
