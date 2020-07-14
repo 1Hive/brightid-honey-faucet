@@ -56,7 +56,7 @@ export function useBrightIdVerification(account) {
 
           setVerificationInfo({
             addressExist: true,
-            userAddresses: response?.data?.contextIds,
+            userAddresses: response.data.contextIds,
             fetching: false,
           })
           return

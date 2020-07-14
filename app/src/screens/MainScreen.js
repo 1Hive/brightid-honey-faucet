@@ -2,9 +2,10 @@ import React from 'react'
 import { Box, GU, Link, textStyle, theme } from '@1hive/1hive-ui'
 import FaucetInfo from '../components/FaucetInfo'
 
+import distributionIcon from '../assets/distributionIcon.svg'
+import tokensAvailableIcon from '../assets/tokensAvailableIcon.svg'
 import tokenIcon from '../assets/tokenIcon.svg'
-
-// TODO - use the right icons once fiore sent us and add the contracts calls to get the info
+import userIcon from '../assets/userIcon.svg'
 
 const MainScreen = React.memo(({ isLoading }) => {
   if (isLoading) {
@@ -82,19 +83,19 @@ const MainScreen = React.memo(({ isLoading }) => {
           amount={0}
           decimals={0}
           text="Registered users"
-          icon={tokenIcon}
+          icon={userIcon}
         />
         <FaucetInfo
           amount={0}
           decimals={0}
           text="Total distributed"
-          icon={tokenIcon}
+          icon={distributionIcon}
         />
         <FaucetInfo
           amount={0}
           decimals={0}
           text="Currently available"
-          icon={tokenIcon}
+          icon={tokensAvailableIcon}
         />
         <FaucetInfo
           amount={0}

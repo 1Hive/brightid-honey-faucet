@@ -9,15 +9,15 @@ import {
 } from '@1hive/1hive-ui'
 import QRCode from 'qrcode.react'
 import { useWallet } from '../providers/Wallet'
-import { useBrightIdVerification } from '../hooks/useBirightIdVerification'
+import { useBrightIdVerification } from '../hooks/useBrightIdVerification'
 import { BRIGHT_ID_APP_DEEPLINK } from '../constants'
 
-function Wallet() {
+function Wallet({ isLoading }) {
   const theme = useTheme()
   const { account } = useWallet()
-  const { error, addressExist } = useBrightIdVerification(account)
 
-  console.log('error ', error)
+  // TODO - error handling on this api call
+  const { addressExist } = useBrightIdVerification(account)
 
   const deepLink = `${BRIGHT_ID_APP_DEEPLINK}/account`
 
