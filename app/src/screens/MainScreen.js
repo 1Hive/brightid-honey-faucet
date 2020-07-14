@@ -1,5 +1,10 @@
 import React from 'react'
 import { Box, GU, Link, textStyle, theme } from '@1hive/1hive-ui'
+import FaucetInfo from '../components/FaucetInfo'
+
+import tokenIcon from '../assets/tokenIcon.svg'
+
+// TODO - use the right icons once fiore sent us and add the contracts calls to get the info
 
 const MainScreen = React.memo(({ isLoading }) => {
   if (isLoading) {
@@ -73,38 +78,30 @@ const MainScreen = React.memo(({ isLoading }) => {
           margin-left: ${2 * GU}px;
         `}
       >
-        <Box
-          css={`
-            width: ${33 * GU}px;
-            height: ${18 * GU}px;
-          `}
-        >
-          BOX 1
-        </Box>
-        <Box
-          css={`
-            width: ${33 * GU}px;
-            height: ${18 * GU}px;
-          `}
-        >
-          BOX 2
-        </Box>
-        <Box
-          css={`
-            width: ${33 * GU}px;
-            height: ${18 * GU}px;
-          `}
-        >
-          BOX 3
-        </Box>
-        <Box
-          css={`
-            width: ${33 * GU}px;
-            height: ${18 * GU}px;
-          `}
-        >
-          BOX 4
-        </Box>
+        <FaucetInfo
+          amount={0}
+          decimals={0}
+          text="Registered users"
+          icon={tokenIcon}
+        />
+        <FaucetInfo
+          amount={0}
+          decimals={0}
+          text="Total distributed"
+          icon={tokenIcon}
+        />
+        <FaucetInfo
+          amount={0}
+          decimals={0}
+          text="Currently available"
+          icon={tokenIcon}
+        />
+        <FaucetInfo
+          amount={0}
+          decimals={0}
+          text="Amount paid per user this period"
+          icon={tokenIcon}
+        />
       </div>
     </div>
   )
