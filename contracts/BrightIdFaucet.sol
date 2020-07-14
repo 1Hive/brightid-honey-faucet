@@ -130,22 +130,8 @@ contract BrightIdFaucet is Ownable {
             uint256 claimerPayout = getPeriodPayout(currentPeriod);
             uint256 tokensSold = 0;
 
-            // Sell tokens in exchange fot ETH/xDAI if the claimer's balance is less than 0.5 ETH/xDAI
             if (msg.sender.balance < minimumEthBalance) {
-
-                uint256 exchangeAllowance = token.allowance(address(this), address(uniswapExchange));
-                if (exchangeAllowance < claimerPayout) {
-                    // Some ERC20 tokens fail if allowance is not 0 when approving tokens
-                    if (exchangeAllowance > 0) {
-                        token.approve(address(uniswapExchange), 0);
-                    }
-
-                    // Approve uniswap exchange to transfer an unlimited amount of tokens on facuet's behalf.
-                    token.approve(address(uniswapExchange), claimerPayout);
-                }
-
-                uint256 amountToBuy = minimumEthBalance.sub(msg.sender.balance);
-                tokensSold = uniswapExchange.tokenToEthTransferOutput(amountToBuy, claimerPayout, block.timestamp.add(_transferWindow), msg.sender);
+                tokensSold = _topUpSenderEthBalance(msg.sender, claimerPayout, _transferWindow);
             }
 
             uint256 totalPayout = claimerPayout.sub(tokensSold);
@@ -205,5 +191,20 @@ contract BrightIdFaucet is Ownable {
 
             index++;
         }
+    }
+
+    function _topUpSenderEthBalance(address _sender, uint256 _maxAmount, uint256 _transferWindow) private returns (uint256 tokensSold){
+        uint256 exchangeAllowance = token.allowance(address(this), address(uniswapExchange));
+        if (exchangeAllowance < _maxAmount) {
+            // Some ERC20 tokens fail if allowance is not 0 when approving tokens
+            if (exchangeAllowance > 0) {
+                token.approve(address(uniswapExchange), 0);
+            }
+
+            token.approve(address(uniswapExchange), _maxAmount);
+        }
+
+        uint256 amountToBuy = minimumEthBalance.sub(_sender.balance);
+        tokensSold = uniswapExchange.tokenToEthTransferOutput(amountToBuy, _maxAmount, now.add(_transferWindow), _sender);
     }
 }
