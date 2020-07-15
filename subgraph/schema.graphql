@@ -1,10 +1,9 @@
-type Settings @entity {
+type Config @entity {
   id: ID!
   token: ERC20!
-  periodLength: BigInt!
   firstPeriodStart: BigInt!
+  periodLength: BigInt!
   percentPerPeriod: BigInt!
-  pctBase: BigInt!
   minimumEthBalance: BigInt!
 }
 

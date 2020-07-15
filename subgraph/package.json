@@ -8,11 +8,11 @@
     "build": "graph build",
     "deploy": "yarn deploy-xdai",
     "prepare:local": "mustache config/local.json subgraph.template.yaml > subgraph.yaml",
-    "deploy-local": "yarn prepare:local && graph deploy 1hive/brightid-honey-faucet --ipfs http://localhost:5001 --node http://127.0.0.1:8020",
+    "deploy:local": "yarn prepare:local && graph deploy 1hive/brightid-honey-faucet --ipfs http://localhost:5001 --node http://127.0.0.1:8020",
     "prepare:xdai": "mustache config/xdai.json subgraph.template.yaml > subgraph.yaml",
-    "deploy-xdai": "yarn prepare:xdai && graph deploy 1hive/brightid-honey-faucet-xdai --ipfs https://api.thegraph.com/ipfs/ --node https://api.thegraph.com/deploy/",
+    "deploy:xdai": "yarn prepare:xdai && graph deploy 1hive/brightid-honey-faucet-xdai --ipfs https://api.thegraph.com/ipfs/ --node https://api.thegraph.com/deploy/",
     "prepare:mainnet": "mustache config/mainnet.json subgraph.template.yaml > subgraph.yaml",
-    "deploy-mainnet": "yarn prepare:mainnet && graph deploy 1hive/brightid-honey-faucet --ipfs https://api.thegraph.com/ipfs/ --node https://api.thegraph.com/deploy/"
+    "deploy:mainnet": "yarn prepare:mainnet && graph deploy 1hive/brightid-honey-faucet --ipfs https://api.thegraph.com/ipfs/ --node https://api.thegraph.com/deploy/"
   },
   "devDependencies": {
     "@graphprotocol/graph-cli": "^0.18.0",

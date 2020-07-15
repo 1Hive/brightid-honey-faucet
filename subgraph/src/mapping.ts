@@ -1,6 +1,28 @@
 import { Address, BigInt, Bytes } from '@graphprotocol/graph-ts'
-import { BrightIdFaucet, Claim as ClaimEvent, Register as RegisterEvent } from '../generated/BrightIdFaucet/BrightIdFaucet'
-import { Claim, Claimer, Period, Settings } from '../generated/schema'
+import { BrightIdFaucet, Claim as ClaimEvent, Initialize as InitializeEvent, Register as RegisterEvent } from '../generated/BrightIdFaucet/BrightIdFaucet'
+import { ERC20 as ERC20Contract } from '../generated/BrightIdFaucet/ERC20'
+import { Claim, Claimer, Config, ERC20, Period } from '../generated/schema'
+
+export function handleInitialized(event: InitializeEvent): void {
+  let config = new Config(event.address.toHexString())
+  config.firstPeriodStart = event.block.timestamp
+  config.periodLength = event.params.periodLength
+  config.percentPerPeriod = event.params.percentPerPeriod
+  config.minimumEthBalance = event.params.minimumEthBalance
+
+  // Load token
+  let tokenAddress = event.params.token
+  let token = new ERC20(tokenAddress.toHexString())
+  let tokenContract = ERC20Contract.bind(tokenAddress)
+  token.name = tokenContract.name()
+  token.symbol = tokenContract.symbol()
+  token.decimals = tokenContract.decimals()
+  token.save()
+
+  config.token = token.id
+  config.save()
+
+}
 
 export function handleNewClaim(event: ClaimEvent): void {
   let claim = _getClaimEntity(event.params.claimer, event.params.periodNumber)
@@ -17,12 +39,12 @@ export function handleNewClaim(event: ClaimEvent): void {
 export function handleNewRegistration(event: RegisterEvent): void {
   let period = _getPeriodEntity(event.params.periodNumber)
 
-  let faucet = BrightIdFaucet.bind(event.address)
-  period.individualPayout = faucet.getPeriodIndividualPayout(event.params.periodNumber)
+  let faucetContract = BrightIdFaucet.bind(event.address)
+  period.individualPayout = faucetContract.getPeriodIndividualPayout(event.params.periodNumber)
   period.totalRegisteredUsers = period.totalRegisteredUsers.plus(BigInt.fromI32(1))
   period.save()
 
-  let claimerData = faucet.claimers(event.params.sender) 
+  let claimerData = faucetContract.claimers(event.params.sender) 
   let claimer = _getClaimerEntity(event.params.sender)
   claimer.registeredForPeriod = event.params.periodNumber
   claimer.addressVoid = claimerData.value2
