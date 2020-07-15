@@ -1,100 +1,87 @@
-import BigNumber from './bigNumber'
+import { utils as EthersUtils } from 'ethers'
 
-/**
- * Generic round function, see:
- *  - https://stackoverflow.com/a/18358056/1375656
- *  - https://stackoverflow.com/a/19722641/1375656
- *
- * Fixed for NaNs on really small values
- *
- * @param {number} num Number to round
- * @param {number} [places=2] Number of places to round to
- * @returns {number} Rounded number
- */
-export function round(num, places = 2) {
-  const rounded = Number(Math.round(num + 'e+' + places) + 'e-' + places)
-  return Number.isNaN(rounded) ? Number(num.toFixed(places)) : rounded
+export function bigNum(value) {
+  return new EthersUtils.BigNumber(value)
 }
 
-/**
- * Get the whole and decimal parts from a number.
- * Trims leading and trailing zeroes.
- *
- * @param {string} num the number
- * @returns {Array<string>} array with the [<whole>, <decimal>] parts of the number
- */
-function splitDecimalNumber(num) {
-  const [whole = '', dec = ''] = num.split('.')
-  return [
-    whole.replace(/^0*/, ''), // trim leading zeroes
-    dec.replace(/0*$/, ''), // trim trailing zeroes
-  ]
+export function formatTokenAmount(
+  amount,
+  decimals = 0,
+  displaySign = false,
+  isIncoming
+) {
+  return (
+    (displaySign ? (isIncoming ? '+' : '-') : '') +
+    formatUnits(amount, { digits: decimals })
+  )
 }
+
 /**
  * Format a decimal-based number back to a normal number
  *
- * @param {string} num the number
- * @param {number} decimals number of decimal places
- * @param {Object} [options] options object
- * @param {bool} [options.truncate=true] Should the number be truncated to its decimal base
- * @returns {string} formatted number
+ * @param {string} value the number
+ * @param {number} digits number of decimal places
+ * @returns {BN} value converted to it's normal representation
  */
-export function fromDecimals(num, decimals, { truncate = true } = {}) {
-  const [whole, dec] = splitDecimalNumber(num)
-  if (!whole && !dec) {
-    return '0'
-  }
-
-  const paddedWhole = whole.padStart(decimals + 1, '0')
-  const decimalIndex = paddedWhole.length - decimals
-  const wholeWithoutBase = paddedWhole.slice(0, decimalIndex)
-  const decWithoutBase = paddedWhole.slice(decimalIndex)
-
-  if (!truncate && dec) {
-    // We need to keep all the zeroes in this case
-    return `${wholeWithoutBase}.${decWithoutBase}${dec}`
-  }
-
-  // Trim any trailing zeroes from the new decimals
-  const decWithoutBaseTrimmed = decWithoutBase.replace(/0*$/, '')
-  if (decWithoutBaseTrimmed) {
-    return `${wholeWithoutBase}.${decWithoutBaseTrimmed}`
-  }
-
-  return wholeWithoutBase
+export function parseUnits(value, digits) {
+  return EthersUtils.parseUnits(value, digits)
 }
 
 /**
- * Format the number to be in a given decimal base
+ * Format an amount of units to be displayed.
  *
- * @param {string} num the number
- * @param {number} decimals number of decimal places
- * @param {Object} [options] options object
- * @param {bool} [options.truncate=true] Should the number be truncated to its decimal base
- * @returns {string} formatted number
+ * @param {BigNumber} value Amount of units to format.
+ * @param {Number} options.digits Amount of digits on the token.
+ * @param {Boolean} options.commas Use comma-separated groups.
+ * @param {Boolean} options.replaceZeroBy The string to be returned when value is zero.
+ * @param {Boolean} options.precision The precision of the resulting number
+ * @returns {String} value formatted
  */
-export function toDecimals(num, decimals, { truncate = true } = {}) {
-  const [whole, dec] = splitDecimalNumber(num)
-  if (!whole && !dec) {
-    return '0'
+export function formatUnits(
+  value,
+  { digits = 18, commas = true, replaceZeroBy = '0', precision = 2 } = {}
+) {
+  if (value.lt(0) || digits < 0) {
+    return ''
   }
 
-  const wholeLengthWithBase = whole.length + decimals
-  const withoutDecimals = (whole + dec).padEnd(wholeLengthWithBase, '0')
-  const wholeWithBase = withoutDecimals.slice(0, wholeLengthWithBase)
+  let valueBeforeCommas = EthersUtils.formatUnits(value.toString(), digits)
 
-  if (!truncate && wholeWithBase.length < withoutDecimals.length) {
-    return `${wholeWithBase}.${withoutDecimals.slice(wholeLengthWithBase)}`
+  // Replace 0 by an empty value
+  if (valueBeforeCommas === '0.0') {
+    return replaceZeroBy
   }
-  return wholeWithBase
+
+  // EthersUtils.formatUnits() adds a decimal even when 0, this removes it.
+  valueBeforeCommas = valueBeforeCommas.replace(/\.0$/, '')
+
+  const roundedValue = round(valueBeforeCommas, precision)
+
+  return commas ? EthersUtils.commify(roundedValue) : roundedValue
 }
 
-export function pct(a, b) {
-  if (b.eq(new BigNumber(0))) {
-    return 0
-  }
+/**
+ * Format an amount of units to be displayed.
+ *
+ * @param {String} value Value to round
+ * @param {Number} precision Rounding precision
+ * @returns {String} Value rounded to `precision` decimals
+ */
+export function round(value, precision = 2) {
+  let [whole, decimal] = value.split('.')
 
-  return (a * 100) / b
+  if (!decimal || decimal.length <= precision) return value
+
+  // Round and keep the last `precision` digits
+  decimal = Math.round(parseInt((decimal || '0').slice(0, precision + 2)) / 100)
+
+  return `${whole}${decimal ? `.${decimal}` : ''}`
+}
+
+export function getPercentage(value, totalValue) {
+  if (!totalValue > 0) return 0
+
+  return Math.round((value * 100) / totalValue, 2)
 }
 
 // Return 0 if denominator is 0 to avoid NaNs

@@ -6,6 +6,7 @@ import distributionIcon from '../assets/distributionIcon.svg'
 import tokensAvailableIcon from '../assets/tokensAvailableIcon.svg'
 import tokenIcon from '../assets/tokenIcon.svg'
 import userIcon from '../assets/userIcon.svg'
+import { bigNum } from '../lib/math-utils'
 
 const MainScreen = React.memo(({ isLoading }) => {
   if (isLoading) {
@@ -80,25 +81,25 @@ const MainScreen = React.memo(({ isLoading }) => {
         `}
       >
         <FaucetInfo
-          amount={0}
+          amount={bigNum(0)}
           decimals={0}
           text="Registered users"
           icon={userIcon}
         />
         <FaucetInfo
-          amount={0}
+          amount={bigNum(0)}
           decimals={0}
           text="Total distributed"
           icon={distributionIcon}
         />
         <FaucetInfo
-          amount={0}
+          amount={bigNum(0)}
           decimals={0}
           text="Currently available"
           icon={tokensAvailableIcon}
         />
         <FaucetInfo
-          amount={0}
+          amount={bigNum(0)}
           decimals={0}
           text="Amount paid per user this period"
           icon={tokenIcon}

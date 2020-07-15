@@ -108,26 +108,6 @@ export function formatDecimals(value, digits) {
   }
 }
 
-export function formatTokenAmount(
-  amount,
-  decimals = 0,
-  isIncoming,
-  displaySign = false,
-  { rounding = 2, commas = true, replaceZeroBy = '0' } = {}
-) {
-  const roundedAmount = round(amount / Math.pow(10, decimals), rounding)
-  const formattedAmount = formatDecimals(roundedAmount, 18)
-
-  if (formattedAmount === '0') {
-    return replaceZeroBy
-  }
-
-  return (
-    (displaySign ? (isIncoming ? '+' : '-') : '') +
-    (commas ? formattedAmount : formattedAmount.replace(',', ''))
-  )
-}
-
 export function getTokenIconBySymbol(symbol) {
   return LOCAL_TOKEN_ICONS.get(symbol)
 }
