@@ -26,6 +26,7 @@ type Period @entity {
   id: ID!
   totalRegisteredUsers: BigInt!
   individualPayout: BigInt!
+  maxPayout: BigInt!
 }
 
 type ERC20 @entity {

@@ -34,6 +34,16 @@ export function handleNewClaim(event: ClaimEvent): void {
   claimer.claims.push(claim.id)
 
   claimer.save()
+
+  // Load period 
+  let period = _getPeriodEntity(event.params.periodNumber)
+  if (period.maxPayout.equals(BigInt.fromI32(0))) {
+    let faucetContract = BrightIdFaucet.bind(event.address)
+    let periodData = faucetContract.periods(event.params.periodNumber)
+    period.maxPayout = periodData.value1
+
+    period.save()
+  }
 }
 
 export function handleNewRegistration(event: RegisterEvent): void {
