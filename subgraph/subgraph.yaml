@@ -8,7 +8,7 @@ dataSources:
     name: BrightIdFaucet
     network: xdai
     source:
-      address: 0x
+      address: '0x60a9372862bD752CD02D9AE482F94Cd2fe92A0Bf'
       abi: BrightIdFaucet
       startBlock: 0
     mapping:
@@ -16,14 +16,19 @@ dataSources:
       apiVersion: 0.0.4
       language: wasm/assemblyscript
       entities:
-        - Claimer
-        - Period
         - Claim
-        - Settings
+        - Claimer
+        - Config
+        - ERC20
+        - Period
       abis:
         - name: BrightIdFaucet
           file: ./abis/BrightIdFaucet.json
+        - name: ERC20
+          file: ./abis/ERC20.json
       eventHandlers:
+        - event: Initialize(address,uint256,uint256,bytes32,address,uint256,address)
+          handler: handleInitialized
         - event: Claim(address,uint256,uint256)
           handler: handleNewClaim
         - event: Register(address,uint256)
