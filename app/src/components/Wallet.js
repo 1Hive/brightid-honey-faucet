@@ -86,7 +86,7 @@ function Wallet({ isLoading }) {
             </span>
           </div>
 
-          {!addressExist && (
+          {!addressExist && account && (
             <div
               css={`
                 padding: ${3 * GU}px;
