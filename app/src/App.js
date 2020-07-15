@@ -1,29 +1,22 @@
 import React from 'react'
 import { Split, SyncIndicator } from '@1hive/1hive-ui'
 import MainScreen from './screens/MainScreen'
-import Wallet from './components/Wallet'
+import WalletAndTimer from './components/WalletAndTimer'
 import useAppLogic from './app-logic'
-import { useWallet } from './providers/Wallet'
 
 const App = React.memo(function App() {
   const { isLoading } = useAppLogic()
-
-  const { account } = useWallet()
 
   const MainScreenComponent = <MainScreen isLoading={isLoading} />
 
   return (
     <div>
       <SyncIndicator visible={isLoading} />
-      {!account ? (
-        MainScreenComponent
-      ) : (
-        <Split
-          primary={MainScreenComponent}
-          secondary={<Wallet />}
-          invert="horizontal"
-        />
-      )}
+      <Split
+        primary={MainScreenComponent}
+        secondary={<WalletAndTimer />}
+        invert="horizontal"
+      />
     </div>
   )
 })
