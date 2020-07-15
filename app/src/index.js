@@ -7,18 +7,21 @@ import MainView from './components/MainView'
 import SubgraphClient from './SubgraphClient'
 import { WalletProvider } from './providers/Wallet'
 import { AppStateProvider } from './providers/AppState'
+import { ClockProvider } from './providers/Clock'
 
 ReactDOM.render(
   <SubgraphClient>
     <WalletProvider>
       <AppStateProvider>
-        <Main assetsUrl="/aragon-ui/" layout={false}>
-          <HashRouter>
-            <MainView>
-              <App />
-            </MainView>
-          </HashRouter>
-        </Main>
+        <ClockProvider>
+          <Main assetsUrl="/aragon-ui/" layout={false}>
+            <HashRouter>
+              <MainView>
+                <App />
+              </MainView>
+            </HashRouter>
+          </Main>
+        </ClockProvider>
       </AppStateProvider>
     </WalletProvider>
   </SubgraphClient>,
