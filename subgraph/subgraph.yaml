@@ -1,0 +1,31 @@
+specVersion: 0.0.2
+description: BrightId Honey Faucet
+repository: https://github.com/1Hive/brightid-honey-faucet
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum/contract
+    name: BrightIdFaucet
+    network: xdai
+    source:
+      address: 0x
+      abi: BrightIdFaucet
+      startBlock: 0
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.4
+      language: wasm/assemblyscript
+      entities:
+        - Claimer
+        - Period
+        - Claim
+        - Settings
+      abis:
+        - name: BrightIdFaucet
+          file: ./abis/BrightIdFaucet.json
+      eventHandlers:
+        - event: Claim(address,uint256,uint256)
+          handler: handleNewClaim
+        - event: Register(address,uint256)
+          handler: handleNewRegistration
+      file: ./src/mapping.ts
