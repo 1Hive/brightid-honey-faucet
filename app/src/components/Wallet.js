@@ -66,6 +66,7 @@ function Wallet({ isLoading }) {
               align-items: center;
               padding: ${3 * GU}px;
               border-bottom: 1px solid ${theme.border};
+              justify-content: center;
             `}
           >
             <EthIdenticon
