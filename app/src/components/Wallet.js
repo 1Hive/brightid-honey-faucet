@@ -20,7 +20,7 @@ function Wallet({ isLoading }) {
   // TODO - error handling on this api call
   const { addressExist } = useBrightIdVerification(account)
 
-  const deepLink = `${BRIGHT_ID_APP_DEEPLINK}/account`
+  const deepLink = `${BRIGHT_ID_APP_DEEPLINK}/${account}`
 
   return (
     <Box padding={0}>
