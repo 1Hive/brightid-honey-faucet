@@ -14,7 +14,7 @@ const networks = {
     ensRegistry: '0x98df287b6c145399aaa709692c8d308357bc085d',
     name: 'Rinkeby',
     type: 'rinkeby',
-    faucet: '', // TODO: Add facuet address
+    faucet: '0x0705fccf97970573c3f6ba1d91b99c0289afbfba',
   },
   xdai: {
     chainId: 100,
