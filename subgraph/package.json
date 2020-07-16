@@ -1,0 +1,31 @@
+{
+  "name": "honey-faucet",
+  "version": "0.1.0",
+  "scripts": {
+    "create": "graph create 1hive/brightid-honey-faucet --node https://api.thegraph.com/deploy/",
+    "create-local": "graph create 1hive/brightid-honey-faucet --node http://127.0.0.1:8020",
+    "codegen": "graph codegen",
+    "build": "graph build",
+    "deploy": "yarn deploy-xdai",
+    "prepare:local": "mustache config/local.json subgraph.template.yaml > subgraph.yaml",
+    "deploy:local": "yarn prepare:local && graph deploy 1hive/brightid-honey-faucet --ipfs http://localhost:5001 --node http://127.0.0.1:8020",
+    "prepare:xdai": "mustache config/xdai.json subgraph.template.yaml > subgraph.yaml",
+    "deploy:xdai": "yarn prepare:xdai && graph deploy 1hive/brightid-honey-faucet-xdai --ipfs https://api.thegraph.com/ipfs/ --node https://api.thegraph.com/deploy/",
+    "prepare:rinkeby": "mustache config/rinkeby.json subgraph.template.yaml > subgraph.yaml",
+    "deploy:rinkeby": "yarn prepare:rinkeby && graph deploy 1hive/brightid-honey-faucet-rinkeby --ipfs https://api.thegraph.com/ipfs/ --node https://api.thegraph.com/deploy/",
+    "prepare:mainnet": "mustache config/mainnet.json subgraph.template.yaml > subgraph.yaml",
+    "deploy:mainnet": "yarn prepare:mainnet && graph deploy 1hive/brightid-honey-faucet --ipfs https://api.thegraph.com/ipfs/ --node https://api.thegraph.com/deploy/"
+  },
+  "devDependencies": {
+    "@graphprotocol/graph-cli": "^0.18.0",
+    "@graphprotocol/graph-ts": "^0.18.0"
+  },
+  "dependencies": {
+    "babel-polyfill": "^6.26.0",
+    "babel-register": "^6.26.0",
+    "mustache": "^4.0.1",
+    "truffle": "^5.0.4",
+    "truffle-contract": "^4.0.5",
+    "truffle-hdwallet-provider": "^1.0.4"
+  }
+}
