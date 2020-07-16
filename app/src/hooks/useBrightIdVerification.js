@@ -1,11 +1,9 @@
 import { useEffect, useState } from 'react'
 import { BRIGHTID_CONTEXT, BRIGHTID_VERIFICATION_ENDPOINT } from '../constants'
+import { ERROR_CODE, NOT_FOUND_CODE } from '../services/responseCodes'
 
 const VERIFICATION_RETRY_EVERY = 1000
 const REQUEST_TIMEOUT = 60000
-
-const NOT_FOUND_CODE = 404
-const ERROR_CODE = 500
 
 const VERIFICATION_INFO_DEFAULT = {
   addressExist: false,
