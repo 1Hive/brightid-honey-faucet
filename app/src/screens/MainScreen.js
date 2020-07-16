@@ -26,6 +26,7 @@ const MainScreen = React.memo(({ isLoading }) => {
       <Box
         css={`
           height: fit-content;
+          width: 100%;
         `}
       >
         <div>
