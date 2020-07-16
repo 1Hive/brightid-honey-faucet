@@ -11,7 +11,7 @@
     "clipboard-polyfill": "^2.8.6",
     "ethers": "4.0.28",
     "node-fetch": "^2.6.0",
-    "qrcode.react" : "^1.0.0",
+    "qrcode.react": "^1.0.0",
     "react": "^16.13.1",
     "react-app-polyfill": "^1.0.6",
     "react-app-rewired": "^2.1.5",
@@ -23,7 +23,10 @@
     "styled-components": "^4.3.2",
     "url": "^0.11.0",
     "use-wallet": "^0.5.0",
-    "web3-utils": "^1.2.0"
+    "web3-utils": "^1.2.0",
+    "tweetnacl": "^1.0.3",
+    "tweetnacl-util": "^0.15.1",
+    "js-sha256": "^0.9.0"
   },
   "scripts": {
     "start": "npm run sync-assets && react-app-rewired start",
