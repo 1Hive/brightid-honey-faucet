@@ -1,4 +1,4 @@
-import { toChecksumAddress } from 'web3-utils'
+import { getAddress } from 'ethers/utils'
 import env from '../environment'
 import { getDefaultChain } from '../local-settings'
 
@@ -61,8 +61,8 @@ export function getNetworkName(chainId = getDefaultChain()) {
 
 // Check address equality with checksums
 export function addressesEqual(first, second) {
-  first = first && toChecksumAddress(first)
-  second = second && toChecksumAddress(second)
+  first = first && getAddress(first)
+  second = second && getAddress(second)
   return first === second
 }
 
@@ -92,5 +92,5 @@ export function addressesEqualNoSum(first, second) {
   return first === second
 }
 
-// Re-export some web3-utils functions
-export { isAddress, toChecksumAddress, toUtf8 } from 'web3-utils'
+// Re-export some ethers/utils functions
+export { getAddress, toUtf8String, id as keccak256 } from 'ethers/utils'
