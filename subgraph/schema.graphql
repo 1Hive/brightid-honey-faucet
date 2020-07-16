@@ -1,0 +1,37 @@
+type Config @entity {
+  id: ID!
+  token: ERC20!
+  firstPeriodStart: BigInt!
+  periodLength: BigInt!
+  percentPerPeriod: BigInt!
+  minimumEthBalance: BigInt!
+}
+
+type Claimer @entity {
+  id: ID!
+  registeredForPeriod: BigInt!
+  latestClaimPeriod: BigInt!
+  addressVoid: Boolean!
+  claims: [Claim!]! @derviedFrom(field: "claimer")
+}
+
+type Claim @entity {
+  id: ID!
+  claimer: Claimer!
+  amount: BigInt!
+  period: Period!
+}
+
+type Period @entity {
+  id: ID!
+  totalRegisteredUsers: BigInt!
+  individualPayout: BigInt!
+  maxPayout: BigInt!
+}
+
+type ERC20 @entity {
+  id: ID!
+  name: String!
+  symbol: String!
+  decimals: Int!
+}
