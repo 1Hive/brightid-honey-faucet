@@ -34,7 +34,7 @@ export function useClaimer(claimerAddress) {
     [data]
   )
 
-  return { claimer, fetching: !data && !error, error }
+  return { claimer, fetching: claimerAddress && !data && !error, error }
 }
 
 export function usePeriod(periodNumber) {

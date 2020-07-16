@@ -1,6 +1,7 @@
 import React from 'react'
 import { Box, GU, Link, textStyle, theme } from '@1hive/1hive-ui'
 import FaucetInfo from '../components/FaucetInfo'
+import { useAppState } from '../providers/AppState'
 
 import distributionIcon from '../assets/distributionIcon.svg'
 import tokensAvailableIcon from '../assets/tokensAvailableIcon.svg'
@@ -9,9 +10,12 @@ import userIcon from '../assets/userIcon.svg'
 import { bigNum } from '../lib/math-utils'
 
 const MainScreen = React.memo(({ isLoading }) => {
+  const { config } = useAppState()
+
   if (isLoading) {
     return null
   }
+
   return (
     <div
       css={`
@@ -46,7 +50,8 @@ const MainScreen = React.memo(({ isLoading }) => {
                 margin-top: ${2 * GU}px;
               `}
             >
-              This Faucet is to claim HNY tokens by using BrightID.
+              This Faucet is to claim {config.token.symbol} tokens by using
+              BrightID.
             </span>
             <span
               css={`

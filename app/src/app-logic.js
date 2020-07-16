@@ -1,4 +1,8 @@
+import { useAppState } from './providers/AppState'
+
 // Handles the main logic of the app.
 export default function useAppLogic() {
-  return { isLoading: false }
+  const { loading } = useAppState()
+
+  return { isLoading: loading }
 }
