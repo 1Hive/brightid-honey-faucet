@@ -1,0 +1,20 @@
+Show QR code if `/verifications` returns JSON with:
+"errorNum": "2"
+"code": "404"
+"errorMessage": "contextId not found"
+eg http://node.brightid.org/brightid/v4/verifications/1hive/0xFF3B8aaD3DBFaF7FFEA00a96e33aa18952b4f9B8?signed=eth
+
+
+
+Show waiting for Sponsorship (or the create Sponsor transaction button) if `/verifications` returns JSON with:
+"errorNum": "4"
+"code": 403
+"errorMessage": "user is not sponsored"
+eg http://node.brightid.org/brightid/v4/verifications/1hive/0xFF3B8aaD3DBFaF7FFEA00a96e33aa18952b4f9B7?signed=eth
+
+
+
+Show register/claim button if `/verifications` returns JSON with:
+"unique": "true"
+Also store the signature to use in the "claimAndOrRegister()" function.
+eg http://node.brightid.org/brightid/v4/verifications/1hive/0x93889F441C03E6E8A662c9c60c750A9BfEcb00bd?signed=eth
