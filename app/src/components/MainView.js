@@ -14,7 +14,6 @@ function MainView({ children }) {
       css={`
         display: flex;
         flex-direction: column;
-        height: 100vh;
       `}
     >
       <Header compact={compactMode} />
@@ -27,7 +26,7 @@ function MainView({ children }) {
       >
         <div
           css={`
-            height: 100%;
+            margin-bottom: ${2 * GU}px;
           `}
         >
           <Layout>{children}</Layout>
