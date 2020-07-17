@@ -14,14 +14,16 @@ function MainView({ children }) {
       css={`
         display: flex;
         flex-direction: column;
+        height: 100%;
       `}
     >
       <Header compact={compactMode} />
 
       <div
         css={`
+          flex: 1;
+          height: 100%;
           ${!compactMode && `transform: translateY(-${4 * GU}px);`}
-          flex: 1 0 auto;
         `}
       >
         <div
@@ -31,8 +33,8 @@ function MainView({ children }) {
         >
           <Layout>{children}</Layout>
         </div>
-        <Footer compact={compactMode} />
       </div>
+      <Footer compact={compactMode} />
     </div>
   )
 }
