@@ -1,0 +1,4 @@
+[
+  "function claim() public",
+  "function claimAndOrRegister(bytes32,address[],uint8,bytes32,bytes32) public"
+]

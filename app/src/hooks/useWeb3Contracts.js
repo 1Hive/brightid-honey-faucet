@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { Contract as EthersContract, providers as Providers } from 'ethers'
-import { useWallet } from './providers/Wallet'
+import { useWallet } from '../providers/Wallet'
 import { getNetwork } from '../networks'
 
 export function useContract(address, abi, signer = true) {
