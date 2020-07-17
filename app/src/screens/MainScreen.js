@@ -68,13 +68,16 @@ const MainScreen = React.memo(({ isLoading }) => {
               `}
             >
               <span>
-                <Link>Honey is 1Hive's community currency</Link>. Similar to
-                Bitcoin or Ether, Honey is issued and distributed by an economic
-                protocol, and can be freely exchanged on a distributed ledger.
-                When you hold Honey you are betting on the Honey economy growing
-                over time, and you can help realize that goal by staking your
-                Honey on distribution proposals which allocate Honey issuance
-                towards the initiatives that help 1Hive thrive.
+                <Link href="https://blog.1hive.org/honey/">
+                  Honey is 1Hive's community currency
+                </Link>
+                . Similar to Bitcoin or Ether, Honey is issued and distributed
+                by an economic protocol, and can be freely exchanged on a
+                distributed ledger. When you hold Honey you are betting on the
+                Honey economy growing over time, and you can help realize that
+                goal by staking your Honey on distribution proposals which
+                allocate Honey issuance towards the initiatives that help 1Hive
+                thrive.
               </span>
             </div>
           </div>
@@ -133,7 +136,8 @@ const MainScreen = React.memo(({ isLoading }) => {
                 on a personal computer and this resulted in a broad and
                 inclusive distribution. In principal this faucet operates on the
                 same basic premise, but instead of proof of work we rely on
-                <Link>BrightID</Link> for sybil resistance.
+                <Link href="https://www.brightid.org/">BrightID</Link> for sybil
+                resistance.
               </span>
             </div>
           </div>
@@ -177,7 +181,9 @@ const MainScreen = React.memo(({ isLoading }) => {
                 BrightID, BrightID is a decentralized protocol for proof of
                 uniqueness. If you've never used it before you'll need to
                 download it, make a few connections, and get verified. We can
-                help! just hop on the <Link>1Hive Discord</Link> 🍯 and say Hi!
+                help! just hop on the{' '}
+                <Link href="https://discord.gg/GFWC5c">1Hive Discord</Link> 🍯
+                and say Hi!
               </span>
             </div>
           </div>

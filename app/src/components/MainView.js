@@ -14,6 +14,7 @@ function MainView({ children }) {
       css={`
         display: flex;
         flex-direction: column;
+        min-height: 100vh;
       `}
     >
       <Header compact={compactMode} />
@@ -22,7 +23,6 @@ function MainView({ children }) {
         id="LAYYY"
         css={`
           flex: 1;
-          height: 100%;
           ${!compactMode && `transform: translateY(-${4 * GU}px);`}
         `}
       >
