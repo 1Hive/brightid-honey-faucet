@@ -27,7 +27,7 @@ export function useBrightIdVerification(account) {
     }
 
     const fetchVerificationInfo = async () => {
-      const endpoint = `${BRIGHTID_VERIFICATION_ENDPOINT}/${BRIGHTID_CONTEXT}/${account}` // 0xe8fb09228d1373f931007ca7894a08344b80901c
+      const endpoint = `${BRIGHTID_VERIFICATION_ENDPOINT}/${BRIGHTID_CONTEXT}/${account}`
       try {
         const rawResponse = await fetch(endpoint, {
           method: 'GET',
