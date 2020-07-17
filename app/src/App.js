@@ -5,16 +5,16 @@ import WalletAndTimer from './components/WalletAndTimer'
 import useAppLogic from './app-logic'
 
 const App = React.memo(function App() {
-  const { isLoading } = useAppLogic()
-
-  const MainScreenComponent = <MainScreen isLoading={isLoading} />
+  const { actions, isLoading } = useAppLogic()
 
   return (
     <div>
       <SyncIndicator visible={isLoading} />
       <Split
-        primary={MainScreenComponent}
-        secondary={<WalletAndTimer />}
+        primary={<MainScreen isLoading={isLoading} />}
+        secondary={
+          <WalletAndTimer onClaimAndOrRegister={actions.onClaimAndOrRegister} />
+        }
         invert="horizontal"
       />
     </div>

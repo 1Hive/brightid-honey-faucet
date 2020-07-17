@@ -1,6 +1,6 @@
 import React from 'react'
 import { Box, GU, useTheme, textStyle } from '@1hive/1hive-ui'
-import { formatTokenAmount } from '../lib/token-utils'
+import { formatTokenAmount } from '../lib/math-utils'
 
 function FaucetInfo({ amount, decimals, text, icon }) {
   const theme = useTheme()

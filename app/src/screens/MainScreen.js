@@ -1,16 +1,21 @@
 import React from 'react'
 import { Box, GU, Link, textStyle, theme } from '@1hive/1hive-ui'
 import FaucetInfo from '../components/FaucetInfo'
+import { useAppState } from '../providers/AppState'
 
 import distributionIcon from '../assets/distributionIcon.svg'
 import tokensAvailableIcon from '../assets/tokensAvailableIcon.svg'
 import tokenIcon from '../assets/tokenIcon.svg'
 import userIcon from '../assets/userIcon.svg'
+import { bigNum } from '../lib/math-utils'
 
 const MainScreen = React.memo(({ isLoading }) => {
+  const { config } = useAppState()
+
   if (isLoading) {
     return null
   }
+
   return (
     <div
       css={`
@@ -46,7 +51,8 @@ const MainScreen = React.memo(({ isLoading }) => {
                 margin-top: ${2 * GU}px;
               `}
             >
-              This Faucet is to claim HNY tokens by using BrightID.
+              This Faucet is to claim {config.token.symbol} tokens by using
+              BrightID.
             </span>
             <span
               css={`
@@ -81,25 +87,25 @@ const MainScreen = React.memo(({ isLoading }) => {
         `}
       >
         <FaucetInfo
-          amount={0}
+          amount={bigNum(0)}
           decimals={0}
           text="Registered users"
           icon={userIcon}
         />
         <FaucetInfo
-          amount={0}
+          amount={bigNum(0)}
           decimals={0}
           text="Total distributed"
           icon={distributionIcon}
         />
         <FaucetInfo
-          amount={0}
+          amount={bigNum(0)}
           decimals={0}
           text="Currently available"
           icon={tokensAvailableIcon}
         />
         <FaucetInfo
-          amount={0}
+          amount={bigNum(0)}
           decimals={0}
           text="Amount paid per user this period"
           icon={tokenIcon}

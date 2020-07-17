@@ -42,6 +42,15 @@ contract BrightIdFaucet is Ownable {
     mapping (address => Claimer) public claimers;
     mapping (uint256 => Period) public periods;
 
+    event Initialize(
+        address token,
+        uint256 periodLength,
+        uint256 percentPerPeriod,
+        bytes32 brightIdContext,
+        address brightIdVerifier,
+        uint256 minimumEthBalance,
+        address uniswapExchange
+    );
     event SetPercentPerPeriod(uint256 percentPerPeriod);
     event SetBrightIdSettings(bytes32 brightIdContext, address brightIdVerifier);
     event SetMinimumEthBalance(uint256 miniumBalance);
@@ -71,6 +80,8 @@ contract BrightIdFaucet is Ownable {
         minimumEthBalance = _minimumEthBalance;
         uniswapExchange = _uniswapExchange;
         firstPeriodStart = now;
+
+        emit Initialize(address(_token), _periodLength, _percentPerPeriod, _brightIdContext, _brightIdVerifier, _minimumEthBalance, address(_uniswapExchange));
     }
 
     function setPercentPerPeriod(uint256 _percentPerPeriod) public onlyOwner {
@@ -143,6 +154,10 @@ contract BrightIdFaucet is Ownable {
 
             emit Claim(msg.sender, currentPeriod, totalPayout);
         }
+    }
+
+    function withdraw(address _to) public onlyOwner {
+        token.transfer(_to, token.balanceOf(address(this)));
     }
 
     function getCurrentPeriod() public view returns (uint256) {
