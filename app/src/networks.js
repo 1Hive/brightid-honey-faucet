@@ -7,12 +7,14 @@ const networks = {
     ensRegistry: '0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e',
     name: 'Mainnet',
     type: 'main',
+    faucet: '', // TODO: Add facuet address
   },
   rinkeby: {
     chainId: 4,
     ensRegistry: '0x98df287b6c145399aaa709692c8d308357bc085d',
     name: 'Rinkeby',
     type: 'rinkeby',
+    faucet: '0x0705fccf97970573c3f6ba1d91b99c0289afbfba',
   },
   xdai: {
     chainId: 100,
@@ -20,6 +22,7 @@ const networks = {
     name: 'xDai',
     type: 'xdai',
     defaultEthNode: 'https://xdai.poanetwork.dev/',
+    faucet: '', // TODO: Add facuet address
   },
 }
 
