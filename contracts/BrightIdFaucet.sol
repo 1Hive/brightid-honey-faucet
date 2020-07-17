@@ -156,6 +156,10 @@ contract BrightIdFaucet is Ownable {
         }
     }
 
+    function withdraw(address _to) public onlyOwner {
+        token.transfer(_to, token.balanceOf(address(this)));
+    }
+
     function getCurrentPeriod() public view returns (uint256) {
         return (now - firstPeriodStart) / periodLength;
     }
