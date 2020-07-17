@@ -14,12 +14,12 @@ function MainView({ children }) {
       css={`
         display: flex;
         flex-direction: column;
-        height: 100%;
       `}
     >
       <Header compact={compactMode} />
 
       <div
+        id="LAYYY"
         css={`
           flex: 1;
           height: 100%;
