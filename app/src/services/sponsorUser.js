@@ -2,8 +2,10 @@ import tweetNacl from 'tweetnacl'
 import tweetNaclUtils from 'tweetnacl-util'
 import sha256 from 'js-sha256'
 
-import { BRIGHTID_SUBSCRIPTION_ENDPOINT, CONTEXT_ID } from '../constants'
+import { CONTEXT_ID } from '../constants'
+import { BRIGHTID_SUBSCRIPTION_ENDPOINT } from '../endpoints'
 import { NO_CONTENT } from './responseCodes'
+import env from '../environment'
 
 export async function sponsorUser(account) {
   const { key, signedMessage } = sponsorKeyAndSig(account)
@@ -44,7 +46,7 @@ export async function sponsorUser(account) {
 }
 
 function sponsorKeyAndSig(account) {
-  const privateKey = 'OMITTED FOR GIT'
+  const privateKey = env('NODE_PK')
   const privateKeyUint8Array = tweetNaclUtils.decodeBase64(privateKey)
 
   const message = `Sponsor,${CONTEXT_ID},${account}`
