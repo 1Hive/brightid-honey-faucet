@@ -11,7 +11,7 @@ import {
 import QRCode from 'qrcode.react'
 import { useWallet } from '../providers/Wallet'
 import { useBrightIdVerification } from '../hooks/useBrightIdVerification'
-import { BRIGHT_ID_APP_DEEPLINK } from '../constants'
+import { BRIGHT_ID_APP_DEEPLINK } from '../endpoints'
 
 function Wallet({ isLoading }) {
   const theme = useTheme()

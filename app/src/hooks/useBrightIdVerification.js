@@ -1,11 +1,10 @@
 import { useEffect, useState } from 'react'
-import { BRIGHTID_CONTEXT, BRIGHTID_VERIFICATION_ENDPOINT } from '../constants'
+import { BRIGHTID_CONTEXT } from '../constants'
+import { BRIGHTID_VERIFICATION_ENDPOINT } from '../endpoints'
+import { ERROR_CODE, NOT_FOUND_CODE } from '../services/responseCodes'
 
 const VERIFICATION_RETRY_EVERY = 1000
 const REQUEST_TIMEOUT = 60000
-
-const NOT_FOUND_CODE = 404
-const ERROR_CODE = 500
 
 const VERIFICATION_INFO_DEFAULT = {
   addressExist: false,
@@ -28,7 +27,7 @@ export function useBrightIdVerification(account) {
     }
 
     const fetchVerificationInfo = async () => {
-      const endpoint = `${BRIGHTID_VERIFICATION_ENDPOINT}/${BRIGHTID_CONTEXT}/${account}` // 0xe8fb09228d1373f931007ca7894a08344b80901c
+      const endpoint = `${BRIGHTID_VERIFICATION_ENDPOINT}/${BRIGHTID_CONTEXT}/${account}`
       try {
         const rawResponse = await fetch(endpoint, {
           method: 'GET',
