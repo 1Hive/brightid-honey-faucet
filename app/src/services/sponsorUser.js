@@ -2,16 +2,15 @@ import tweetNacl from 'tweetnacl'
 import tweetNaclUtils from 'tweetnacl-util'
 import sha256 from 'js-sha256'
 
-import { CONTEXT_ID } from '../constants'
+import { BRIGHTID_CONTEXT } from '../constants'
 import { BRIGHTID_SUBSCRIPTION_ENDPOINT } from '../endpoints'
 import { NO_CONTENT } from './responseCodes'
 import env from '../environment'
 
 export async function sponsorUser(account) {
-  const { key, signedMessage } = sponsorKeyAndSig(account)
-  const endpoint = `${BRIGHTID_SUBSCRIPTION_ENDPOINT}/${key}`
-
   try {
+    const { key, signedMessage } = sponsorKeyAndSig(account)
+    const endpoint = `${BRIGHTID_SUBSCRIPTION_ENDPOINT}/${key}`
     const rawResponse = await fetch(endpoint, {
       method: 'PUT',
       headers: {
@@ -22,7 +21,7 @@ export async function sponsorUser(account) {
         name: 'Sponsor',
         _key: key,
         contextId: account,
-        context: CONTEXT_ID,
+        context: BRIGHTID_CONTEXT,
         sig: signedMessage,
         v: 4,
       }),
@@ -47,9 +46,14 @@ export async function sponsorUser(account) {
 
 function sponsorKeyAndSig(account) {
   const privateKey = env('NODE_PK')
+
+  if (!privateKey) {
+    throw new Error('Missing pk')
+  }
+
   const privateKeyUint8Array = tweetNaclUtils.decodeBase64(privateKey)
 
-  const message = `Sponsor,${CONTEXT_ID},${account}`
+  const message = `Sponsor,${BRIGHTID_CONTEXT},${account}`
   const messageUint8Array = Buffer.from(message)
   const messageSha256 = sha256.sha256.digest(message)
   const messageBase64 = tweetNaclUtils.encodeBase64(messageSha256)

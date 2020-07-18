@@ -1,14 +1,21 @@
 import { useEffect, useState } from 'react'
 import { BRIGHTID_CONTEXT } from '../constants'
 import { BRIGHTID_VERIFICATION_ENDPOINT } from '../endpoints'
-import { ERROR_CODE, NOT_FOUND_CODE } from '../services/responseCodes'
+import {
+  ERROR_CODE,
+  NOT_FOUND_CODE,
+  CAN_NOT_BE_VERIFIED,
+} from '../services/responseCodes'
 
 const VERIFICATION_RETRY_EVERY = 1000
 const REQUEST_TIMEOUT = 60000
 
 const VERIFICATION_INFO_DEFAULT = {
   addressExist: false,
+  signature: null,
   userAddresses: [],
+  userSponsored: false,
+  userVerified: false,
   error: null,
   fetching: true,
 }
@@ -23,11 +30,11 @@ export function useBrightIdVerification(account) {
     let retryTimer
 
     if (!account) {
-      return
+      return setVerificationInfo(info => ({ ...info, fetching: false }))
     }
 
     const fetchVerificationInfo = async () => {
-      const endpoint = `${BRIGHTID_VERIFICATION_ENDPOINT}/${BRIGHTID_CONTEXT}/${account}`
+      const endpoint = `${BRIGHTID_VERIFICATION_ENDPOINT}/${BRIGHTID_CONTEXT}/${account}?signed=eth`
       try {
         const rawResponse = await fetch(endpoint, {
           method: 'GET',
@@ -41,10 +48,6 @@ export function useBrightIdVerification(account) {
         const response = await rawResponse.json()
 
         if (!cancelled) {
-          if (response.code === NOT_FOUND_CODE) {
-            setVerificationInfo({ addressExist: false, fetching: false })
-            return
-          }
           if (response.code === ERROR_CODE) {
             setVerificationInfo({
               error: response.errorMessage,
@@ -53,9 +56,24 @@ export function useBrightIdVerification(account) {
             return
           }
 
+          if (response.code === NOT_FOUND_CODE) {
+            // If the users didn't link their address to the their BrightId account or cannot be verified for the context (meaning is unverified on the BrightId app)
+            setVerificationInfo({
+              addressExist: response.errorNum === CAN_NOT_BE_VERIFIED,
+              userAddresses: [],
+              userSponsored: response.errorNum === CAN_NOT_BE_VERIFIED,
+              userVerified: false,
+              fetching: false,
+            })
+            return
+          }
+
           setVerificationInfo({
             addressExist: true,
+            signature: response.data.sig,
             userAddresses: response.data.contextIds,
+            userSponsored: true,
+            userVerified: true,
             fetching: false,
           })
           return
