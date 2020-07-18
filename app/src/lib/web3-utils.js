@@ -92,5 +92,12 @@ export function addressesEqualNoSum(first, second) {
   return first === second
 }
 
+export function sanitizeSignature(signature) {
+  return Object.entries(signature).reduce(
+    (acc, [key, value]) => ({ ...acc, [key]: `0x${value}` }),
+    {}
+  )
+}
+
 // Re-export some ethers/utils functions
 export { getAddress, toUtf8String, id as keccak256 } from 'ethers/utils'
