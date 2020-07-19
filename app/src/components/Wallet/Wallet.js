@@ -103,16 +103,18 @@ function AccountConnected({ account, onClaimAndOrRegister }) {
           {shortenAddress(account, 4)}
         </span>
       </div>
-      <div
-        css={`
-          padding: ${3 * GU}px;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-        `}
-      >
+      <div>
         {fetching ? (
-          <LoadingRing />
+          <div
+            css={`
+              padding: ${3 * GU}px;
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+            `}
+          >
+            <LoadingRing />
+          </div>
         ) : (
           <div>
             {(() => {

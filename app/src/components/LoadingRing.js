@@ -6,13 +6,13 @@ export default function LoadingRing() {
     <LoadingRingComponent
       mode="half-circle"
       css={`
-  width: ${4 * GU}px;
-  height: ${4 * GU}px;
+        width: ${4 * GU}px;
+        height: ${4 * GU}px;
 
-  & > svg {
-    width: ${4 * GU}px;
-    height: ${4 * GU}px;
-`}
+        & > svg {
+          width: ${4 * GU}px;
+          height: ${4 * GU}px;
+      `}
     />
   )
 }

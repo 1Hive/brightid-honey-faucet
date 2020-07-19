@@ -2,7 +2,7 @@ import { useCallback } from 'react'
 import { getNetwork } from '../networks'
 import { useContract } from './useWeb3Contracts'
 
-import { keccak256, sanitizeSignature } from '../lib/web3-utils'
+import { formatBytes32String, sanitizeSignature } from '../lib/web3-utils'
 import { BRIGHTID_CONTEXT } from '../constants'
 import brightIdFaucetAbi from '../abi/BrightIdFaucet.json'
 
@@ -16,7 +16,7 @@ function useFaucetActions() {
 
   const claimAndOrRegister = useCallback(
     (addrs, signature) => {
-      const context = keccak256(BRIGHTID_CONTEXT)
+      const context = formatBytes32String(BRIGHTID_CONTEXT)
       const sig = sanitizeSignature(signature)
 
       return faucetContract.claimAndOrRegister(

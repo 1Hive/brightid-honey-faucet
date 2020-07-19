@@ -39,6 +39,7 @@ function BrightIdConnect({ account, addressExist }) {
   return (
     <div
       css={`
+        padding: ${3 * GU}px;
         display: flex;
         flex-direction: column;
         align-items: center;
