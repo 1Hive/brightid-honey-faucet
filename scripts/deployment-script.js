@@ -4,7 +4,7 @@ const bn = require("bn.js")
 const toBn = (x, y = 18) => new bn((x * 10 ** y).toString())
 const toBnPercent = (value) => toBn(value, 16)
 
-const periodLength = 10 * 60 // 5 minutes
+const periodLength = 10 * 60 // 10 minutes
 const percentPerPeriod = toBnPercent(20)
 const brightIdContext = "0x3168697665000000000000000000000000000000000000000000000000000000" // stringToBytes32("1hive")
 const brightIdVerifier = "0xb1d71F62bEe34E9Fc349234C201090c33BCdF6DB"
