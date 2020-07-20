@@ -1,1 +1,1 @@
-export const BRIGHTID_CONTEXT = '1hive'
+export const CONTEXT_ID = '1hive'
