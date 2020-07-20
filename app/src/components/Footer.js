@@ -12,7 +12,7 @@ export default function Footer({ compact }) {
       css={`
         flex-shrink: 0;
         width: 100%;
-        padding: ${5 * GU}px ${compact ? `${3 * GU}px` : 0};
+        padding: ${4 * GU}px ${compact ? `${3 * GU}px` : 0};
         background: ${theme.surface};
       `}
     >
@@ -23,8 +23,6 @@ export default function Footer({ compact }) {
             align-items: flex-start;
 
             & > div {
-              margin-bottom: ${2 * GU}px;
-
               &:not(:first-child) {
                 width: ${25 * GU}px;
               }
@@ -60,7 +58,13 @@ export default function Footer({ compact }) {
             <Link href="https://twitter.com/1HiveOrg" external>
               Twitter
             </Link>
-            <Link href="https://forum.1hive.org/" external>
+            <Link
+              css={`
+                margin-bottom: 0px;
+              `}
+              href="https://forum.1hive.org/"
+              external
+            >
               Forum
             </Link>
           </div>
