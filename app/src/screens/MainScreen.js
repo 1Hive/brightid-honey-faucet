@@ -9,7 +9,6 @@ import {
   useViewport,
 } from '@1hive/1hive-ui'
 import FaucetInfo from '../components/FaucetInfo'
-// import { useAppState } from '../providers/AppState'
 import { bigNum } from '../lib/math-utils'
 
 import distributionIcon from '../assets/distributionIcon.svg'
@@ -21,7 +20,6 @@ import freeMoneyIcon from '../assets/freeMoneyIcon.svg'
 import howItWorksIcon from '../assets/howItWorksIcon.svg'
 
 const MainScreen = React.memo(({ isLoading }) => {
-  // const { config } = useAppState()
   const theme = useTheme()
   const { below } = useViewport()
   const compact = below('medium')
@@ -34,7 +32,6 @@ const MainScreen = React.memo(({ isLoading }) => {
     <div
       css={`
         display: flex;
-        flex-direction: row;
       `}
     >
       <Box
@@ -46,7 +43,6 @@ const MainScreen = React.memo(({ isLoading }) => {
         <div
           css={`
             display: flex;
-            flex-direction: row;
             justify-content: space-between;
           `}
         >
@@ -63,7 +59,7 @@ const MainScreen = React.memo(({ isLoading }) => {
               css={`
                 width:${compact ? 'auto' : `${57 * GU}px;`}
                 margin-top: ${4 * GU}px;
-                line-height: 16px;
+                line-height: ${2 * GU}px;
                 ${textStyle('body2')};
               `}
             >
@@ -96,7 +92,6 @@ const MainScreen = React.memo(({ isLoading }) => {
         <div
           css={`
             display: flex;
-            flex-direction: row;
             justify-content: space-between;
           `}
         >
@@ -122,7 +117,7 @@ const MainScreen = React.memo(({ isLoading }) => {
               css={`
                 width:${compact ? 'auto' : `${57 * GU}px;`}
                 margin-top: ${4 * GU}px;
-                line-height: 16px;
+                line-height: ${2 * GU}px;
                 ${textStyle('body2')};
               `}
             >
@@ -163,7 +158,7 @@ const MainScreen = React.memo(({ isLoading }) => {
               css={`
                 width:${compact ? 'auto' : `${57 * GU}px;`}
                 margin-top: ${4 * GU}px;
-                line-height: 16px;
+                line-height: ${2 * GU}px;
                 ${textStyle('body2')};
               `}
             >

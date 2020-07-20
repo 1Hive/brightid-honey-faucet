@@ -33,14 +33,14 @@ function Wallet({ onClaimAndOrRegister }) {
           <div
             css={`
               border-radius: 50%;
-              border: 2.3px solid #c2c2c2;
+              background: #f9f9f9;
               width: ${7 * GU}px;
               height: ${7 * GU}px;
             `}
           >
             <IconConnect
               css={`
-                color: #c2c2c2;
+                color: #d7d7d7;
               `}
               size="large"
             />

@@ -20,7 +20,6 @@ function MainView({ children }) {
       <Header compact={compactMode} />
 
       <div
-        id="LAYYY"
         css={`
           flex: 1;
           ${!compactMode && `transform: translateY(-${4 * GU}px);`}
