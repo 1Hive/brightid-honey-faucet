@@ -3,7 +3,7 @@ import { getNetwork } from '../networks'
 import { useContract } from './useWeb3Contracts'
 
 import { formatBytes32String, sanitizeSignature } from '../lib/web3-utils'
-import { BRIGHTID_CONTEXT } from '../constants'
+import { CONTEXT_ID } from '../constants'
 import brightIdFaucetAbi from '../abi/BrightIdFaucet.json'
 
 function useFaucetContract() {
@@ -16,7 +16,7 @@ function useFaucetActions() {
 
   const claimAndOrRegister = useCallback(
     (addrs, signature) => {
-      const context = formatBytes32String(BRIGHTID_CONTEXT)
+      const context = formatBytes32String(CONTEXT_ID)
       const sig = sanitizeSignature(signature)
 
       return faucetContract.claimAndOrRegister(

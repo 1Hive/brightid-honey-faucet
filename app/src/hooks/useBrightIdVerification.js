@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { BRIGHTID_CONTEXT } from '../constants'
+import { CONTEXT_ID } from '../constants'
 import { BRIGHTID_VERIFICATION_ENDPOINT } from '../endpoints'
 import {
   ERROR_CODE,
@@ -34,7 +34,7 @@ export function useBrightIdVerification(account) {
     }
 
     const fetchVerificationInfo = async () => {
-      const endpoint = `${BRIGHTID_VERIFICATION_ENDPOINT}/${BRIGHTID_CONTEXT}/${account}?signed=eth`
+      const endpoint = `${BRIGHTID_VERIFICATION_ENDPOINT}/${CONTEXT_ID}/${account}?signed=eth`
       try {
         const rawResponse = await fetch(endpoint, {
           method: 'GET',
@@ -70,8 +70,8 @@ export function useBrightIdVerification(account) {
 
           setVerificationInfo({
             addressExist: true,
-            signature: response.data.sig,
-            userAddresses: response.data.contextIds,
+            hi: response.data?.sig,
+            userAddresses: response.data?.contextIds,
             userSponsored: true,
             userVerified: true,
             fetching: false,

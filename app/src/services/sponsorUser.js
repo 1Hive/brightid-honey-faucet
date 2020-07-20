@@ -2,7 +2,7 @@ import tweetNacl from 'tweetnacl'
 import tweetNaclUtils from 'tweetnacl-util'
 import sha256 from 'js-sha256'
 
-import { BRIGHTID_CONTEXT } from '../constants'
+import { CONTEXT_ID } from '../constants'
 import { BRIGHTID_SUBSCRIPTION_ENDPOINT } from '../endpoints'
 import { NO_CONTENT } from './responseCodes'
 import env from '../environment'
@@ -21,7 +21,7 @@ export async function sponsorUser(account) {
         name: 'Sponsor',
         _key: key,
         contextId: account,
-        context: BRIGHTID_CONTEXT,
+        context: CONTEXT_ID,
         sig: signedMessage,
         v: 4,
       }),
@@ -53,7 +53,7 @@ function sponsorKeyAndSig(account) {
 
   const privateKeyUint8Array = tweetNaclUtils.decodeBase64(privateKey)
 
-  const message = `Sponsor,${BRIGHTID_CONTEXT},${account}`
+  const message = `Sponsor,${CONTEXT_ID},${account}`
   const messageUint8Array = Buffer.from(message)
   const messageSha256 = sha256.sha256.digest(message)
   const messageBase64 = tweetNaclUtils.encodeBase64(messageSha256)
