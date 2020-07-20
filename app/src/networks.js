@@ -7,6 +7,7 @@ const networks = {
     ensRegistry: '0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e',
     name: 'Mainnet',
     type: 'main',
+    defaultEthNode: 'https://mainnet.eth.aragon.network/',
     faucet: '', // TODO: Add facuet address
   },
   rinkeby: {
@@ -14,7 +15,8 @@ const networks = {
     ensRegistry: '0x98df287b6c145399aaa709692c8d308357bc085d',
     name: 'Rinkeby',
     type: 'rinkeby',
-    faucet: '0x0705fccf97970573c3f6ba1d91b99c0289afbfba',
+    defaultEthNode: 'https://rinkeby.eth.aragon.network/',
+    faucet: '0x49870bd3f4a6ed9d2bf60e3fdf05e51cfaa6a745',
   },
   xdai: {
     chainId: 100,

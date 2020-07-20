@@ -1,7 +1,7 @@
 import React from 'react'
 import { Split, SyncIndicator } from '@1hive/1hive-ui'
 import MainScreen from './screens/MainScreen'
-import WalletAndTimer from './components/WalletAndTimer'
+import WalletAndTimer from './components/Wallet/WalletAndTimer'
 import useAppLogic from './app-logic'
 
 const App = React.memo(function App() {
@@ -13,7 +13,7 @@ const App = React.memo(function App() {
       <Split
         primary={<MainScreen isLoading={isLoading} />}
         secondary={
-          <WalletAndTimer onClaimAndOrRegister={actions.onClaimAndOrRegister} />
+          <WalletAndTimer onClaimAndOrRegister={actions.claimAndOrRegister} />
         }
         invert="horizontal"
       />

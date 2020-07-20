@@ -8,10 +8,9 @@ import { NO_CONTENT } from './responseCodes'
 import env from '../environment'
 
 export async function sponsorUser(account) {
-  const { key, signedMessage } = sponsorKeyAndSig(account)
-  const endpoint = `${BRIGHTID_SUBSCRIPTION_ENDPOINT}/${key}`
-
   try {
+    const { key, signedMessage } = sponsorKeyAndSig(account)
+    const endpoint = `${BRIGHTID_SUBSCRIPTION_ENDPOINT}/${key}`
     const rawResponse = await fetch(endpoint, {
       method: 'PUT',
       headers: {
@@ -47,6 +46,11 @@ export async function sponsorUser(account) {
 
 function sponsorKeyAndSig(account) {
   const privateKey = env('NODE_PK')
+
+  if (!privateKey) {
+    throw new Error('Missing pk')
+  }
+
   const privateKeyUint8Array = tweetNaclUtils.decodeBase64(privateKey)
 
   const message = `Sponsor,${CONTEXT_ID},${account}`

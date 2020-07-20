@@ -73,6 +73,10 @@ function _getClaimerEntity(claimerAddress: Address): Claimer | null {
 
   if (!claimer) {
     claimer = new Claimer(claimerEntityId)
+    claimer.latestClaimPeriod = BigInt.fromI32(0)
+    claimer.registeredForPeriod = BigInt.fromI32(0)
+    claimer.addressVoid = false
+    claimer.claims = []
   }
 
   return claimer
@@ -109,6 +113,8 @@ function _getPeriodEntity(periodNumber: BigInt): Period | null {
 
   if (!period) {
     period = new Period(periodEntityId)
+    period.totalRegisteredUsers = BigInt.fromI32(0)
+    period.maxPayout = BigInt.fromI32(0)
   }
 
   return period
