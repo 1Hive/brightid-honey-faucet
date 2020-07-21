@@ -9,7 +9,13 @@ import env from '../environment'
 
 export async function sponsorUser(account) {
   try {
-    const { key, signedMessage } = sponsorKeyAndSig(account)
+    const privateKey = env('NODE_PK')
+
+    if (!privateKey) {
+      return { error: 'No private key found for the node' }
+    }
+
+    const { key, signedMessage } = sponsorKeyAndSig(account, privateKey)
     const endpoint = `${BRIGHTID_SUBSCRIPTION_ENDPOINT}/${key}`
     const rawResponse = await fetch(endpoint, {
       method: 'PUT',
@@ -44,13 +50,7 @@ export async function sponsorUser(account) {
   }
 }
 
-function sponsorKeyAndSig(account) {
-  const privateKey = env('NODE_PK')
-
-  if (!privateKey) {
-    throw new Error('Missing pk')
-  }
-
+function sponsorKeyAndSig(account, privateKey) {
   const privateKeyUint8Array = tweetNaclUtils.decodeBase64(privateKey)
 
   const message = `Sponsor,${CONTEXT_ID},${account}`
