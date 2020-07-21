@@ -21,6 +21,9 @@ module.exports = {
     },
     rinkeby: {
       url: "https://rinkeby.infura.io/v3/8e0a671dca444df9ad47246e07aac303",
+    },
+    xdai: {
+      url: "https://xdai.poanetwork.dev",
     }
   },
   solc: {
