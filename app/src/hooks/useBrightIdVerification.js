@@ -87,6 +87,7 @@ export function useBrightIdVerification(account) {
             userSponsored: true,
             userVerified: true,
             fetching: false,
+            signature: { ...response.data?.sig },
           })
           return
         }
