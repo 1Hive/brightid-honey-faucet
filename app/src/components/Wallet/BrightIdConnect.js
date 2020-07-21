@@ -24,7 +24,7 @@ function BrightIdConnect({ account, addressExist }) {
         const { error } = await sponsorUser(account)
 
         if (error && !cancelled) {
-          setError(`Error sponsoring account: ${error.message}`)
+          setError(`Error sponsoring account: ${error}`)
         }
       } catch (err) {
         console.error('Error when sponsoring account: ', err)
@@ -33,7 +33,9 @@ function BrightIdConnect({ account, addressExist }) {
 
     sponsor()
 
-    return () => (cancelled = true)
+    return () => {
+      cancelled = true
+    }
   }, [account, addressExist])
 
   return (
