@@ -5,6 +5,7 @@ import {
   ERROR_CODE,
   NOT_FOUND_CODE,
   CAN_NOT_BE_VERIFIED,
+  NOT_SPONSORED_CODE,
 } from '../services/responseCodes'
 
 const VERIFICATION_RETRY_EVERY = 1000
@@ -68,6 +69,17 @@ export function useBrightIdVerification(account) {
             return
           }
 
+          if (response.code === NOT_SPONSORED_CODE) {
+            setVerificationInfo({
+              addressExist: true,
+              userAddresses: [],
+              userSponsored: false,
+              userVerified: false,
+              fetching: false,
+            })
+            return
+          }
+
           setVerificationInfo({
             addressExist: true,
             signature: response.data?.sig,
@@ -75,6 +87,7 @@ export function useBrightIdVerification(account) {
             userSponsored: true,
             userVerified: true,
             fetching: false,
+            signature: { ...response.data?.sig },
           })
           return
         }
