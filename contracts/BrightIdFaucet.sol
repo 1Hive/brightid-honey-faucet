@@ -169,7 +169,7 @@ contract BrightIdFaucet is Ownable {
 
     // TODO: This should also accept a timestamp but the nodes do not currently provide one, once they do we can add it.
     function _isVerifiedUnique(bytes32 _brightIdContext, address[] memory _addrs, uint8 _v, bytes32 _r, bytes32 _s)
-        public view returns (bool)
+        internal view returns (bool)
     {
         bytes32 signedMessage = keccak256(abi.encodePacked(_brightIdContext, _addrs));
         address verifierAddress = ecrecover(signedMessage, _v, _r, _s);
