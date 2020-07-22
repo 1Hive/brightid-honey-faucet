@@ -15,9 +15,6 @@ module.exports = {
   networks: {
     localhost: {
       url: 'http://localhost:8545',
-      accounts: {
-        mnemonic: "explain tackle mirror kit van hammer degree position ginger unfair soup bonus"
-      }
     },
     rinkeby: {
       url: "https://rinkeby.infura.io/v3/8e0a671dca444df9ad47246e07aac303",
@@ -29,5 +26,5 @@ module.exports = {
       enabled: true,
       runs: 10000,
     },
-  },
-};
+  }
+}

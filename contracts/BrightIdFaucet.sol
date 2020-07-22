@@ -1,7 +1,5 @@
 pragma solidity ^0.6.11;
 
-// Log messages to console with `console.log("Message", "Other Message")` like JS, remove for production.
-import "@nomiclabs/buidler/console.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
@@ -171,7 +169,7 @@ contract BrightIdFaucet is Ownable {
 
     // TODO: This should also accept a timestamp but the nodes do not currently provide one, once they do we can add it.
     function _isVerifiedUnique(bytes32 _brightIdContext, address[] memory _addrs, uint8 _v, bytes32 _r, bytes32 _s)
-        internal view returns (bool)
+        public view returns (bool)
     {
         bytes32 signedMessage = keccak256(abi.encodePacked(_brightIdContext, _addrs));
         address verifierAddress = ecrecover(signedMessage, _v, _r, _s);
@@ -190,9 +188,8 @@ contract BrightIdFaucet is Ownable {
 
         // Void all previously used addresses to prevent users from registering multiple times using old BrightID verifications.
         uint256 index = 1;
-        while (!claimers[_addrs[index]].addressVoid) {
+        while (index < _addrs.length && !claimers[_addrs[index]].addressVoid) {
             claimers[_addrs[index]].addressVoid = true;
-
             index++;
         }
     }
@@ -224,6 +221,10 @@ contract BrightIdFaucet is Ownable {
     }
 
     function _getPeriodIndividualPayout(Period storage period) internal view returns (uint256) {
+        if (period.totalRegisteredUsers == 0) {
+            return 0;
+        }
+
         uint256 periodMaxPayout = period.maxPayout == 0 ?
         _getPeriodMaxPayout(token.balanceOf(address(this))) : period.maxPayout;
 

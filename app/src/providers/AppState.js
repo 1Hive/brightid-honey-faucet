@@ -6,15 +6,15 @@ import { getNetwork } from '../networks'
 const AppStateContext = React.createContext()
 
 function AppStateProvider({ children }) {
-  const facuetAddress = getNetwork().faucet
+  const faucetAddress = getNetwork().faucet
   const wallet = useWallet()
   const { config, fetching: fetchingConfig, error: errorConfig } = useConfig(
-    facuetAddress
+    faucetAddress
   )
   const {
     claimer,
     fetching: fetchingClaimer,
-    errro: errorClaimer,
+    error: errorClaimer,
   } = useClaimer(wallet.account)
 
   return (
