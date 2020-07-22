@@ -4,7 +4,7 @@ import { CONTEXT_ID } from './constants'
 // BrightId endpoints
 export const NODE_URL = 'http:%2f%2fnode.brightid.org'
 
-export const BRIGHT_ID_ENDPOINT = 'http://node.brightid.org/brightid/v4'
+export const BRIGHT_ID_ENDPOINT = 'https://app.brightid.org/node/v4'
 export const BRIGHTID_VERIFICATION_ENDPOINT = `${BRIGHT_ID_ENDPOINT}/verifications`
 export const BRIGHTID_SUBSCRIPTION_ENDPOINT = `${BRIGHT_ID_ENDPOINT}/operations`
 
