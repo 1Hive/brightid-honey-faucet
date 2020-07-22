@@ -53,7 +53,7 @@ contract BrightIdFaucet is Ownable {
     event SetBrightIdSettings(bytes32 brightIdContext, address brightIdVerifier);
     event SetMinimumEthBalance(uint256 miniumBalance);
     event SetUniswapExchange(UniswapExchange uniswapExchange);
-    event Claim(address claimer, uint256 periodNumber, uint256 amount);
+    event Claim(address claimer, uint256 periodNumber, uint256 payoutMinusSold, uint256 claimerPayout);
     event Register(address sender, uint256 periodNumber);
 
     constructor(
@@ -145,12 +145,12 @@ contract BrightIdFaucet is Ownable {
                 tokensSoldForEth = _topUpSenderEthBalance(msg.sender, claimerPayout);
             }
 
-            uint256 totalPayout = claimerPayout.sub(tokensSoldForEth);
-            token.transfer(msg.sender, totalPayout);
+            uint256 payoutMinusSold = claimerPayout.sub(tokensSoldForEth);
+            token.transfer(msg.sender, payoutMinusSold);
 
             claimer.latestClaimPeriod = currentPeriod;
 
-            emit Claim(msg.sender, currentPeriod, totalPayout);
+            emit Claim(msg.sender, currentPeriod, payoutMinusSold, claimerPayout);
         }
     }
 
