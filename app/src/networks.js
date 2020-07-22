@@ -16,7 +16,7 @@ const networks = {
     name: 'Rinkeby',
     type: 'rinkeby',
     defaultEthNode: 'https://rinkeby.eth.aragon.network/',
-    faucet: '0x49870bd3f4a6ed9d2bf60e3fdf05e51cfaa6a745',
+    faucet: '0x30256f4abdd58766af69a03AB415F771D994dBc1',
   },
   xdai: {
     chainId: 100,

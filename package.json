@@ -8,11 +8,13 @@
     "@nomiclabs/buidler-truffle5": "^1.3.4",
     "@nomiclabs/buidler-web3": "^1.3.4",
     "@openzeppelin/contracts": "^3.1.0",
+    "homedir": "^0.6.0",
     "bn.js": "^5.1.2"
   },
   "scripts": {
     "test": "buidler test --network localhost",
     "compile": "buidler compile",
-    "deploy": "buidler run --network localhost scripts/deployment-script.js"
+    "deploy": "buidler run --network localhost scripts/deployment-script.js",
+    "deploy:rinkeby": "buidler run --network rinkeby scripts/deployment-script.js"
   }
 }
