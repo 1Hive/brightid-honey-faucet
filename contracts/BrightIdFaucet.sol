@@ -1,7 +1,5 @@
 pragma solidity ^0.6.11;
 
-// Log messages to console with `console.log("Message", "Other Message")` like JS, remove for production.
-import "@nomiclabs/buidler/console.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
@@ -55,7 +53,7 @@ contract BrightIdFaucet is Ownable {
     event SetBrightIdSettings(bytes32 brightIdContext, address brightIdVerifier);
     event SetMinimumEthBalance(uint256 miniumBalance);
     event SetUniswapExchange(UniswapExchange uniswapExchange);
-    event Claim(address claimer, uint256 periodNumber, uint256 amount);
+    event Claim(address claimer, uint256 periodNumber, uint256 payoutMinusSold, uint256 claimerPayout);
     event Register(address sender, uint256 periodNumber);
 
     constructor(
@@ -147,12 +145,12 @@ contract BrightIdFaucet is Ownable {
                 tokensSoldForEth = _topUpSenderEthBalance(msg.sender, claimerPayout);
             }
 
-            uint256 totalPayout = claimerPayout.sub(tokensSoldForEth);
-            token.transfer(msg.sender, totalPayout);
+            uint256 payoutMinusSold = claimerPayout.sub(tokensSoldForEth);
+            token.transfer(msg.sender, payoutMinusSold);
 
             claimer.latestClaimPeriod = currentPeriod;
 
-            emit Claim(msg.sender, currentPeriod, totalPayout);
+            emit Claim(msg.sender, currentPeriod, payoutMinusSold, claimerPayout);
         }
     }
 
@@ -190,9 +188,8 @@ contract BrightIdFaucet is Ownable {
 
         // Void all previously used addresses to prevent users from registering multiple times using old BrightID verifications.
         uint256 index = 1;
-        while (!claimers[_addrs[index]].addressVoid) {
+        while (index < _addrs.length && !claimers[_addrs[index]].addressVoid) {
             claimers[_addrs[index]].addressVoid = true;
-
             index++;
         }
     }
@@ -224,6 +221,10 @@ contract BrightIdFaucet is Ownable {
     }
 
     function _getPeriodIndividualPayout(Period storage period) internal view returns (uint256) {
+        if (period.totalRegisteredUsers == 0) {
+            return 0;
+        }
+
         uint256 periodMaxPayout = period.maxPayout == 0 ?
         _getPeriodMaxPayout(token.balanceOf(address(this))) : period.maxPayout;
 

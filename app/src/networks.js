@@ -16,7 +16,7 @@ const networks = {
     name: 'Rinkeby',
     type: 'rinkeby',
     defaultEthNode: 'https://rinkeby.eth.aragon.network/',
-    faucet: '0x49870bd3f4a6ed9d2bf60e3fdf05e51cfaa6a745',
+    faucet: '0xC42B4c75706fA9AC7B3DE20548851F96685A1Cf1',
   },
   xdai: {
     chainId: 100,
@@ -24,7 +24,7 @@ const networks = {
     name: 'xDai',
     type: 'xdai',
     defaultEthNode: 'https://xdai.poanetwork.dev/',
-    faucet: '0xDBcC5379E331067fD24A2C987244B9F1CeAd4350',
+    faucet: '0x8D02D7f2726c8947c01472106a1b6d9DBf14Ce7b',
   },
 }
 
