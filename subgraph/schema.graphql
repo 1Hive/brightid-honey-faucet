@@ -5,6 +5,7 @@ type Config @entity {
   periodLength: BigInt!
   percentPerPeriod: BigInt!
   minimumEthBalance: BigInt!
+  totalDistributed: BigInt!
 }
 
 type Claimer @entity {

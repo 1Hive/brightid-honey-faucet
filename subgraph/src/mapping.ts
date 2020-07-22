@@ -4,7 +4,7 @@ import { ERC20 as ERC20Contract } from '../generated/BrightIdFaucet/ERC20'
 import { Claim, Claimer, Config, ERC20, Period } from '../generated/schema'
 
 export function handleInitialized(event: InitializeEvent): void {
-  let config = new Config(event.address.toHexString())
+  let config = _getConfigEntity(event.address)
   config.firstPeriodStart = event.block.timestamp
   config.periodLength = event.params.periodLength
   config.percentPerPeriod = event.params.percentPerPeriod
@@ -28,6 +28,10 @@ export function handleNewClaim(event: ClaimEvent): void {
   let claim = _getClaimEntity(event.params.claimer, event.params.periodNumber)
   claim.amount = event.params.amount
   claim.save()
+
+  let config =_getConfigEntity(event.address)
+  config.totalDistributed = config.totalDistributed.plus(event.params.amount)
+  config.save()
   
   let claimer = _getClaimerEntity(event.params.claimer)
   claimer.latestClaimPeriod = event.params.periodNumber
@@ -118,4 +122,17 @@ function _getPeriodEntity(periodNumber: BigInt): Period | null {
   }
 
   return period
+}
+
+function _getConfigEntity(address: Address): Config | null {
+
+  let configEntityId = address.toHexString()
+  let config = Config.load(address.toHexString())
+
+  if (!config) {
+    config = new Config(configEntityId)
+    config.totalDistributed = BigInt.fromI32(0)
+  }
+
+  return config
 }
