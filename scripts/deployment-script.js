@@ -12,7 +12,7 @@ const networks = new Map([
   [
     "rinkeby", 
     {
-      token: "",
+      token: "0x4a7683282053ff1e2381cc1663fb04fbbcd18350",
       uniswapExchange: "0x20f2fDE9F6f9F72625c3b4cC36c451630e87eEAe", 
       minimumEthBalance: toBn(5, 17) 
     },
@@ -30,19 +30,19 @@ const networks = new Map([
 
 async function main() {
   await env.run("compile")
-  const BrightIdFaucet = env.artifacts.require("BrightIdFaucet")
 
-  let { tokenAddress, uniswapExchange, minimumEthBalance } = networks.get(env.network.name)
+  let { token: tokenAddress, uniswapExchange, minimumEthBalance } = networks.get(env.network.name)
 
-  if (env.network.name === "rinkeby") {
+  if (tokenAddress === "") {
     const Token = env.artifacts.require("Token")
     console.log("Deploying Token...")
     const token = await Token.new("Test Token", "TTN")
     tokenAddress = token.address
-    console.log("Token address:", tokenAddress)
   }
+  console.log("Token address:", tokenAddress)
 
   console.log("Deploying BrightIdFaucet...")
+  const BrightIdFaucet = env.artifacts.require("BrightIdFaucet")
   const brightIdFaucet = await BrightIdFaucet.new(tokenAddress, periodLength, percentPerPeriod, brightIdContext, brightIdVerifier, minimumEthBalance, uniswapExchange)
   console.log("BrightIdFaucet address:", brightIdFaucet.address)
 }
