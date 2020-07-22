@@ -10,6 +10,12 @@ import {
 } from '@1hive/1hive-ui'
 import FaucetInfo from '../components/FaucetInfo'
 import { bigNum } from '../lib/math-utils'
+import { useClock } from '../providers/Clock'
+import { usePeriod } from '../hooks/subscription-hooks'
+import { getNetwork } from '../networks'
+import { useTokenBalance } from '../hooks/useTokenBalance'
+import { useIndividualPayout } from '../hooks/useIndividualPayout'
+import { useAppState } from '../providers/AppState'
 
 import distributionIcon from '../assets/distributionIcon.svg'
 import tokensAvailableIcon from '../assets/tokensAvailableIcon.svg'
@@ -20,9 +26,23 @@ import freeMoneyIcon from '../assets/freeMoneyIcon.svg'
 import howItWorksIcon from '../assets/howItWorksIcon.svg'
 
 const MainScreen = React.memo(({ isLoading }) => {
+  const { config } = useAppState()
   const theme = useTheme()
   const { below } = useViewport()
   const compact = below('medium')
+
+  const { currentPeriod } = useClock()
+
+  const { period, fetching, error } = usePeriod(currentPeriod)
+  console.log('periodData ', period, fetching, error)
+
+  const individualPayout = useIndividualPayout(1)
+
+  console.log('individualPayout ', individualPayout)
+
+  const facuetAddress = getNetwork().faucet
+
+  const faucetHoneyBalance = useTokenBalance(facuetAddress, config?.token)
 
   if (isLoading) {
     return null
@@ -212,10 +232,11 @@ const MainScreen = React.memo(({ isLoading }) => {
           icon={distributionIcon}
         />
         <FaucetInfo
-          amount={bigNum(0)}
-          decimals={0}
+          amount={faucetHoneyBalance}
+          decimals={config?.token?.decimals}
           text="Currently available"
           icon={tokensAvailableIcon}
+          loading={faucetHoneyBalance.eq(-1)}
         />
         <FaucetInfo
           amount={bigNum(0)}
