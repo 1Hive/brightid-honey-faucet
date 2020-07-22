@@ -1,29 +1,34 @@
-usePlugin("@nomiclabs/buidler-truffle5");
+const homedir = require('homedir')
+const path = require('path')
+usePlugin("@nomiclabs/buidler-truffle5")
 
-// This is a sample Buidler task. To learn how to create your own go to
-// https://buidler.dev/guides/create-task.html
-task("accounts", "Prints the list of accounts", async () => {
-  const accounts = await web3.eth.getAccounts();
-
-  for (const account of accounts) {
-    console.log(account);
+const settingsForNetwork = (network) => {
+  try {
+    const keyFilePath = path.join(homedir(), `.aragon/${network}_key.json`)
+    return require(keyFilePath)
+  } catch (e) {
+    return { }
   }
-});
+}
+
+const key = (network) => {
+  let { keys } = settingsForNetwork(network)
+  return keys[0]
+}
 
 module.exports = {
   defaultNetwork: 'localhost',
   networks: {
     localhost: {
       url: 'http://localhost:8545',
-      accounts: {
-        mnemonic: "explain tackle mirror kit van hammer degree position ginger unfair soup bonus"
-      }
     },
     rinkeby: {
       url: "https://rinkeby.infura.io/v3/8e0a671dca444df9ad47246e07aac303",
+      accounts: ["0x" + key("rinkeby")]
     },
     xdai: {
       url: "https://xdai.poanetwork.dev",
+      accounts: ["0x" + key("xdai")]
     }
   },
   solc: {
@@ -32,5 +37,5 @@ module.exports = {
       enabled: true,
       runs: 10000,
     },
-  },
-};
+  }
+}
