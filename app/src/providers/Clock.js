@@ -10,8 +10,6 @@ function ClockProvider({ children }) {
   const now = useNow()
   const { config } = useAppState()
 
-  console.log('CONFIG ', config)
-
   const { periodNumber = 0, startTime = 0, endTime = 0 } = config
     ? getCurrentPeriod(now, config.firstPeriodStart, config.periodLength)
     : {}
