@@ -82,7 +82,6 @@ export function useBrightIdVerification(account) {
 
           setVerificationInfo({
             addressExist: true,
-            signature: response.data?.sig,
             userAddresses: response.data?.contextIds,
             userSponsored: true,
             userVerified: true,
