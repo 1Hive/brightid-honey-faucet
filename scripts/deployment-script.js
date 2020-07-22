@@ -4,8 +4,8 @@ const bn = require("bn.js")
 const toBn = (x, y = 18) => new bn((x * 10 ** y).toString())
 const toBnPercent = (value) => toBn(value, 16)
 
-const periodLength = 24 * 60 * 60  // 1 day
-const percentPerPeriod = toBnPercent(20)
+const periodLength = 60 * 60 * 24 * 2 // 2 days
+const percentPerPeriod = toBnPercent(20) // 20%
 const brightIdContext = "0x3168697665000000000000000000000000000000000000000000000000000000" // stringToBytes32("1hive")
 const brightIdVerifier = "0xb1d71F62bEe34E9Fc349234C201090c33BCdF6DB"
 const networks = new Map([

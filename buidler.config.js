@@ -28,6 +28,7 @@ module.exports = {
     },
     xdai: {
       url: "https://xdai.poanetwork.dev",
+      accounts: ["0x" + key("xdai")]
     }
   },
   solc: {

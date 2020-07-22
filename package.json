@@ -15,6 +15,7 @@
     "test": "buidler test --network localhost",
     "compile": "buidler compile",
     "deploy": "buidler run --network localhost scripts/deployment-script.js",
-    "deploy:rinkeby": "buidler run --network rinkeby scripts/deployment-script.js"
+    "deploy:rinkeby": "buidler run --network rinkeby scripts/deployment-script.js",
+    "deploy:xdai": "buidler run --network xdai scripts/deployment-script.js"
   }
 }
