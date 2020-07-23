@@ -4,6 +4,8 @@ import { GU, IdentityBadge, useTheme } from '@1hive/1hive-ui'
 function AddressReplaced({ addrs }) {
   const theme = useTheme()
 
+  const primaryAddress = addrs.length > 0 ? addrs[0] : ''
+
   return (
     <div
       css={`
@@ -18,8 +20,8 @@ function AddressReplaced({ addrs }) {
           margin-top: ${2 * GU}px;
         `}
       >
-        You must use <IdentityBadge entity={addrs[0]} /> to interact with the
-        facuet
+        You must use <IdentityBadge entity={primaryAddress} /> to interact with
+        the facuet
       </div>
     </div>
   )
