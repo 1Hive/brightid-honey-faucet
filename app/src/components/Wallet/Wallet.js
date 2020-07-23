@@ -10,10 +10,11 @@ import {
 } from '@1hive/1hive-ui'
 import BrightIdConnect from './BrightIdConnect'
 import ClaimAndRegister from './ClaimAndRegister'
+import LoadingRing from '../LoadingRing'
+import TokenBalance from './TokenBalance'
 
 import { useWallet } from '../../providers/Wallet'
 import { useBrightIdVerification } from '../../hooks/useBrightIdVerification'
-import LoadingRing from '../LoadingRing'
 
 function Wallet({ onClaimAndOrRegister }) {
   const { account } = useWallet()
@@ -103,6 +104,7 @@ function AccountConnected({ account, onClaimAndOrRegister }) {
           {shortenAddress(account, 4)}
         </span>
       </div>
+      <TokenBalance />
       <div>
         {fetching ? (
           <div
