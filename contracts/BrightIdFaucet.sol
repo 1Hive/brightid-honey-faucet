@@ -10,6 +10,7 @@ contract BrightIdFaucet is Ownable {
 
     string private constant ERROR_ADDRESS_VOIDED = "ADDRESS_VOIDED";
     string private constant ERROR_FAUCET_BALANCE_IS_ZERO = "FAUCET_BALANCE_IS_ZERO";
+    string private constant ERROR_ALREADY_REGISTERED = "ALREADY_REGISTERED";
     string private constant ERROR_INCORRECT_VERIFICATION = "INCORRECT_VERIFICATION";
     string private constant ERROR_INVALID_PERIOD_LENGTH = "INVALID_PERIOD_LENGTH";
     string private constant ERROR_INVALID_PERIOD_PERCENTAGE = "INVALID_PERIOD_PERCENTAGE";
@@ -107,6 +108,7 @@ contract BrightIdFaucet is Ownable {
  
     // If you have previously registered then you will claim here and register for the next period.
     function claimAndOrRegister(bytes32 _brightIdContext, address[] memory _addrs, uint8 _v, bytes32 _r, bytes32 _s) public {
+        require(claimers[msg.sender].registeredForPeriod <= getCurrentPeriod(), ERROR_ALREADY_REGISTERED);
         require(_isVerifiedUnique(_brightIdContext, _addrs, _v, _r, _s), ERROR_INCORRECT_VERIFICATION);
         require(msg.sender == _addrs[0], ERROR_SENDER_NOT_VERIFIED);
 
