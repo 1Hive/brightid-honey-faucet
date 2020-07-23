@@ -32,12 +32,13 @@ const MainScreen = React.memo(({ isLoading }) => {
 
   const { currentPeriod } = useClock()
 
-  const { period, fetchingPeriodData } = usePeriod(currentPeriod)
-  const { totalRegisteredUsers, individualPayout } = period
+  const { period, fetching: fetchingPeriodData } = usePeriod(currentPeriod)
+  const { totalRegisteredUsers = bigNum(0), individualPayout = bigNum(0) } =
+    period || {}
 
-  const facuetAddress = getNetwork().faucet
+  const faucetAddress = getNetwork().faucet
 
-  const faucetHoneyBalance = useTokenBalance(facuetAddress, config?.token)
+  const faucetHoneyBalance = useTokenBalance(faucetAddress, config?.token)
 
   if (isLoading) {
     return null
@@ -223,21 +224,22 @@ const MainScreen = React.memo(({ isLoading }) => {
         />
         {/** TODO - get the total amount from the subgraph */}
         <FaucetInfo
-          amount={bigNum(0)}
+          amount={config.totalDistributed}
           decimals={0}
           text="Total distributed"
           icon={distributionIcon}
+          loading={!config.totalDistributed}
         />
         <FaucetInfo
           amount={faucetHoneyBalance}
-          decimals={config?.token?.decimals}
+          decimals={config.token.decimals}
           text="Currently available"
           icon={tokensAvailableIcon}
           loading={faucetHoneyBalance.eq(-1)}
         />
         <FaucetInfo
           amount={individualPayout}
-          decimals={config?.token?.decimals}
+          decimals={config.token.decimals}
           text="Amount paid per user this period"
           icon={tokenIcon}
           loading={fetchingPeriodData || !config?.token?.decimals}

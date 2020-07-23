@@ -7,6 +7,7 @@ export function transformConfigData(config) {
     minimumEthBalance: bigNum(config.minimumEthBalance),
     periodLength: parseInt(config.periodLength, 10) * 1000,
     percentPerPeriod: bigNum(config.percentPerPeriod),
+    totalDistributed: bigNum(config.totalDistributed),
   }
 }
 
