@@ -7,6 +7,7 @@ export const Config = gql`
       periodLength
       percentPerPeriod
       minimumEthBalance
+      totalDistributed
       token {
         id
         name

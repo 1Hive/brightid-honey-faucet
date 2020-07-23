@@ -10,6 +10,11 @@ import {
 } from '@1hive/1hive-ui'
 import FaucetInfo from '../components/FaucetInfo'
 import { bigNum } from '../lib/math-utils'
+import { useClock } from '../providers/Clock'
+import { usePeriod } from '../hooks/subscription-hooks'
+import { getNetwork } from '../networks'
+import { useTokenBalance } from '../hooks/useTokenBalance'
+import { useAppState } from '../providers/AppState'
 
 import distributionIcon from '../assets/distributionIcon.svg'
 import tokensAvailableIcon from '../assets/tokensAvailableIcon.svg'
@@ -20,9 +25,20 @@ import freeMoneyIcon from '../assets/freeMoneyIcon.svg'
 import howItWorksIcon from '../assets/howItWorksIcon.svg'
 
 const MainScreen = React.memo(({ isLoading }) => {
+  const { config } = useAppState()
   const theme = useTheme()
   const { below } = useViewport()
   const compact = below('medium')
+
+  const { currentPeriod } = useClock()
+
+  const { period, fetching: fetchingPeriodData } = usePeriod(currentPeriod)
+  const { totalRegisteredUsers = bigNum(0), individualPayout = bigNum(0) } =
+    period || {}
+
+  const faucetAddress = getNetwork().faucet
+
+  const faucetHoneyBalance = useTokenBalance(faucetAddress, config?.token)
 
   if (isLoading) {
     return null
@@ -203,28 +219,32 @@ const MainScreen = React.memo(({ isLoading }) => {
         `}
       >
         <FaucetInfo
-          amount={bigNum(0)}
+          amount={totalRegisteredUsers}
           decimals={0}
           text="Registered users"
           icon={userIcon}
+          loading={fetchingPeriodData}
         />
         <FaucetInfo
-          amount={bigNum(0)}
-          decimals={0}
+          amount={config.totalDistributed}
+          decimals={config.token.decimals}
           text="Total distributed"
           icon={distributionIcon}
+          loading={!config.totalDistributed}
         />
         <FaucetInfo
-          amount={bigNum(0)}
-          decimals={0}
+          amount={faucetHoneyBalance}
+          decimals={config.token.decimals}
           text="Currently available"
           icon={tokensAvailableIcon}
+          loading={faucetHoneyBalance.eq(-1)}
         />
         <FaucetInfo
-          amount={bigNum(0)}
-          decimals={0}
+          amount={individualPayout}
+          decimals={config.token.decimals}
           text="Amount paid per user this period"
           icon={tokenIcon}
+          loading={fetchingPeriodData || !config?.token?.decimals}
         />
       </div>
     </div>

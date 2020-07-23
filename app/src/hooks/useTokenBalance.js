@@ -5,7 +5,7 @@ import { useContractReadOnly } from './useWeb3Contracts'
 import tokenAbi from '../abi/ERC20.json'
 
 export function useTokenBalance(account, token) {
-  const tokenContract = useContractReadOnly(token.id, tokenAbi)
+  const tokenContract = useContractReadOnly(token?.id, tokenAbi)
   const [balance, setBalance] = useState(bigNum(-1))
 
   useEffect(() => {
@@ -40,7 +40,7 @@ export function useTokenBalance(account, token) {
       cancelled = true
       clearTimeout(timeoutId)
     }
-  }, [account, balance, tokenContract, token.id])
+  }, [account, balance, tokenContract, token])
 
   return balance
 }

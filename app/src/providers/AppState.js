@@ -11,6 +11,7 @@ function AppStateProvider({ children }) {
   const { config, fetching: fetchingConfig, error: errorConfig } = useConfig(
     faucetAddress
   )
+
   const {
     claimer,
     fetching: fetchingClaimer,
