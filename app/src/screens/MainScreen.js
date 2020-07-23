@@ -233,7 +233,7 @@ const MainScreen = React.memo(({ isLoading }) => {
 
 const LineSeparator = styled.div`
   height: 1px;
-  border: 0.5px solid ${({ border }) => border};
+  border-bottom: 0.5px solid ${({ border }) => border};
   margin: ${6 * GU}px 0;
 `
 
