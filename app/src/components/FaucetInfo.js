@@ -3,21 +3,22 @@ import { Box, GU, useTheme, textStyle } from '@1hive/1hive-ui'
 import LoadingRing from './LoadingRing'
 import { formatTokenAmount } from '../lib/math-utils'
 
-function FaucetInfo({ amount, decimals, text, icon, loading }) {
+function FaucetInfo({ amount, decimals, text, icon, loading, compact }) {
   const theme = useTheme()
 
+  const Container = compact ? 'div' : Box
+
   return (
-    <Box
+    <Container
       padding={0}
-      css={`
-        box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.15);
-      `}
+      style={{
+        boxShadow: compact ? '' : '0px 1px 3px rgba(0, 0, 0, 0.15)',
+      }}
     >
       <div
         css={`
           display: flex;
           align-items: center;
-          width: ${33 * GU}px;
           height: ${18 * GU}px;
           padding: ${3 * GU}px;
         `}
@@ -63,7 +64,7 @@ function FaucetInfo({ amount, decimals, text, icon, loading }) {
           </>
         )}
       </div>
-    </Box>
+    </Container>
   )
 }
 

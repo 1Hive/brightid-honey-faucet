@@ -1,11 +1,13 @@
 import React from 'react'
-import { Split, SyncIndicator } from '@1hive/1hive-ui'
+import { Split, SyncIndicator, useLayout } from '@1hive/1hive-ui'
 import MainScreen from './screens/MainScreen'
 import WalletAndTimer from './components/Wallet/WalletAndTimer'
 import useAppLogic from './app-logic'
 
 const App = React.memo(function App() {
   const { actions, isLoading } = useAppLogic()
+  const { name: layout } = useLayout()
+  const oneColumn = layout === 'small' || layout === 'medium'
 
   return (
     <div>
@@ -15,7 +17,7 @@ const App = React.memo(function App() {
         secondary={
           <WalletAndTimer onClaimAndOrRegister={actions.claimAndOrRegister} />
         }
-        invert="horizontal"
+        invert={oneColumn ? 'vertical' : 'horizontal'}
       />
     </div>
   )

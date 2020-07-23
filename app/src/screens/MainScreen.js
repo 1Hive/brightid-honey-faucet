@@ -1,44 +1,16 @@
 import React from 'react'
 import styled from 'styled-components'
-import {
-  Box,
-  GU,
-  textStyle,
-  Link,
-  useTheme,
-  useViewport,
-} from '@1hive/1hive-ui'
-import FaucetInfo from '../components/FaucetInfo'
-import { bigNum } from '../lib/math-utils'
-import { useClock } from '../providers/Clock'
-import { usePeriod } from '../hooks/subscription-hooks'
-import { getNetwork } from '../networks'
-import { useTokenBalance } from '../hooks/useTokenBalance'
-import { useAppState } from '../providers/AppState'
+import { Box, GU, textStyle, Link, useTheme, useLayout } from '@1hive/1hive-ui'
 
-import distributionIcon from '../assets/distributionIcon.svg'
-import tokensAvailableIcon from '../assets/tokensAvailableIcon.svg'
-import tokenIcon from '../assets/tokenIcon.svg'
-import userIcon from '../assets/userIcon.svg'
 import honeyIsMoneyIcon from '../assets/honeyIsMoneyIcon.svg'
 import freeMoneyIcon from '../assets/freeMoneyIcon.svg'
 import howItWorksIcon from '../assets/howItWorksIcon.svg'
+import Metrics from '../components/Metrics'
 
 const MainScreen = React.memo(({ isLoading }) => {
-  const { config } = useAppState()
   const theme = useTheme()
-  const { below } = useViewport()
-  const compact = below('medium')
-
-  const { currentPeriod } = useClock()
-
-  const { period, fetching: fetchingPeriodData } = usePeriod(currentPeriod)
-  const { totalRegisteredUsers = bigNum(0), individualPayout = bigNum(0) } =
-    period || {}
-
-  const faucetAddress = getNetwork().faucet
-
-  const faucetHoneyBalance = useTokenBalance(faucetAddress, config?.token)
+  const { name: layout } = useLayout()
+  const compact = layout === 'small' || layout === 'medium'
 
   if (isLoading) {
     return null
@@ -47,7 +19,9 @@ const MainScreen = React.memo(({ isLoading }) => {
   return (
     <div
       css={`
-        display: flex;
+        display: grid;
+        grid-template-columns: ${compact ? '1fr' : `1fr ${33 * GU}px`};
+        grid-gap: ${2 * GU}px;
       `}
     >
       <Box
@@ -56,200 +30,139 @@ const MainScreen = React.memo(({ isLoading }) => {
           width: 100%;
         `}
       >
-        <div
-          css={`
-            display: flex;
-            justify-content: space-between;
-          `}
-        >
-          <div>
-            <h5
-              css={`
-                ${textStyle('title3')};
-                color: ${theme.surfaceContent};
-              `}
-            >
-              Honey is Money
-            </h5>
-            <div
-              css={`
-                width:${compact ? 'auto' : `${57 * GU}px;`}
-                margin-top: ${4 * GU}px;
-                line-height: ${2 * GU}px;
-                ${textStyle('body2')};
-              `}
-            >
-              <span>
-                <Link href="https://blog.1hive.org/honey/">
-                  Honey is 1Hive's community currency
-                </Link>
-                . Similar to Bitcoin or Ether, Honey is issued and distributed
-                by an economic protocol, and can be freely exchanged on a
-                distributed ledger. When you hold Honey you are betting on the
-                Honey economy growing over time, and you can help realize that
-                goal by staking your Honey on distribution proposals which
-                allocate Honey issuance towards the initiatives that help 1Hive
-                thrive.
-              </span>
-            </div>
-          </div>
+        <Content
+          compact={layout === 'small'}
+          icon={honeyIsMoneyIcon}
+          title="Honey is Money"
+          reverse
+          text={
+            <span>
+              <Link href="https://blog.1hive.org/honey/">
+                Honey is 1Hive's community currency
+              </Link>
+              . Similar to Bitcoin or Ether, Honey is issued and distributed by
+              an economic protocol, and can be freely exchanged on a distributed
+              ledger. When you hold Honey you are betting on the Honey economy
+              growing over time, and you can help realize that goal by staking
+              your Honey on distribution proposals which allocate Honey issuance
+              towards the initiatives that help 1Hive thrive.
+            </span>
+          }
+        />
+        <LineSeparator border={theme.border} />
 
-          <img
-            src={honeyIsMoneyIcon}
-            width={20 * GU}
-            height={20 * GU}
-            alt=""
-            css={`
-              flex-shrink: 0;
-            `}
-          />
-        </div>
+        <Content
+          compact={layout === 'small'}
+          icon={freeMoneyIcon}
+          title="Free Money?"
+          text={
+            <span>
+              This faucet allows you to claim Honey just for being a human and
+              showing interest in 1Hive... but if Honey is Money, why would we
+              want to just give it out like that? The answer is that having a
+              broad and inclusive distribution of Honey is critical for the
+              1Hive community to grow and decentralize. In the early days of
+              Ethereum and Bitcoin, it was possible to mine Ether and Bitcoin on
+              a personal computer and this resulted in a broad and inclusive
+              distribution. In principal this faucet operates on the same basic
+              premise, but instead of proof of work we rely on
+              <Link href="https://www.brightid.org/">BrightID</Link> for sybil
+              resistance.
+            </span>
+          }
+        />
         <LineSeparator border={theme.border} />
-        <div
-          css={`
-            display: flex;
-            justify-content: space-between;
-          `}
-        >
-          <img
-            src={freeMoneyIcon}
-            width={20 * GU}
-            height={20 * GU}
-            alt=""
-            css={`
-              flex-shrink: 0;
-            `}
-          />
-          <div>
-            <h5
-              css={`
-                ${textStyle('title3')};
-                color: ${theme.surfaceContent};
-              `}
-            >
-              Free Money?
-            </h5>
-            <div
-              css={`
-                width:${compact ? 'auto' : `${57 * GU}px;`}
-                margin-top: ${4 * GU}px;
-                line-height: ${2 * GU}px;
-                ${textStyle('body2')};
-              `}
-            >
+        <Content
+          compact={layout === 'small'}
+          icon={howItWorksIcon}
+          title="How it works"
+          reverse
+          text={
+            <span>
+              This faucet is funded through{' '}
+              <Link href="https://1hive.org/#/">
+                Honey distribution proposals
+              </Link>
+              , anyone can make a proposal to top up the faucet with more Honey,
+              and if there is sufficient support it will happen. The faucet will
+              allocate a portion of its balance to all registered users each
+              period, when a user claims their share they will automatically be
+              registered for the next periods distribution. If you forget to
+              claim your share, it will be forfeited and you will need to
+              re-register before claiming again, so be sure to check back in and
+              claim your share each period!
+              <br />
+              <br />
               <span>
-                This faucet allows you to claim Honey just for being a human and
-                showing interest in 1Hive... but if Honey is Money, why would we
-                want to just give it out like that? The answer is that having a
-                broad and inclusive distribution of Honey is critical for the
-                1Hive community to grow and decentralize. In the early days of
-                Ethereum and Bitcoin, it was possible to mine Ether and Bitcoin
-                on a personal computer and this resulted in a broad and
-                inclusive distribution. In principal this faucet operates on the
-                same basic premise, but instead of proof of work we rely on
-                <Link href="https://www.brightid.org/">BrightID</Link> for sybil
-                resistance.
-              </span>
-            </div>
-          </div>
-        </div>
-        <LineSeparator border={theme.border} />
-        <div
-          css={`
-            display: flex;
-            flex-direction: row;
-            justify-content: space-between;
-          `}
-        >
-          <div>
-            <h5
-              css={`
-                ${textStyle('title3')};
-                color: ${theme.surfaceContent};
-              `}
-            >
-              How it works
-            </h5>
-            <div
-              css={`
-                width:${compact ? 'auto' : `${57 * GU}px;`}
-                margin-top: ${4 * GU}px;
-                line-height: ${2 * GU}px;
-                ${textStyle('body2')};
-              `}
-            >
-              <span>
-                This faucet is funded through{' '}
-                <Link href="https://1hive.org/#/">
-                  Honey distribution proposals
-                </Link>
-                , anyone can make a proposal to top up the faucet with more
-                Honey, and if there is sufficient support it will happen. The
-                faucet will allocate a portion of its balance to all registered
-                users each period, when a user claims their share they will
-                automatically be registered for the next periods distribution.
-                If you forget to claim your share, it will be forfeited and you
-                will need to re-register before claiming again, so be sure to
-                check back in and claim your share each period! In order to
-                register you'll first need to validate your account using
-                BrightID, BrightID is a decentralized protocol for proof of
-                uniqueness. If you've never used it before you'll need to
+                In order to register you'll first need to validate your account
+                using BrightID, BrightID is a decentralized protocol for proof
+                of uniqueness. If you've never used it before you'll need to
                 download it, make a few connections, and get verified. We can
                 help! Just hop on the{' '}
                 <Link href="https://discord.gg/GFWC5c">1Hive Discord</Link> 🍯
                 and say Hi!
               </span>
-            </div>
-          </div>
-
-          <img
-            src={howItWorksIcon}
-            width={20 * GU}
-            height={20 * GU}
-            alt=""
-            css={`
-              flex-shrink: 0;
-            `}
-          />
-        </div>
+            </span>
+          }
+        />
       </Box>
-      <div
-        css={`
-          margin-left: ${2 * GU}px;
-        `}
-      >
-        <FaucetInfo
-          amount={bigNum(totalRegisteredUsers)}
-          decimals={0}
-          text="Registered users"
-          icon={userIcon}
-          loading={fetchingPeriodData}
-        />
-        <FaucetInfo
-          amount={config.totalDistributed}
-          decimals={config.token.decimals}
-          text="Total distributed"
-          icon={distributionIcon}
-          loading={!config.totalDistributed}
-        />
-        <FaucetInfo
-          amount={faucetHoneyBalance}
-          decimals={config.token.decimals}
-          text="Currently available"
-          icon={tokensAvailableIcon}
-          loading={faucetHoneyBalance.eq(-1)}
-        />
-        <FaucetInfo
-          amount={individualPayout}
-          decimals={config.token.decimals}
-          text="Amount paid per user this period"
-          icon={tokenIcon}
-          loading={fetchingPeriodData || !config?.token?.decimals}
-        />
-      </div>
+      <Metrics />
     </div>
   )
 })
+
+function Content({ compact, icon, title, text, reverse }) {
+  const theme = useTheme()
+
+  return (
+    <div
+      css={`
+        display: flex;
+        flex-direction: ${compact
+          ? 'column'
+          : `row${reverse ? '-reverse' : ''}`};
+        justify-content: space-between;
+        align-items: ${compact ? 'center' : 'flex-start'};
+      `}
+    >
+      <img
+        src={icon}
+        width={20 * GU}
+        height={20 * GU}
+        alt=""
+        css={`
+          flex-shrink: 0;
+          margin: ${compact ? `${3 * GU}px 0` : '0'};
+        `}
+      />
+      <div
+        css={`
+          ${compact ? '' : `margin-${reverse ? 'left' : 'right'}: ${4 * GU}px`};
+        `}
+      >
+        <h5
+          css={`
+            ${textStyle('title3')};
+            color: ${theme.surfaceContent};
+            text-align: ${compact ? 'center' : 'inherit'};
+          `}
+        >
+          {title}
+        </h5>
+        <div
+          css={`
+            width: ${compact ? 'auto' : `${57 * GU}px;`};
+            margin-top: ${2 * GU}px;
+            line-height: ${2 * GU}px;
+            ${textStyle('body2')};
+          `}
+        >
+          {text}
+        </div>
+      </div>
+    </div>
+  )
+}
 
 const LineSeparator = styled.div`
   height: 1px;
