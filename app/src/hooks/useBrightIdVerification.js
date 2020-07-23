@@ -13,6 +13,7 @@ const REQUEST_TIMEOUT = 60000
 
 const VERIFICATION_INFO_DEFAULT = {
   addressExist: false,
+  addressUnique: false,
   signature: null,
   timestamp: 0,
   userAddresses: [],
@@ -62,6 +63,7 @@ export function useBrightIdVerification(account) {
             // If the users didn't link their address to the their BrightId account or cannot be verified for the context (meaning is unverified on the BrightId app)
             setVerificationInfo({
               addressExist: response.errorNum === CAN_NOT_BE_VERIFIED,
+              addressUnique: false,
               timestamp: 0,
               userAddresses: [],
               userSponsored: response.errorNum === CAN_NOT_BE_VERIFIED,
@@ -74,6 +76,7 @@ export function useBrightIdVerification(account) {
           if (response.code === NOT_SPONSORED_CODE) {
             setVerificationInfo({
               addressExist: true,
+              addressUnique: false,
               timestamp: 0,
               userAddresses: [],
               userSponsored: false,
@@ -85,12 +88,13 @@ export function useBrightIdVerification(account) {
 
           setVerificationInfo({
             addressExist: true,
+            addressUnique: response.data?.unique,
+            signature: { ...response.data?.sig },
             timestamp: response.data?.timestamp,
             userAddresses: response.data?.contextIds,
             userSponsored: true,
             userVerified: true,
             fetching: false,
-            signature: { ...response.data?.sig },
           })
           return
         }

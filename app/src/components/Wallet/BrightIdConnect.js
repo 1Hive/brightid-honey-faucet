@@ -87,10 +87,21 @@ function BrightIdConnect({ account, addressExist }) {
           )}
         </div>
       ) : (
-        <QRCode
-          value={deepLink}
-          style={{ width: `${17 * GU}px`, height: `${17 * GU}px` }}
-        />
+        <>
+          <QRCode
+            value={deepLink}
+            style={{ width: `${17 * GU}px`, height: `${17 * GU}px` }}
+          />
+          <Info
+            mode="warning"
+            css={`
+              margin-top: ${3 * GU}px;
+            `}
+          >
+            Scanning this code will prevent any previously connected addresses
+            from registering or claiming
+          </Info>
+        </>
       )}
     </div>
   )
