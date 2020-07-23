@@ -22,6 +22,7 @@ contract BrightIdFaucet is Ownable {
     struct Claimer {
         uint256 registeredForPeriod;
         uint256 latestClaimPeriod;
+        uint timestamp;
         bool addressVoid;
     }
 
@@ -107,15 +108,16 @@ contract BrightIdFaucet is Ownable {
     }
  
     // If you have previously registered then you will claim here and register for the next period.
-    function claimAndOrRegister(bytes32 _brightIdContext, address[] memory _addrs, uint8 _v, bytes32 _r, bytes32 _s) public {
+    function claimAndOrRegister(bytes32 _brightIdContext, address[] memory _addrs, uint timestamp, uint8 _v, bytes32 _r, bytes32 _s) public {
         require(claimers[msg.sender].registeredForPeriod <= getCurrentPeriod(), ERROR_ALREADY_REGISTERED);
-        require(_isVerifiedUnique(_brightIdContext, _addrs, _v, _r, _s), ERROR_INCORRECT_VERIFICATION);
+        require(_isVerifiedUnique(_brightIdContext, _addrs, timestamp, _v, _r, _s), ERROR_INCORRECT_VERIFICATION);
         require(msg.sender == _addrs[0], ERROR_SENDER_NOT_VERIFIED);
 
         claim();
 
         uint256 nextPeriod = getCurrentPeriod() + 1;
         claimers[msg.sender].registeredForPeriod = nextPeriod;
+        claimers[msg.sender].timestamp = timestamp;
         periods[nextPeriod].totalRegisteredUsers++;
         _voidUserHistory(_addrs);
 
@@ -169,18 +171,17 @@ contract BrightIdFaucet is Ownable {
         return _getPeriodIndividualPayout(period);
     }
 
-    // TODO: This should also accept a timestamp but the nodes do not currently provide one, once they do we can add it.
-    function _isVerifiedUnique(bytes32 _brightIdContext, address[] memory _addrs, uint8 _v, bytes32 _r, bytes32 _s)
+    function _isVerifiedUnique(bytes32 _brightIdContext, address[] memory _addrs, uint timestamp, uint8 _v, bytes32 _r, bytes32 _s)
         internal view returns (bool)
     {
-        bytes32 signedMessage = keccak256(abi.encodePacked(_brightIdContext, _addrs));
+        bytes32 signedMessage = keccak256(abi.encodePacked(_brightIdContext, _addrs, timestamp));
         address verifierAddress = ecrecover(signedMessage, _v, _r, _s);
 
         bool correctVerifier = brightIdVerifier == verifierAddress;
         bool correctContext = brightIdContext == _brightIdContext;
-        // bool correctTimestamp = timestamp = now +/- 1 day // Within a day of now to account for block wait times? Can think of alternative?
+        bool correctTimestamp = claimers[_addrs[0]].timestamp < timestamp;
 
-        return correctVerifier && correctContext; // && correctTimestamp;
+        return correctVerifier && correctContext && correctTimestamp;
     }
 
     function _voidUserHistory(address[] memory _addrs) internal {
