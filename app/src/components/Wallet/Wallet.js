@@ -8,14 +8,15 @@ import {
   textStyle,
   useTheme,
 } from '@1hive/1hive-ui'
+import AddressReplaced from './AddressReplaced'
 import BrightIdConnect from './BrightIdConnect'
 import ClaimAndRegister from './ClaimAndRegister'
 import LoadingRing from '../LoadingRing'
+import NotVerified from './NotVerified'
 import TokenBalance from './TokenBalance'
 
 import { useWallet } from '../../providers/Wallet'
 import { useBrightIdVerification } from '../../hooks/useBrightIdVerification'
-import userIconGray from '../../assets/userIconGray.svg'
 
 function Wallet({ onClaimAndOrRegister }) {
   const { account } = useWallet()
@@ -71,6 +72,7 @@ function AccountConnected({ account, onClaimAndOrRegister }) {
   // TODO - error handling on this api call
   const {
     addressExist,
+    addressUnique,
     signature,
     userAddresses,
     userSponsored,
@@ -131,29 +133,11 @@ function AccountConnected({ account, onClaimAndOrRegister }) {
               }
 
               if (!userVerified) {
-                return (
-                  <div
-                    css={`
-                      padding: ${3 * GU}px;
-                      display: flex;
-                      text-align: center;
-                      flex-direction: column;
-                      align-items: center;
-                    `}
-                  >
-                    <img src={userIconGray} width={5 * GU} height={5 * GU} />
-                    <span
-                      css={`
-                        margin-top: ${2 * GU}px;
-                        color: ${theme.surfaceContentSecondary};
-                        ${textStyle('body2')};
-                      `}
-                    >
-                      You are yet to be identified as a unique individual by
-                      BrightID
-                    </span>
-                  </div>
-                )
+                return <NotVerified />
+              }
+
+              if (!addressUnique) {
+                return <AddressReplaced addrs={userAddresses} />
               }
 
               return (
