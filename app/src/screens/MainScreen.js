@@ -225,10 +225,9 @@ const MainScreen = React.memo(({ isLoading }) => {
           icon={userIcon}
           loading={fetchingPeriodData}
         />
-        {/** TODO - get the total amount from the subgraph */}
         <FaucetInfo
           amount={config.totalDistributed}
-          decimals={0}
+          decimals={config.token.decimals}
           text="Total distributed"
           icon={distributionIcon}
           loading={!config.totalDistributed}

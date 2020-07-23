@@ -7,7 +7,12 @@ function FaucetInfo({ amount, decimals, text, icon, loading }) {
   const theme = useTheme()
 
   return (
-    <Box padding={0}>
+    <Box
+      padding={0}
+      css={`
+        box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.15);
+      `}
+    >
       <div
         css={`
           display: flex;
