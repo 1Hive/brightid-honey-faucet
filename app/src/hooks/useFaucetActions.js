@@ -15,13 +15,14 @@ function useFaucetActions() {
   const faucetContract = useFaucetContract()
 
   const claimAndOrRegister = useCallback(
-    (addrs, signature) => {
+    (addrs, timestamp, signature) => {
       const context = formatBytes32String(CONTEXT_ID)
       const sig = sanitizeSignature(signature)
 
       return faucetContract.claimAndOrRegister(
         context,
         addrs,
+        timestamp,
         sig.v,
         sig.r,
         sig.s,

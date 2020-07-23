@@ -10,7 +10,12 @@ import { usePeriod } from '../../hooks/subscription-hooks'
 import { formatTokenAmount } from '../../lib/math-utils'
 import honeySvg from '../../assets/honey.svg'
 
-function ClaimAndRegister({ addrs, onClaimAndOrRegister, signature }) {
+function ClaimAndRegister({
+  addrs,
+  onClaimAndOrRegister,
+  signature,
+  timestamp,
+}) {
   const theme = useTheme()
   const { claimer } = useAppState()
   const { currentPeriod } = useClock()
@@ -18,9 +23,9 @@ function ClaimAndRegister({ addrs, onClaimAndOrRegister, signature }) {
   const handleSubmit = useCallback(
     event => {
       event.preventDefault()
-      onClaimAndOrRegister(addrs, signature)
+      onClaimAndOrRegister(addrs, timestamp, signature)
     },
-    [addrs, onClaimAndOrRegister, signature]
+    [addrs, onClaimAndOrRegister, signature, timestamp]
   )
 
   const [
