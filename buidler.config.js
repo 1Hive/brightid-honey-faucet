@@ -13,6 +13,11 @@ const settingsForNetwork = (network) => {
 
 const key = (network) => {
   let { keys } = settingsForNetwork(network)
+
+  if (!keys) {
+    return ''
+  }
+
   return keys[0]
 }
 
