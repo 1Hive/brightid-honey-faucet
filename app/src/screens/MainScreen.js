@@ -179,11 +179,14 @@ const MainScreen = React.memo(({ isLoading }) => {
               `}
             >
               <span>
-                This faucet is funded through honey distribution proposals,
-                anyone can make a proposal to top up the faucet with more honey,
-                and if there is sufficient support it will happen. The faucet
-                will allocate a portion of its balance to all registered users
-                each period, when a user claims their share they will
+                This faucet is funded through{' '}
+                <Link href="https://1hive.org/#/">
+                  Honey distribution proposals
+                </Link>
+                , anyone can make a proposal to top up the faucet with more
+                Honey, and if there is sufficient support it will happen. The
+                faucet will allocate a portion of its balance to all registered
+                users each period, when a user claims their share they will
                 automatically be registered for the next periods distribution.
                 If you forget to claim your share, it will be forfeited and you
                 will need to re-register before claiming again, so be sure to
@@ -192,7 +195,7 @@ const MainScreen = React.memo(({ isLoading }) => {
                 BrightID, BrightID is a decentralized protocol for proof of
                 uniqueness. If you've never used it before you'll need to
                 download it, make a few connections, and get verified. We can
-                help! just hop on the{' '}
+                help! Just hop on the{' '}
                 <Link href="https://discord.gg/GFWC5c">1Hive Discord</Link> 🍯
                 and say Hi!
               </span>

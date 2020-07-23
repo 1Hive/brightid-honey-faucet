@@ -45,7 +45,7 @@ async function main() {
   console.log("Deploying BrightIdFaucet...")
   const BrightIdFaucet = env.artifacts.require("BrightIdFaucet")
   const brightIdFaucet = await BrightIdFaucet.new(tokenAddress, periodLength, percentPerPeriod, brightIdContext, brightIdVerifier, minimumEthBalance, uniswapExchange)
-  console.log("BrightIdFaucet address:", brightIdFaucet.address)
+  console.log("BrightIdFaucet address:", brightIdFaucet.address, "block:", await web3.eth.getBlockNumber())
 }
 
 // We recommend this pattern to be able to use async/await everywhere
