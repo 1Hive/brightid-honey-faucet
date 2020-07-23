@@ -1,7 +1,7 @@
 import React from 'react'
 import { Box, GU, useTheme, textStyle } from '@1hive/1hive-ui'
 import LoadingRing from './LoadingRing'
-import { formatTokenAmount } from '../lib/math-utils'
+import { formatTokenAmount, isBigNum } from '../lib/math-utils'
 
 function FaucetInfo({ amount, decimals, text, icon, loading }) {
   const theme = useTheme()
@@ -50,7 +50,9 @@ function FaucetInfo({ amount, decimals, text, icon, loading }) {
                   color: ${theme.content};
                 `}
               >
-                {formatTokenAmount(amount, decimals)}
+                {isBigNum(amount)
+                  ? formatTokenAmount(amount, decimals)
+                  : amount}
               </h5>
               <span
                 css={`

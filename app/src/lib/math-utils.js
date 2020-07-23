@@ -4,6 +4,10 @@ export function bigNum(value) {
   return new EthersUtils.BigNumber(value)
 }
 
+export function isBigNum(value) {
+  return EthersUtils.BigNumber.isBigNumber(value)
+}
+
 export function formatTokenAmount(
   amount,
   decimals = 0,
