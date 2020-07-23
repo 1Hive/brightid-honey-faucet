@@ -18,11 +18,11 @@ contract BrightIdFaucet is Ownable {
 
     uint256 public constant ONE_HUNDRED_PERCENT = 1e18;
     uint256 public constant UNISWAP_DEADLINE_PERIOD = 1 days;
+    uint256 public constant VERIFICATION_TIMESTAMP_VARIANCE = 1 days;
 
     struct Claimer {
         uint256 registeredForPeriod;
         uint256 latestClaimPeriod;
-        uint timestamp;
         bool addressVoid;
     }
 
@@ -117,7 +117,6 @@ contract BrightIdFaucet is Ownable {
 
         uint256 nextPeriod = getCurrentPeriod() + 1;
         claimers[msg.sender].registeredForPeriod = nextPeriod;
-        claimers[msg.sender].timestamp = timestamp;
         periods[nextPeriod].totalRegisteredUsers++;
         _voidUserHistory(_addrs);
 
@@ -179,7 +178,7 @@ contract BrightIdFaucet is Ownable {
 
         bool correctVerifier = brightIdVerifier == verifierAddress;
         bool correctContext = brightIdContext == _brightIdContext;
-        bool correctTimestamp = claimers[_addrs[0]].timestamp < timestamp;
+        bool correctTimestamp = timestamp < now + VERIFICATION_TIMESTAMP_VARIANCE;
 
         return correctVerifier && correctContext && correctTimestamp;
     }
