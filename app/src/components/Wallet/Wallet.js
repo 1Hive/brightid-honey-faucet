@@ -72,13 +72,10 @@ function AccountConnected({ account, onClaimAndOrRegister }) {
     addressExist,
     signature,
     userAddresses,
-    // userSponsored,
-    // userVerified,
+    userSponsored,
+    userVerified,
     fetching,
   } = useBrightIdVerification(account)
-
-  const userSponsored = true
-  const userVerified = false
 
   return (
     <div>
