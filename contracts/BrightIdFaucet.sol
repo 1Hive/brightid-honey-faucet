@@ -81,7 +81,15 @@ contract BrightIdFaucet is Ownable {
         uniswapExchange = _uniswapExchange;
         firstPeriodStart = now;
 
-        emit Initialize(address(_token), _periodLength, _percentPerPeriod, _brightIdContext, _brightIdVerifier, _minimumEthBalance, address(_uniswapExchange));
+        emit Initialize(
+            address(_token),
+            _periodLength,
+            _percentPerPeriod,
+            _brightIdContext,
+            _brightIdVerifier,
+            _minimumEthBalance,
+            address(_uniswapExchange)
+        );
     }
 
     function setPercentPerPeriod(uint256 _percentPerPeriod) public onlyOwner {
@@ -108,7 +116,16 @@ contract BrightIdFaucet is Ownable {
     }
  
     // If you have previously registered then you will claim here and register for the next period.
-    function claimAndOrRegister(bytes32 _brightIdContext, address[] memory _addrs, uint256 _timestamp, uint8 _v, bytes32 _r, bytes32 _s) public {
+    function claimAndOrRegister(
+        bytes32 _brightIdContext,
+        address[] memory _addrs,
+        uint256 _timestamp,
+        uint8 _v,
+        bytes32 _r,
+        bytes32 _s
+    )
+        public
+    {
         require(claimers[msg.sender].registeredForPeriod <= getCurrentPeriod(), ERROR_ALREADY_REGISTERED);
         require(_isVerifiedUnique(_brightIdContext, _addrs, _timestamp, _v, _r, _s), ERROR_INCORRECT_VERIFICATION);
         require(msg.sender == _addrs[0], ERROR_SENDER_NOT_VERIFIED);
@@ -170,7 +187,13 @@ contract BrightIdFaucet is Ownable {
         return _getPeriodIndividualPayout(period);
     }
 
-    function _isVerifiedUnique(bytes32 _brightIdContext, address[] memory _addrs, uint256 _timestamp, uint8 _v, bytes32 _r, bytes32 _s)
+    function _isVerifiedUnique(bytes32 _brightIdContext,
+        address[] memory _addrs,
+        uint256 _timestamp,
+        uint8 _v,
+        bytes32 _r,
+        bytes32 _s
+    )
         internal view returns (bool)
     {
         bytes32 signedMessage = keccak256(abi.encodePacked(_brightIdContext, _addrs, _timestamp));
@@ -178,9 +201,9 @@ contract BrightIdFaucet is Ownable {
 
         bool correctVerifier = brightIdVerifier == verifierAddress;
         bool correctContext = brightIdContext == _brightIdContext;
-        bool correctTimestamp = now < _timestamp + VERIFICATION_TIMESTAMP_VARIANCE;
+        bool acceptableTimestamp = now < _timestamp.add(VERIFICATION_TIMESTAMP_VARIANCE);
 
-        return correctVerifier && correctContext && correctTimestamp;
+        return correctVerifier && correctContext && acceptableTimestamp;
     }
 
     function _voidUserHistory(address[] memory _addrs) internal {
@@ -215,7 +238,8 @@ contract BrightIdFaucet is Ownable {
         }
 
         uint256 amountToBuy = minimumEthBalance.sub(_sender.balance);
-        tokensSold = uniswapExchange.tokenToEthTransferOutput(amountToBuy, _maxTokensToSpend, now + UNISWAP_DEADLINE_PERIOD, _sender);
+        tokensSold = uniswapExchange
+            .tokenToEthTransferOutput(amountToBuy, _maxTokensToSpend, now + UNISWAP_DEADLINE_PERIOD, _sender);
     }
 
     function _getPeriodMaxPayout(uint256 _faucetBalance) internal view returns (uint256) {
