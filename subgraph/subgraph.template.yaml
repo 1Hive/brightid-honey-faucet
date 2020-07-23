@@ -29,7 +29,7 @@ dataSources:
       eventHandlers:
         - event: Initialize(address,uint256,uint256,bytes32,address,uint256,address)
           handler: handleInitialized
-        - event: Claim(address,uint256,uint256)
+        - event: Claim(address,uint256,uint256,uint256)
           handler: handleNewClaim
         - event: Register(address,uint256)
           handler: handleNewRegistration
