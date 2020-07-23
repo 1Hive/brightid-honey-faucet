@@ -219,7 +219,7 @@ const MainScreen = React.memo(({ isLoading }) => {
         `}
       >
         <FaucetInfo
-          amount={totalRegisteredUsers}
+          amount={bigNum(totalRegisteredUsers)}
           decimals={0}
           text="Registered users"
           icon={userIcon}

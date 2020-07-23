@@ -15,6 +15,7 @@ import TokenBalance from './TokenBalance'
 
 import { useWallet } from '../../providers/Wallet'
 import { useBrightIdVerification } from '../../hooks/useBrightIdVerification'
+import userIconGray from '../../assets/userIconGray.svg'
 
 function Wallet({ onClaimAndOrRegister }) {
   const { account } = useWallet()
@@ -130,7 +131,29 @@ function AccountConnected({ account, onClaimAndOrRegister }) {
               }
 
               if (!userVerified) {
-                return <span>User not verified</span> // TODO: Ask for some desgins?
+                return (
+                  <div
+                    css={`
+                      padding: ${3 * GU}px;
+                      display: flex;
+                      text-align: center;
+                      flex-direction: column;
+                      align-items: center;
+                    `}
+                  >
+                    <img src={userIconGray} width={5 * GU} height={5 * GU} />
+                    <span
+                      css={`
+                        margin-top: ${2 * GU}px;
+                        color: ${theme.surfaceContentSecondary};
+                        ${textStyle('body2')};
+                      `}
+                    >
+                      You are yet to be identified as a unique individual by
+                      BrightID
+                    </span>
+                  </div>
+                )
               }
 
               return (
