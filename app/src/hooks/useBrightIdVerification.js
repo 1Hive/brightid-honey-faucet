@@ -15,6 +15,7 @@ const VERIFICATION_INFO_DEFAULT = {
   addressExist: false,
   addressUnique: false,
   signature: null,
+  timestamp: 0,
   userAddresses: [],
   userSponsored: false,
   userVerified: false,
@@ -36,7 +37,7 @@ export function useBrightIdVerification(account) {
     }
 
     const fetchVerificationInfo = async () => {
-      const endpoint = `${BRIGHTID_VERIFICATION_ENDPOINT}/${CONTEXT_ID}/${account}?signed=eth`
+      const endpoint = `${BRIGHTID_VERIFICATION_ENDPOINT}/${CONTEXT_ID}/${account}?signed=eth&timestamp=seconds`
       try {
         const rawResponse = await fetch(endpoint, {
           method: 'GET',
@@ -63,6 +64,7 @@ export function useBrightIdVerification(account) {
             setVerificationInfo({
               addressExist: response.errorNum === CAN_NOT_BE_VERIFIED,
               addressUnique: false,
+              timestamp: 0,
               userAddresses: [],
               userSponsored: response.errorNum === CAN_NOT_BE_VERIFIED,
               userVerified: false,
@@ -75,6 +77,7 @@ export function useBrightIdVerification(account) {
             setVerificationInfo({
               addressExist: true,
               addressUnique: false,
+              timestamp: 0,
               userAddresses: [],
               userSponsored: false,
               userVerified: false,
@@ -86,11 +89,12 @@ export function useBrightIdVerification(account) {
           setVerificationInfo({
             addressExist: true,
             addressUnique: response.data?.unique,
+            signature: { ...response.data?.sig },
+            timestamp: response.data?.timestamp,
             userAddresses: response.data?.contextIds,
             userSponsored: true,
             userVerified: true,
             fetching: false,
-            signature: { ...response.data?.sig },
           })
           return
         }

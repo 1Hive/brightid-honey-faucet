@@ -74,6 +74,7 @@ function AccountConnected({ account, onClaimAndOrRegister }) {
     addressExist,
     addressUnique,
     signature,
+    timestamp,
     userAddresses,
     userSponsored,
     userVerified,
@@ -145,6 +146,7 @@ function AccountConnected({ account, onClaimAndOrRegister }) {
                   addrs={userAddresses}
                   onClaimAndOrRegister={onClaimAndOrRegister}
                   signature={signature}
+                  timestamp={timestamp}
                 />
               )
             })()}
