@@ -26,11 +26,11 @@ export function handleInitialized(event: InitializeEvent): void {
 
 export function handleNewClaim(event: ClaimEvent): void {
   let claim = _getClaimEntity(event.params.claimer, event.params.periodNumber)
-  claim.amount = event.params.amount
+  claim.amount = event.params.claimerPayout
   claim.save()
 
   let config =_getConfigEntity(event.address)
-  config.totalDistributed = config.totalDistributed.plus(event.params.amount)
+  config.totalDistributed = config.totalDistributed.plus(event.params.claimerPayout)
   config.save()
   
   let claimer = _getClaimerEntity(event.params.claimer)
