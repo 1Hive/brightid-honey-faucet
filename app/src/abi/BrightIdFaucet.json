@@ -1,5 +1,5 @@
 [
   "function claim() public",
-  "function claimAndOrRegister(bytes32,address[],uint,uint8,bytes32,bytes32) public",
+  "function claimAndOrRegister(bytes32,address[],uint256,uint8,bytes32,bytes32) public",
   "function getPeriodIndividualPayout(uint256 _periodNumber) public view returns (uint256)"
 ]

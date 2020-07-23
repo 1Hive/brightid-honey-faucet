@@ -108,9 +108,9 @@ contract BrightIdFaucet is Ownable {
     }
  
     // If you have previously registered then you will claim here and register for the next period.
-    function claimAndOrRegister(bytes32 _brightIdContext, address[] memory _addrs, uint timestamp, uint8 _v, bytes32 _r, bytes32 _s) public {
+    function claimAndOrRegister(bytes32 _brightIdContext, address[] memory _addrs, uint256 _timestamp, uint8 _v, bytes32 _r, bytes32 _s) public {
         require(claimers[msg.sender].registeredForPeriod <= getCurrentPeriod(), ERROR_ALREADY_REGISTERED);
-        require(_isVerifiedUnique(_brightIdContext, _addrs, timestamp, _v, _r, _s), ERROR_INCORRECT_VERIFICATION);
+        require(_isVerifiedUnique(_brightIdContext, _addrs, _timestamp, _v, _r, _s), ERROR_INCORRECT_VERIFICATION);
         require(msg.sender == _addrs[0], ERROR_SENDER_NOT_VERIFIED);
 
         claim();
@@ -170,15 +170,15 @@ contract BrightIdFaucet is Ownable {
         return _getPeriodIndividualPayout(period);
     }
 
-    function _isVerifiedUnique(bytes32 _brightIdContext, address[] memory _addrs, uint timestamp, uint8 _v, bytes32 _r, bytes32 _s)
+    function _isVerifiedUnique(bytes32 _brightIdContext, address[] memory _addrs, uint256 _timestamp, uint8 _v, bytes32 _r, bytes32 _s)
         internal view returns (bool)
     {
-        bytes32 signedMessage = keccak256(abi.encodePacked(_brightIdContext, _addrs, timestamp));
+        bytes32 signedMessage = keccak256(abi.encodePacked(_brightIdContext, _addrs, _timestamp));
         address verifierAddress = ecrecover(signedMessage, _v, _r, _s);
 
         bool correctVerifier = brightIdVerifier == verifierAddress;
         bool correctContext = brightIdContext == _brightIdContext;
-        bool correctTimestamp = timestamp < now + VERIFICATION_TIMESTAMP_VARIANCE;
+        bool correctTimestamp = now < _timestamp + VERIFICATION_TIMESTAMP_VARIANCE;
 
         return correctVerifier && correctContext && correctTimestamp;
     }
