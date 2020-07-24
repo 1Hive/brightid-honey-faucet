@@ -8,7 +8,7 @@ import {
   NOT_SPONSORED_CODE,
 } from '../services/responseCodes'
 
-const VERIFICATION_RETRY_EVERY = 1000
+const VERIFICATION_POLLING_EVERY = 1000
 const REQUEST_TIMEOUT = 60000
 
 const VERIFICATION_INFO_DEFAULT = {
@@ -100,12 +100,13 @@ export function useBrightIdVerification(account) {
         }
       } catch (err) {
         console.error(`Could not fetch verification info `, err)
-        if (!cancelled) {
-          retryTimer = setTimeout(
-            fetchVerificationInfo,
-            VERIFICATION_RETRY_EVERY
-          )
-        }
+      }
+
+      if (!cancelled) {
+        retryTimer = setTimeout(
+          fetchVerificationInfo,
+          VERIFICATION_POLLING_EVERY
+        )
       }
     }
 
