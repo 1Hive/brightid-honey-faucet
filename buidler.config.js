@@ -33,7 +33,9 @@ module.exports = {
     },
     xdai: {
       url: "https://xdai.poanetwork.dev",
-      accounts: ["0x" + key("xdai")]
+      chainId: 100,
+      accounts: ["0x" + key("xdai")],
+      gasPrice: 40
     }
   },
   solc: {
