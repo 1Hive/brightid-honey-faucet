@@ -8,7 +8,7 @@ import {
   NOT_SPONSORED_CODE,
 } from '../services/responseCodes'
 
-const VERIFICATION_POLLING_EVERY = 1000
+const VERIFICATION_POLLING_EVERY = 3000
 const REQUEST_TIMEOUT = 60000
 
 const VERIFICATION_INFO_DEFAULT = {
