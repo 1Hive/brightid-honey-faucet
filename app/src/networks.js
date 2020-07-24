@@ -24,7 +24,7 @@ const networks = {
     name: 'xDai',
     type: 'xdai',
     defaultEthNode: 'https://xdai.poanetwork.dev/',
-    faucet: '0x8D02D7f2726c8947c01472106a1b6d9DBf14Ce7b',
+    faucet: '0x967ebb4343c442d19a47b9196d121bd600600911',
   },
 }
 
