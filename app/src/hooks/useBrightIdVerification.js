@@ -8,7 +8,7 @@ import {
   NOT_SPONSORED_CODE,
 } from '../services/responseCodes'
 
-const VERIFICATION_RETRY_EVERY = 1000
+const VERIFICATION_POLLING_EVERY = 3000
 const REQUEST_TIMEOUT = 60000
 
 const VERIFICATION_INFO_DEFAULT = {
@@ -51,61 +51,62 @@ export function useBrightIdVerification(account) {
         const response = await rawResponse.json()
 
         if (!cancelled) {
-          if (response.code === ERROR_CODE) {
-            setVerificationInfo({
-              error: response.errorMessage,
-              fetching: false,
-            })
-            return
-          }
+          switch (response.code) {
+            case ERROR_CODE:
+              setVerificationInfo({
+                error: response.errorMessage,
+                fetching: false,
+              })
+              break
 
-          if (response.code === NOT_FOUND_CODE) {
-            // If the users didn't link their address to the their BrightId account or cannot be verified for the context (meaning is unverified on the BrightId app)
-            setVerificationInfo({
-              addressExist: response.errorNum === CAN_NOT_BE_VERIFIED,
-              addressUnique: false,
-              timestamp: 0,
-              userAddresses: [],
-              userSponsored: response.errorNum === CAN_NOT_BE_VERIFIED,
-              userVerified: false,
-              fetching: false,
-            })
-            return
-          }
+            case NOT_FOUND_CODE:
+              // If the users didn't link their address to the their BrightId account or cannot be verified for the context (meaning is unverified on the BrightId app)
+              setVerificationInfo({
+                addressExist: response.errorNum === CAN_NOT_BE_VERIFIED,
+                addressUnique: false,
+                timestamp: 0,
+                userAddresses: [],
+                userSponsored: response.errorNum === CAN_NOT_BE_VERIFIED,
+                userVerified: false,
+                fetching: false,
+              })
+              break
 
-          if (response.code === NOT_SPONSORED_CODE) {
-            setVerificationInfo({
-              addressExist: true,
-              addressUnique: false,
-              timestamp: 0,
-              userAddresses: [],
-              userSponsored: false,
-              userVerified: false,
-              fetching: false,
-            })
-            return
-          }
+            case NOT_SPONSORED_CODE:
+              setVerificationInfo({
+                addressExist: true,
+                addressUnique: false,
+                timestamp: 0,
+                userAddresses: [],
+                userSponsored: false,
+                userVerified: false,
+                fetching: false,
+              })
+              break
 
-          setVerificationInfo({
-            addressExist: true,
-            addressUnique: response.data?.unique,
-            signature: { ...response.data?.sig },
-            timestamp: response.data?.timestamp,
-            userAddresses: response.data?.contextIds,
-            userSponsored: true,
-            userVerified: true,
-            fetching: false,
-          })
-          return
+            default:
+              setVerificationInfo({
+                addressExist: true,
+                addressUnique: response.data?.unique,
+                signature: { ...response.data?.sig },
+                timestamp: response.data?.timestamp,
+                userAddresses: response.data?.contextIds,
+                userSponsored: true,
+                userVerified: true,
+                fetching: false,
+              })
+              break
+          }
         }
       } catch (err) {
         console.error(`Could not fetch verification info `, err)
-        if (!cancelled) {
-          retryTimer = setTimeout(
-            fetchVerificationInfo,
-            VERIFICATION_RETRY_EVERY
-          )
-        }
+      }
+
+      if (!cancelled) {
+        retryTimer = setTimeout(
+          fetchVerificationInfo,
+          VERIFICATION_POLLING_EVERY
+        )
       }
     }
 
