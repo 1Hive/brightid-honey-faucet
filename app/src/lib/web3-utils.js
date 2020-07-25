@@ -1,8 +1,11 @@
 import { getAddress } from 'ethers/utils'
 import env from '../environment'
 import { getDefaultChain } from '../local-settings'
+import { parseUnits } from './math-utils'
 
 const DEFAULT_LOCAL_CHAIN = ''
+const DEFAULT_GAS_LIMIT = 500000
+const DEFAULT_GAS_PRICE = parseUnits('2', 'gwei')
 
 export function getUseWalletProviders() {
   const providers = [{ id: 'injected' }]
@@ -98,6 +101,14 @@ export function sanitizeSignature(signature) {
     r: `0x${signature.r}`,
     s: `0x${signature.s}`,
   }
+}
+
+export function getGasPrice() {
+  return env('GAS_PRICE') || DEFAULT_GAS_PRICE
+}
+
+export function getGasLimit() {
+  return env('GAS_LIMIT') || DEFAULT_GAS_LIMIT
 }
 
 // Re-export some ethers/utils functions

@@ -2,7 +2,12 @@ import { useCallback } from 'react'
 import { getNetwork } from '../networks'
 import { useContract } from './useWeb3Contracts'
 
-import { formatBytes32String, sanitizeSignature } from '../lib/web3-utils'
+import {
+  formatBytes32String,
+  getGasLimit,
+  getGasPrice,
+  sanitizeSignature,
+} from '../lib/web3-utils'
 import { CONTEXT_ID } from '../constants'
 import brightIdFaucetAbi from '../abi/BrightIdFaucet.json'
 
@@ -26,7 +31,7 @@ function useFaucetActions() {
         sig.v,
         sig.r,
         sig.s,
-        { gasLimit: 500000 }
+        { gasLimit: getGasLimit(), gasPrice: getGasPrice() }
       )
     },
     [faucetContract]
