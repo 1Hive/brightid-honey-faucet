@@ -33,6 +33,12 @@ export async function sponsorUser(account) {
       }),
     })
 
+    if (rawResponse.ok) {
+      return {
+        error: null,
+      }
+    }
+
     const response = await rawResponse.json()
 
     if (response.code === NO_CONTENT) {
