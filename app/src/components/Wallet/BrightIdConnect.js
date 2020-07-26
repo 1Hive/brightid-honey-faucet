@@ -99,7 +99,7 @@ function BrightIdConnect({ account, addressExist }) {
             `}
           >
             Scanning this code will prevent any previously connected addresses
-            from registering or claiming
+            from registering, claiming or connecting to BrightID
           </Info>
         </>
       )}
