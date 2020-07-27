@@ -18,7 +18,7 @@ function NotVerified() {
       <span
         css={`
           margin-top: ${2 * GU}px;
-          color: ${theme.surfaceContentSecondary};
+          color: ${theme.contentSecondary};
           ${textStyle('body2')};
         `}
       >
