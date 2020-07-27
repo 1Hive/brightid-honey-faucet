@@ -3,7 +3,7 @@ import { GU, textStyle, useTheme } from '@1hive/1hive-ui'
 import userIconGray from '../../assets/userIconGray.svg'
 
 function NotVerified() {
-  const theme = useTheme
+  const theme = useTheme()
   return (
     <div
       css={`
