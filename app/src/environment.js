@@ -16,6 +16,12 @@ const ENV_VARS = {
   NODE_PK() {
     return process.env.REACT_APP_NODE_PK || ''
   },
+  GAS_LIMIT() {
+    return process.env.REACT_APP_GAS_LIMIT || ''
+  },
+  GAS_PRICE() {
+    return process.env.REACT_APP_GAS_PRICE || ''
+  },
 }
 
 export default function env(name) {
