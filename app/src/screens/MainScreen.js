@@ -99,10 +99,8 @@ const MainScreen = React.memo(({ isLoading }) => {
                 of uniqueness. If you've never used it before you'll need to
                 download it, make a few connections, and get verified. We can
                 help! Just hop on the{' '}
-                <Link href="https://discord.com/channels/698287700834517064/708186863537618965">
-                  1Hive Discord
-                </Link>{' '}
-                🍯 and say Hi!
+                <Link href="https://discord.gg/sBzpmxK">1Hive Discord</Link> 🍯
+                and say Hi!
               </span>
             </span>
           }
