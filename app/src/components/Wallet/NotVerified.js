@@ -14,6 +14,15 @@ function NotVerified() {
         align-items: center;
       `}
     >
+      <h5
+        css={`
+          ${textStyle('body1')};
+          color: ${theme.surfaceContent};
+          margin-bottom: ${3 * GU}px;
+        `}
+      >
+        Connect with BrightID
+      </h5>
       <img src={userIconGray} width={5 * GU} height={5 * GU} />
       <span
         css={`
