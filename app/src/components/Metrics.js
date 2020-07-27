@@ -41,7 +41,7 @@ function Metrics() {
       <FaucetInfo
         amount={bigNum(totalRegisteredUsers)}
         decimals={0}
-        text="Registered users"
+        text="Registered users this period"
         icon={userIcon}
         loading={fetchingPeriodData}
         compact={smallLayout}
