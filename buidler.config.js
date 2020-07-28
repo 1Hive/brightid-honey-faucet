@@ -22,10 +22,14 @@ const key = (network) => {
 }
 
 module.exports = {
-  defaultNetwork: 'localhost',
+  defaultNetwork: 'buidlerevm',
   networks: {
+    buidlerevm: {
+      gasPrice: 1000000000 // 1 Gwei
+    },
     localhost: {
       url: 'http://localhost:8545',
+      gasPrice: 1000000000 // 1 Gwei
     },
     rinkeby: {
       url: "https://rinkeby.infura.io/v3/8e0a671dca444df9ad47246e07aac303",
@@ -35,7 +39,7 @@ module.exports = {
       url: "https://xdai.poanetwork.dev",
       chainId: 100,
       accounts: ["0x" + key("xdai")],
-      gasPrice: 40
+      gasPrice: 1000000000 // 1 Gwei
     }
   },
   solc: {

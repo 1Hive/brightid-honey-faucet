@@ -1,27 +1,110 @@
-const BrightIdFaucet = artifacts.require("BrightIdFaucet")
+const BrightIdFaucet = artifacts.require("BrightIdFaucetMock")
 const Token = artifacts.require("Token")
+const UniswapExchange = artifacts.require("uniswap_exchange")
+const UniswapFactory = artifacts.require("uniswap_factory")
+const ethers = require("ethers")
 
-const toBn = (x, y = 18) => new web3.utils.toBN((x * 10 ** y).toString())
-const toBnPercent = (value) => toBn(value, 16)
+const toBn = (value) => new web3.utils.toBN(value)
+const toBnWithDecimals = (x, y = 18) => toBn((toBn(x).mul(toBn(10).pow(toBn(y)))).toString())
+const toBnPercent = (value) => toBnWithDecimals(value, 16)
 
+// Use the private key of whatever the first account is in the local chain
+// In this case it is 0xc783df8a850f42e7F7e57013759C285caa701eB6 which is the first address in the buidlerevm node
+const VERIFICATIONS_PRIVATE_KEY = '0xc5e8f61d1ab959b397eecc0a37a6517b8e67a0e7cf1f4bce5591f3ed80199122'
 const PERIOD_LENGTH = 10 * 60 // 10 minutes
 const PERCENT_PER_PERIOD = toBnPercent(20) // 20%
 const BRIGHT_ID_CONTEXT = "0x3168697665000000000000000000000000000000000000000000000000000000" // stringToBytes32("1hive")
-const BRIGHT_ID_VERIFIER = "0xb1d71F62bEe34E9Fc349234C201090c33BCdF6DB"
-const MIN_ETH_BALANCE = toBn(5, 17) // 0.5 ETH
+const MIN_ETH_BALANCE = toBnWithDecimals(5, 17) // 0.5 ETH
 
-contract("BrightIdFaucet", ([faucetOwner, uniswapExchange]) => {
+const TOKEN_LIQUIDITY = toBnWithDecimals(10)
+const ETH_LIQUIDITY = toBnWithDecimals(100)
+const FAUCET_INITIAL_BALANCE = toBnWithDecimals(100)
 
-  it("Should allow registration after registering multiple addresses", async function() {
-    const token = await Token.new("Test Token", "TTN")
-    const brightIdFaucet = await BrightIdFaucet.new(token.address, PERIOD_LENGTH, PERCENT_PER_PERIOD, BRIGHT_ID_CONTEXT, BRIGHT_ID_VERIFIER, MIN_ETH_BALANCE, uniswapExchange)
+contract("BrightIdFaucet", ([faucetOwner, unusedAccount]) => {
 
-    const addresses = ["0x93889f441c03e6e8a662c9c60c750a9bfecb00bd", "0x92ca5fece2ed59285ac63336221b15d2a47732ca"]
-    const sigR = '0xf20764471401d07d4172cd991f03cc67282070e98ed7afe41907098df37a54e3'
-    const sigS = '0x0446b5d241d716e8fd0c38b4831c2ea4303d666a5455723670fa4a403b288d8f'
-    await brightIdFaucet.claimAndOrRegister(BRIGHT_ID_CONTEXT, addresses, 27, sigR, sigS)
+  let token
 
-    console.log(await brightIdFaucet.claimers(faucetOwner))
+  beforeEach(async () => {
+    token = await Token.new("Test Token", "TTN")
+  })
+
+  const createUniswapExchangeForToken = async (token, tokenLiquidity, ethLiquidity) => {
+    const uniswapFactory = await UniswapFactory.new()
+    const uniswapExchange = await UniswapExchange.new()
+    await uniswapFactory.initializeFactory(uniswapExchange.address)
+
+    await uniswapFactory.createExchange(token.address)
+    const tokenExchangeAddress = await uniswapFactory.getExchange(token.address)
+    const tokenExchange = await UniswapExchange.at(tokenExchangeAddress)
+
+    const blockTimestamp = (await web3.eth.getBlock('latest')).timestamp
+    const futureTimestamp = blockTimestamp + 9999
+    await token.approve(tokenExchangeAddress, tokenLiquidity)
+    await tokenExchange.addLiquidity(0, tokenLiquidity, futureTimestamp, {value: ethLiquidity})
+
+    return tokenExchange
+  }
+
+  const createBrightIdFaucet = async (exchangeTokenLiquidiy, exchangeEthLiquidity) => {
+    const tokenExchange = await createUniswapExchangeForToken(token, toBnWithDecimals(exchangeTokenLiquidiy), toBnWithDecimals(exchangeEthLiquidity))
+    const brightIdFaucet = await BrightIdFaucet.new(token.address, PERIOD_LENGTH, PERCENT_PER_PERIOD, BRIGHT_ID_CONTEXT, faucetOwner, MIN_ETH_BALANCE, tokenExchange.address)
+    await token.transfer(brightIdFaucet.address, FAUCET_INITIAL_BALANCE)
+    return brightIdFaucet
+  }
+
+  const getVerificationsSignature = (contextIds, timestamp) => {
+    const hashedMessage = web3.utils.soliditySha3(
+      BRIGHT_ID_CONTEXT,
+      { type: 'address[]', value: contextIds },
+      timestamp
+    )
+
+    const signingKey = new ethers.utils.SigningKey(VERIFICATIONS_PRIVATE_KEY)
+    return signingKey.signDigest(hashedMessage)
+  }
+
+  it("Should allow claiming when account has less than minimumEthBalance", async () => {
+    const addresses = [faucetOwner]
+    const timestamp = (await web3.eth.getBlock('latest')).timestamp
+    // Note the exchange liquidity determines the cost of exchanging the token for ETH, in this case
+    const brightIdFaucet = await createBrightIdFaucet(1, 100) // 1 ETH costs 0.01 tokens
+    const sig = getVerificationsSignature(addresses, timestamp)
+    await brightIdFaucet.claimAndOrRegister(BRIGHT_ID_CONTEXT, addresses, timestamp, sig.v, sig.r, sig.s)
+    await brightIdFaucet.mockIncreaseTime(PERIOD_LENGTH)
+
+    const balance = toBn(await web3.eth.getBalance(faucetOwner))
+    const balanceToRemove = balance.sub(toBnWithDecimals(3, 17)) // All - 0.3 ETH
+    await web3.eth.sendTransaction({ from: faucetOwner, to: unusedAccount, value: balanceToRemove})
+    const balanceBefore = toBn(await web3.eth.getBalance(faucetOwner))
+    assert.isTrue(MIN_ETH_BALANCE.gt(balanceBefore), "Eth balance too high")
+
+    await brightIdFaucet.claimAndOrRegister(BRIGHT_ID_CONTEXT, addresses, timestamp, sig.v, sig.r, sig.s)
+
+    const balanceAfter = toBn(await web3.eth.getBalance(faucetOwner))
+    assert.isTrue(MIN_ETH_BALANCE.lt(balanceAfter), "Eth balance not topped up")
+    await web3.eth.sendTransaction({ from: unusedAccount, to: faucetOwner, value: balanceToRemove})
+  })
+
+  it("Should allow claiming when account has less than minimumEthBalance and exchange will cost more than faucet payment", async () => {
+    const addresses = [faucetOwner]
+    const timestamp = (await web3.eth.getBlock('latest')).timestamp
+    // Note the exchange liquidity determines the cost of exchanging the token for ETH, in this case
+    const brightIdFaucet = await createBrightIdFaucet(100, 1) // 0.01 ETH costs 1 token
+    const sig = getVerificationsSignature(addresses, timestamp)
+    await brightIdFaucet.claimAndOrRegister(BRIGHT_ID_CONTEXT, addresses, timestamp, sig.v, sig.r, sig.s)
+    await brightIdFaucet.mockIncreaseTime(PERIOD_LENGTH)
+
+    const balance = toBn(await web3.eth.getBalance(faucetOwner))
+    const balanceToRemove = balance.sub(toBnWithDecimals(3, 17)) // All - 0.3 ETH
+    await web3.eth.sendTransaction({ from: faucetOwner, to: unusedAccount, value: balanceToRemove})
+    const balanceBefore = toBn(await web3.eth.getBalance(faucetOwner))
+    assert.isTrue(MIN_ETH_BALANCE.gt(balanceBefore), "Eth balance too high")
+
+    await brightIdFaucet.claimAndOrRegister(BRIGHT_ID_CONTEXT, addresses, timestamp, sig.v, sig.r, sig.s)
+
+    const balanceAfter = toBn(await web3.eth.getBalance(faucetOwner))
+    assert.isTrue(balanceAfter.gt(balanceBefore), "Eth balance not topped up")
+    await web3.eth.sendTransaction({ from: unusedAccount, to: faucetOwner, value: balanceToRemove})
   })
 
 })

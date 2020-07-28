@@ -1,0 +1,677 @@
+{
+  "contractName": "uniswap_factory",
+  "abi": [
+    {
+      "name": "NewExchange",
+      "inputs": [
+        {
+          "type": "address",
+          "name": "token",
+          "indexed": true
+        },
+        {
+          "type": "address",
+          "name": "exchange",
+          "indexed": true
+        }
+      ],
+      "anonymous": false,
+      "type": "event"
+    },
+    {
+      "name": "initializeFactory",
+      "outputs": [],
+      "inputs": [
+        {
+          "type": "address",
+          "name": "template"
+        }
+      ],
+      "constant": false,
+      "payable": false,
+      "type": "function",
+      "gas": 35725
+    },
+    {
+      "name": "createExchange",
+      "outputs": [
+        {
+          "type": "address",
+          "name": "out"
+        }
+      ],
+      "inputs": [
+        {
+          "type": "address",
+          "name": "token"
+        }
+      ],
+      "constant": false,
+      "payable": false,
+      "type": "function",
+      "gas": 187911
+    },
+    {
+      "name": "getExchange",
+      "outputs": [
+        {
+          "type": "address",
+          "name": "out"
+        }
+      ],
+      "inputs": [
+        {
+          "type": "address",
+          "name": "token"
+        }
+      ],
+      "constant": true,
+      "payable": false,
+      "type": "function",
+      "gas": 715
+    },
+    {
+      "name": "getToken",
+      "outputs": [
+        {
+          "type": "address",
+          "name": "out"
+        }
+      ],
+      "inputs": [
+        {
+          "type": "address",
+          "name": "exchange"
+        }
+      ],
+      "constant": true,
+      "payable": false,
+      "type": "function",
+      "gas": 745
+    },
+    {
+      "name": "getTokenWithId",
+      "outputs": [
+        {
+          "type": "address",
+          "name": "out"
+        }
+      ],
+      "inputs": [
+        {
+          "type": "uint256",
+          "name": "token_id"
+        }
+      ],
+      "constant": true,
+      "payable": false,
+      "type": "function",
+      "gas": 736
+    },
+    {
+      "name": "exchangeTemplate",
+      "outputs": [
+        {
+          "type": "address",
+          "name": "out"
+        }
+      ],
+      "inputs": [],
+      "constant": true,
+      "payable": false,
+      "type": "function",
+      "gas": 633
+    },
+    {
+      "name": "tokenCount",
+      "outputs": [
+        {
+          "type": "uint256",
+          "name": "out"
+        }
+      ],
+      "inputs": [],
+      "constant": true,
+      "payable": false,
+      "type": "function",
+      "gas": 663
+    }
+  ],
+  "bytecode": "0x6103f056600035601c52740100000000000000000000000000000000000000006020526f7fffffffffffffffffffffffffffffff6040527fffffffffffffffffffffffffffffffff8000000000000000000000000000000060605274012a05f1fffffffffffffffffffffffffdabf41c006080527ffffffffffffffffffffffffed5fa0e000000000000000000000000000000000060a05263538a3f0e60005114156100ed57602060046101403734156100b457600080fd5b60043560205181106100c557600080fd5b50600054156100d357600080fd5b60006101405114156100e457600080fd5b61014051600055005b631648f38e60005114156102bf576020600461014037341561010e57600080fd5b600435602051811061011f57600080fd5b50600061014051141561013157600080fd5b6000600054141561014157600080fd5b60026101405160e05260c052604060c020541561015d57600080fd5b7f602e600c600039602e6000f33660006000376110006000366000730000000000610180526c010000000000000000000000006000540261019b527f5af41558576110006000f30000000000000000000000000000000000000000006101af5260406101806000f0806101cf57600080fd5b61016052610160513b6101e157600080fd5b610160513014156101f157600080fd5b6000600060246366d3820361022052610140516102405261023c6000610160515af161021c57600080fd5b6101605160026101405160e05260c052604060c020556101405160036101605160e05260c052604060c02055600154600160015401101561025c57600080fd5b6001600154016102a0526102a0516001556101405160046102a05160e05260c052604060c0205561016051610140517f9d42cb017eb05bd8944ab536a8b35bc68085931dd5f4356489801453923953f960006000a36101605160005260206000f3005b6306f2bf62600051141561030e57602060046101403734156102e057600080fd5b60043560205181106102f157600080fd5b5060026101405160e05260c052604060c0205460005260206000f3005b6359770438600051141561035d576020600461014037341561032f57600080fd5b600435602051811061034057600080fd5b5060036101405160e05260c052604060c0205460005260206000f3005b63aa65a6c0600051141561039a576020600461014037341561037e57600080fd5b60046101405160e05260c052604060c0205460005260206000f3005b631c2bbd1860005114156103c05734156103b357600080fd5b60005460005260206000f3005b639f181b5e60005114156103e65734156103d957600080fd5b60015460005260206000f3005b60006000fd5b6100046103f0036100046000396100046103f0036000f3",
+  "deployedBytecode": "0x600035601c52740100000000000000000000000000000000000000006020526f7fffffffffffffffffffffffffffffff6040527fffffffffffffffffffffffffffffffff8000000000000000000000000000000060605274012a05f1fffffffffffffffffffffffffdabf41c006080527ffffffffffffffffffffffffed5fa0e000000000000000000000000000000000060a05263538a3f0e60005114156100ed57602060046101403734156100b457600080fd5b60043560205181106100c557600080fd5b50600054156100d357600080fd5b60006101405114156100e457600080fd5b61014051600055005b631648f38e60005114156102bf576020600461014037341561010e57600080fd5b600435602051811061011f57600080fd5b50600061014051141561013157600080fd5b6000600054141561014157600080fd5b60026101405160e05260c052604060c020541561015d57600080fd5b7f602e600c600039602e6000f33660006000376110006000366000730000000000610180526c010000000000000000000000006000540261019b527f5af41558576110006000f30000000000000000000000000000000000000000006101af5260406101806000f0806101cf57600080fd5b61016052610160513b6101e157600080fd5b610160513014156101f157600080fd5b6000600060246366d3820361022052610140516102405261023c6000610160515af161021c57600080fd5b6101605160026101405160e05260c052604060c020556101405160036101605160e05260c052604060c02055600154600160015401101561025c57600080fd5b6001600154016102a0526102a0516001556101405160046102a05160e05260c052604060c0205561016051610140517f9d42cb017eb05bd8944ab536a8b35bc68085931dd5f4356489801453923953f960006000a36101605160005260206000f3005b6306f2bf62600051141561030e57602060046101403734156102e057600080fd5b60043560205181106102f157600080fd5b5060026101405160e05260c052604060c0205460005260206000f3005b6359770438600051141561035d576020600461014037341561032f57600080fd5b600435602051811061034057600080fd5b5060036101405160e05260c052604060c0205460005260206000f3005b63aa65a6c0600051141561039a576020600461014037341561037e57600080fd5b60046101405160e05260c052604060c0205460005260206000f3005b631c2bbd1860005114156103c05734156103b357600080fd5b60005460005260206000f3005b639f181b5e60005114156103e65734156103d957600080fd5b60015460005260206000f3005b60006000fd",
+  "source": "contract Exchange():\n    def setup(token_addr: address): modifying\n\nNewExchange: event({token: indexed(address), exchange: indexed(address)})\n\nexchangeTemplate: public(address)\ntokenCount: public(uint256)\ntoken_to_exchange: address[address]\nexchange_to_token: address[address]\nid_to_token: address[uint256]\n\n@public\ndef initializeFactory(template: address):\n    assert self.exchangeTemplate == ZERO_ADDRESS\n    assert template != ZERO_ADDRESS\n    self.exchangeTemplate = template\n\n@public\ndef createExchange(token: address) -> address:\n    assert token != ZERO_ADDRESS\n    assert self.exchangeTemplate != ZERO_ADDRESS\n    assert self.token_to_exchange[token] == ZERO_ADDRESS\n    exchange: address = create_with_code_of(self.exchangeTemplate)\n    Exchange(exchange).setup(token)\n    self.token_to_exchange[token] = exchange\n    self.exchange_to_token[exchange] = token\n    token_id: uint256 = self.tokenCount + 1\n    self.tokenCount = token_id\n    self.id_to_token[token_id] = token\n    log.NewExchange(token, exchange)\n    return exchange\n\n@public\n@constant\ndef getExchange(token: address) -> address:\n    return self.token_to_exchange[token]\n\n@public\n@constant\ndef getToken(exchange: address) -> address:\n    return self.exchange_to_token[exchange]\n\n@public\n@constant\ndef getTokenWithId(token_id: uint256) -> address:\n    return self.id_to_token[token_id]\n",
+  "sourcePath": "/Users/william/Development/Ethereum/EmpowerTheDaoRepos/uniswap-aragon-app/uniswap-protocol/contracts/uniswap_factory.vy",
+  "compiler": {
+    "name": "vyper",
+    "version": "0.1.0b4"
+  },
+  "networks": {
+    "1973766": {
+      "events": {
+        "0x9d42cb017eb05bd8944ab536a8b35bc68085931dd5f4356489801453923953f9": {
+          "name": "NewExchange",
+          "inputs": [
+            {
+              "type": "address",
+              "name": "token",
+              "indexed": true
+            },
+            {
+              "type": "address",
+              "name": "exchange",
+              "indexed": true
+            }
+          ],
+          "anonymous": false,
+          "type": "event",
+          "signature": "0x9d42cb017eb05bd8944ab536a8b35bc68085931dd5f4356489801453923953f9"
+        }
+      },
+      "links": {},
+      "address": "0x9d9aA7fbd819e9fd889152d2b7BbbAd5446F5433",
+      "transactionHash": "0x246b7bf70bf223edc0d09755e8b1f239aae12d4eb5be451ace4775d3822c52e2"
+    },
+    "12675000": {
+      "events": {
+        "0x9d42cb017eb05bd8944ab536a8b35bc68085931dd5f4356489801453923953f9": {
+          "name": "NewExchange",
+          "inputs": [
+            {
+              "type": "address",
+              "name": "token",
+              "indexed": true
+            },
+            {
+              "type": "address",
+              "name": "exchange",
+              "indexed": true
+            }
+          ],
+          "anonymous": false,
+          "type": "event",
+          "signature": "0x9d42cb017eb05bd8944ab536a8b35bc68085931dd5f4356489801453923953f9"
+        }
+      },
+      "links": {},
+      "address": "0x0D9039Cf7F38ca6C572F4df7C791B83bA4530cd7",
+      "transactionHash": "0xed721566ed03769b0b2dbd7f5f2840463787f8fafd55cb6c4a99ef53469eb103"
+    },
+    "13621285": {
+      "events": {
+        "0x9d42cb017eb05bd8944ab536a8b35bc68085931dd5f4356489801453923953f9": {
+          "name": "NewExchange",
+          "inputs": [
+            {
+              "type": "address",
+              "name": "token",
+              "indexed": true
+            },
+            {
+              "type": "address",
+              "name": "exchange",
+              "indexed": true
+            }
+          ],
+          "anonymous": false,
+          "type": "event",
+          "signature": "0x9d42cb017eb05bd8944ab536a8b35bc68085931dd5f4356489801453923953f9"
+        }
+      },
+      "links": {},
+      "address": "0x4eD6178D5dEf6AFD8e23334038609125cBB15C8F",
+      "transactionHash": "0x54674d32e85d2de417252c6fa75c37ab8aca557abd73d69f9646b99a8657eb7c"
+    },
+    "14801684": {
+      "events": {
+        "0x9d42cb017eb05bd8944ab536a8b35bc68085931dd5f4356489801453923953f9": {
+          "name": "NewExchange",
+          "inputs": [
+            {
+              "type": "address",
+              "name": "token",
+              "indexed": true
+            },
+            {
+              "type": "address",
+              "name": "exchange",
+              "indexed": true
+            }
+          ],
+          "anonymous": false,
+          "type": "event",
+          "signature": "0x9d42cb017eb05bd8944ab536a8b35bc68085931dd5f4356489801453923953f9"
+        }
+      },
+      "links": {},
+      "address": "0x392f1db987Ef6ef88Bd7d51cA3C89A0b77b4Dd64",
+      "transactionHash": "0x0e9887fbd9137e020e530aa89bf46c2b54eb4ed2e68b539d2740d916fe63af77"
+    },
+    "15812361": {
+      "events": {
+        "0x9d42cb017eb05bd8944ab536a8b35bc68085931dd5f4356489801453923953f9": {
+          "name": "NewExchange",
+          "inputs": [
+            {
+              "type": "address",
+              "name": "token",
+              "indexed": true
+            },
+            {
+              "type": "address",
+              "name": "exchange",
+              "indexed": true
+            }
+          ],
+          "anonymous": false,
+          "type": "event",
+          "signature": "0x9d42cb017eb05bd8944ab536a8b35bc68085931dd5f4356489801453923953f9"
+        }
+      },
+      "links": {},
+      "address": "0xbc1B7f0e9C764deedA0cC56Ad10e5855f3140227",
+      "transactionHash": "0xb5a7f4f592c68b5c1a5ff11d7b87a807106295799ba0d27830ba69b796105113"
+    },
+    "16857027": {
+      "events": {
+        "0x9d42cb017eb05bd8944ab536a8b35bc68085931dd5f4356489801453923953f9": {
+          "name": "NewExchange",
+          "inputs": [
+            {
+              "type": "address",
+              "name": "token",
+              "indexed": true
+            },
+            {
+              "type": "address",
+              "name": "exchange",
+              "indexed": true
+            }
+          ],
+          "anonymous": false,
+          "type": "event",
+          "signature": "0x9d42cb017eb05bd8944ab536a8b35bc68085931dd5f4356489801453923953f9"
+        }
+      },
+      "links": {},
+      "address": "0x24a66c38eE891f4c92Dc59E6461dE3Eaafe05cBa",
+      "transactionHash": "0x9975660fe16f765be2f848623547e4eb3e47b5c974bf73ecf31033d2b76cc030"
+    },
+    "20717426": {
+      "events": {
+        "0x9d42cb017eb05bd8944ab536a8b35bc68085931dd5f4356489801453923953f9": {
+          "name": "NewExchange",
+          "inputs": [
+            {
+              "type": "address",
+              "name": "token",
+              "indexed": true
+            },
+            {
+              "type": "address",
+              "name": "exchange",
+              "indexed": true
+            }
+          ],
+          "anonymous": false,
+          "type": "event",
+          "signature": "0x9d42cb017eb05bd8944ab536a8b35bc68085931dd5f4356489801453923953f9"
+        }
+      },
+      "links": {},
+      "address": "0xF4902c553a6DEB20375Fb9d0468808F60D0167d5",
+      "transactionHash": "0x3745a4c2f6a3045eeb3d962d3befee0f6650be519302b9c4fc32b25bae2b800b"
+    },
+    "22150512": {
+      "events": {
+        "0x9d42cb017eb05bd8944ab536a8b35bc68085931dd5f4356489801453923953f9": {
+          "name": "NewExchange",
+          "inputs": [
+            {
+              "type": "address",
+              "name": "token",
+              "indexed": true
+            },
+            {
+              "type": "address",
+              "name": "exchange",
+              "indexed": true
+            }
+          ],
+          "anonymous": false,
+          "type": "event",
+          "signature": "0x9d42cb017eb05bd8944ab536a8b35bc68085931dd5f4356489801453923953f9"
+        }
+      },
+      "links": {},
+      "address": "0xD436e756Cf41318ADeC62E8dCbEF2608753Ae068",
+      "transactionHash": "0x666dfbade485be43811c45515a76c424f28167a6ef0e38543853d80a882e6aa4"
+    },
+    "23274544": {
+      "events": {
+        "0x9d42cb017eb05bd8944ab536a8b35bc68085931dd5f4356489801453923953f9": {
+          "name": "NewExchange",
+          "inputs": [
+            {
+              "type": "address",
+              "name": "token",
+              "indexed": true
+            },
+            {
+              "type": "address",
+              "name": "exchange",
+              "indexed": true
+            }
+          ],
+          "anonymous": false,
+          "type": "event",
+          "signature": "0x9d42cb017eb05bd8944ab536a8b35bc68085931dd5f4356489801453923953f9"
+        }
+      },
+      "links": {},
+      "address": "0xCceb940c0e4A66d14e973A1d5BA5309F16F8af60",
+      "transactionHash": "0x189590765bae64ceebfdb8eb668372c5aa74f380ec650aa2da6779369b3d51bc"
+    },
+    "27381286": {
+      "events": {
+        "0x9d42cb017eb05bd8944ab536a8b35bc68085931dd5f4356489801453923953f9": {
+          "name": "NewExchange",
+          "inputs": [
+            {
+              "type": "address",
+              "name": "token",
+              "indexed": true
+            },
+            {
+              "type": "address",
+              "name": "exchange",
+              "indexed": true
+            }
+          ],
+          "anonymous": false,
+          "type": "event",
+          "signature": "0x9d42cb017eb05bd8944ab536a8b35bc68085931dd5f4356489801453923953f9"
+        }
+      },
+      "links": {},
+      "address": "0x67D87b795f232AA9B6D4786dBd08b8B1222Ec752",
+      "transactionHash": "0x43eacff55cc5740b459c4c3d3c869c0acbe549d55c49c50693f66948d8d6df93"
+    },
+    "47541467": {
+      "events": {
+        "0x9d42cb017eb05bd8944ab536a8b35bc68085931dd5f4356489801453923953f9": {
+          "name": "NewExchange",
+          "inputs": [
+            {
+              "type": "address",
+              "name": "token",
+              "indexed": true
+            },
+            {
+              "type": "address",
+              "name": "exchange",
+              "indexed": true
+            }
+          ],
+          "anonymous": false,
+          "type": "event",
+          "signature": "0x9d42cb017eb05bd8944ab536a8b35bc68085931dd5f4356489801453923953f9"
+        }
+      },
+      "links": {},
+      "address": "0xB350304ce6CCAe417D71d555814907033C825482",
+      "transactionHash": "0xefc438444c635c2c99352b8878242ef6421fd69fe82c9edbcd75aa8f68da86d8"
+    },
+    "68671940": {
+      "events": {
+        "0x9d42cb017eb05bd8944ab536a8b35bc68085931dd5f4356489801453923953f9": {
+          "name": "NewExchange",
+          "inputs": [
+            {
+              "type": "address",
+              "name": "token",
+              "indexed": true
+            },
+            {
+              "type": "address",
+              "name": "exchange",
+              "indexed": true
+            }
+          ],
+          "anonymous": false,
+          "type": "event",
+          "signature": "0x9d42cb017eb05bd8944ab536a8b35bc68085931dd5f4356489801453923953f9"
+        }
+      },
+      "links": {},
+      "address": "0xE641dE6D88F74f8c82a4386CdF2Ad35282BFbb72",
+      "transactionHash": "0x224516bf4375e7a7683f318b42fcaf2b8d3f8cea893f9887cac4539290e41224"
+    },
+    "72112146": {
+      "events": {
+        "0x9d42cb017eb05bd8944ab536a8b35bc68085931dd5f4356489801453923953f9": {
+          "name": "NewExchange",
+          "inputs": [
+            {
+              "type": "address",
+              "name": "token",
+              "indexed": true
+            },
+            {
+              "type": "address",
+              "name": "exchange",
+              "indexed": true
+            }
+          ],
+          "anonymous": false,
+          "type": "event",
+          "signature": "0x9d42cb017eb05bd8944ab536a8b35bc68085931dd5f4356489801453923953f9"
+        }
+      },
+      "links": {},
+      "address": "0x9E55F61F92f1dA099b913593b75Bafd0c7f9215B",
+      "transactionHash": "0x9a37079f3bb47481aef1e2684b0dbe6cb70d8718d84611c2b25ade5ecc3f9d05"
+    },
+    "77994067": {
+      "events": {
+        "0x9d42cb017eb05bd8944ab536a8b35bc68085931dd5f4356489801453923953f9": {
+          "name": "NewExchange",
+          "inputs": [
+            {
+              "type": "address",
+              "name": "token",
+              "indexed": true
+            },
+            {
+              "type": "address",
+              "name": "exchange",
+              "indexed": true
+            }
+          ],
+          "anonymous": false,
+          "type": "event",
+          "signature": "0x9d42cb017eb05bd8944ab536a8b35bc68085931dd5f4356489801453923953f9"
+        }
+      },
+      "links": {},
+      "address": "0x67D87b795f232AA9B6D4786dBd08b8B1222Ec752",
+      "transactionHash": "0x43eacff55cc5740b459c4c3d3c869c0acbe549d55c49c50693f66948d8d6df93"
+    },
+    "93203935": {
+      "events": {
+        "0x9d42cb017eb05bd8944ab536a8b35bc68085931dd5f4356489801453923953f9": {
+          "name": "NewExchange",
+          "inputs": [
+            {
+              "type": "address",
+              "name": "token",
+              "indexed": true
+            },
+            {
+              "type": "address",
+              "name": "exchange",
+              "indexed": true
+            }
+          ],
+          "anonymous": false,
+          "type": "event",
+          "signature": "0x9d42cb017eb05bd8944ab536a8b35bc68085931dd5f4356489801453923953f9"
+        }
+      },
+      "links": {},
+      "address": "0xf994d982e257b0A4fddFB4f445b64431cc8DdB53",
+      "transactionHash": "0x6ae2e6f563488a6d62864f91cbb7d8c756e7de609af3af33bdbd17dcb1552ae1"
+    },
+    "97706113": {
+      "events": {
+        "0x9d42cb017eb05bd8944ab536a8b35bc68085931dd5f4356489801453923953f9": {
+          "name": "NewExchange",
+          "inputs": [
+            {
+              "type": "address",
+              "name": "token",
+              "indexed": true
+            },
+            {
+              "type": "address",
+              "name": "exchange",
+              "indexed": true
+            }
+          ],
+          "anonymous": false,
+          "type": "event",
+          "signature": "0x9d42cb017eb05bd8944ab536a8b35bc68085931dd5f4356489801453923953f9"
+        }
+      },
+      "links": {},
+      "address": "0x9285cf8b9FFC4EADD054441F0A8E408deAd63CE0",
+      "transactionHash": "0xe755e08d629fdc32848d2b7dfa03b19ba08966750b5de1675fe696d958f46d34"
+    },
+    "1563199830331": {
+      "events": {
+        "0x9d42cb017eb05bd8944ab536a8b35bc68085931dd5f4356489801453923953f9": {
+          "name": "NewExchange",
+          "inputs": [
+            {
+              "type": "address",
+              "name": "token",
+              "indexed": true
+            },
+            {
+              "type": "address",
+              "name": "exchange",
+              "indexed": true
+            }
+          ],
+          "anonymous": false,
+          "type": "event",
+          "signature": "0x9d42cb017eb05bd8944ab536a8b35bc68085931dd5f4356489801453923953f9"
+        }
+      },
+      "links": {},
+      "address": "0x74599ff3AA22b671346C7767DD2FE5039eDB9c30",
+      "transactionHash": "0xe760c6e8766bc168f7decb7d1041b254124601a08938a502602162a61daa03be"
+    },
+    "1566935488595": {
+      "events": {
+        "0x9d42cb017eb05bd8944ab536a8b35bc68085931dd5f4356489801453923953f9": {
+          "name": "NewExchange",
+          "inputs": [
+            {
+              "type": "address",
+              "name": "token",
+              "indexed": true
+            },
+            {
+              "type": "address",
+              "name": "exchange",
+              "indexed": true
+            }
+          ],
+          "anonymous": false,
+          "type": "event",
+          "signature": "0x9d42cb017eb05bd8944ab536a8b35bc68085931dd5f4356489801453923953f9"
+        }
+      },
+      "links": {},
+      "address": "0x129711C337489538cCcbc0EFf52098a46bCF0705",
+      "transactionHash": "0x1152cd0b3f02f194afca0e7d2adc6ae780fb707f41bd1d56973dd955231c1c18"
+    },
+    "1567507914377": {
+      "events": {
+        "0x9d42cb017eb05bd8944ab536a8b35bc68085931dd5f4356489801453923953f9": {
+          "name": "NewExchange",
+          "inputs": [
+            {
+              "type": "address",
+              "name": "token",
+              "indexed": true
+            },
+            {
+              "type": "address",
+              "name": "exchange",
+              "indexed": true
+            }
+          ],
+          "anonymous": false,
+          "type": "event",
+          "signature": "0x9d42cb017eb05bd8944ab536a8b35bc68085931dd5f4356489801453923953f9"
+        }
+      },
+      "links": {},
+      "address": "0x129711C337489538cCcbc0EFf52098a46bCF0705",
+      "transactionHash": "0x1152cd0b3f02f194afca0e7d2adc6ae780fb707f41bd1d56973dd955231c1c18"
+    },
+    "1568109209761": {
+      "events": {
+        "0x9d42cb017eb05bd8944ab536a8b35bc68085931dd5f4356489801453923953f9": {
+          "name": "NewExchange",
+          "inputs": [
+            {
+              "type": "address",
+              "name": "token",
+              "indexed": true
+            },
+            {
+              "type": "address",
+              "name": "exchange",
+              "indexed": true
+            }
+          ],
+          "anonymous": false,
+          "type": "event",
+          "signature": "0x9d42cb017eb05bd8944ab536a8b35bc68085931dd5f4356489801453923953f9"
+        }
+      },
+      "links": {},
+      "address": "0x1f2F5A3Fb995C53172A6E04529bEA55216029424",
+      "transactionHash": "0xc570a6474da2f7e438ae71753c200e8458cf7484d089cf3364f2fd93252a4d60"
+    },
+    "1568200715788": {
+      "events": {
+        "0x9d42cb017eb05bd8944ab536a8b35bc68085931dd5f4356489801453923953f9": {
+          "name": "NewExchange",
+          "inputs": [
+            {
+              "type": "address",
+              "name": "token",
+              "indexed": true
+            },
+            {
+              "type": "address",
+              "name": "exchange",
+              "indexed": true
+            }
+          ],
+          "anonymous": false,
+          "type": "event",
+          "signature": "0x9d42cb017eb05bd8944ab536a8b35bc68085931dd5f4356489801453923953f9"
+        }
+      },
+      "links": {},
+      "address": "0xe9C9Aaf0D7EB97eDAF8DfB82c70f22dD1B660030",
+      "transactionHash": "0x2d9429b835254e80e3c6c84fc306ac6ce168b7d0f78748a0a1a0a7e41b605a50"
+    }
+  },
+  "schemaVersion": "3.0.16",
+  "updatedAt": "2019-11-12T17:03:34.336Z"
+}

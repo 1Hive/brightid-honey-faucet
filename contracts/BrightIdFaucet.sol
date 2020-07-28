@@ -1,11 +1,13 @@
 pragma solidity ^0.6.11;
 
+import "@nomiclabs/buidler/console.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "./lib/UniswapExchange.sol";
+import "./lib/TimeHelpers.sol";
 
-contract BrightIdFaucet is Ownable {
+contract BrightIdFaucet is TimeHelpers, Ownable {
      using SafeMath for uint256;
 
     string private constant ERROR_ADDRESS_VOIDED = "ADDRESS_VOIDED";
@@ -79,7 +81,7 @@ contract BrightIdFaucet is Ownable {
         brightIdVerifier = _brightIdVerifier;
         minimumEthBalance = _minimumEthBalance;
         uniswapExchange = _uniswapExchange;
-        firstPeriodStart = now;
+        firstPeriodStart = getTimestamp();
 
         emit Initialize(
             address(_token),
@@ -179,7 +181,7 @@ contract BrightIdFaucet is Ownable {
     }
 
     function getCurrentPeriod() public view returns (uint256) {
-        return (now - firstPeriodStart) / periodLength;
+        return (getTimestamp() - firstPeriodStart) / periodLength;
     }
 
     function getPeriodIndividualPayout(uint256 _periodNumber) public view returns (uint256) {
@@ -187,7 +189,8 @@ contract BrightIdFaucet is Ownable {
         return _getPeriodIndividualPayout(period);
     }
 
-    function _isVerifiedUnique(bytes32 _brightIdContext,
+    function _isVerifiedUnique(
+        bytes32 _brightIdContext,
         address[] memory _addrs,
         uint256 _timestamp,
         uint8 _v,
@@ -201,7 +204,7 @@ contract BrightIdFaucet is Ownable {
 
         bool correctVerifier = brightIdVerifier == verifierAddress;
         bool correctContext = brightIdContext == _brightIdContext;
-        bool acceptableTimestamp = now < _timestamp.add(VERIFICATION_TIMESTAMP_VARIANCE);
+        bool acceptableTimestamp = getTimestamp() < _timestamp.add(VERIFICATION_TIMESTAMP_VARIANCE);
 
         return correctVerifier && correctContext && acceptableTimestamp;
     }
@@ -226,7 +229,7 @@ contract BrightIdFaucet is Ownable {
         return userRegisteredCurrentPeriod && userYetToClaimCurrentPeriod;
     }
 
-    function _topUpSenderEthBalance(address _sender, uint256 _maxTokensToSpend) private returns (uint256 tokensSold){
+    function _topUpSenderEthBalance(address _sender, uint256 _maxTokensToSpend) private returns (uint256 tokensSold) {
         uint256 exchangeAllowance = token.allowance(address(this), address(uniswapExchange));
         if (exchangeAllowance < _maxTokensToSpend) {
             // Some ERC20 tokens fail if allowance is not 0 before calling approve
@@ -238,8 +241,15 @@ contract BrightIdFaucet is Ownable {
         }
 
         uint256 amountToBuy = minimumEthBalance.sub(_sender.balance);
-        tokensSold = uniswapExchange
-            .tokenToEthTransferOutput(amountToBuy, _maxTokensToSpend, now + UNISWAP_DEADLINE_PERIOD, _sender);
+        uint256 tokenPriceForTopUp = uniswapExchange.getTokenToEthOutputPrice(amountToBuy);
+
+        if (_maxTokensToSpend < tokenPriceForTopUp) {
+            uniswapExchange.tokenToEthTransferInput(_maxTokensToSpend, 1, getTimestamp() + UNISWAP_DEADLINE_PERIOD, _sender);
+            return _maxTokensToSpend;
+        } else {
+            return uniswapExchange
+                .tokenToEthTransferOutput(amountToBuy, _maxTokensToSpend, getTimestamp() + UNISWAP_DEADLINE_PERIOD, _sender);
+        }
     }
 
     function _getPeriodMaxPayout(uint256 _faucetBalance) internal view returns (uint256) {
