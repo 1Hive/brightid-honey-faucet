@@ -3,6 +3,7 @@ const Token = artifacts.require("Token")
 const UniswapExchange = artifacts.require("uniswap_exchange")
 const UniswapFactory = artifacts.require("uniswap_factory")
 const ethers = require("ethers")
+const { assertRevert } = require("./helpers/assertThrow")
 
 const toBn = (value) => new web3.utils.toBN(value)
 const toBnWithDecimals = (x, y = 18) => toBn((toBn(x).mul(toBn(10).pow(toBn(y)))).toString())
@@ -22,7 +23,7 @@ const FAUCET_INITIAL_BALANCE = toBnWithDecimals(100)
 
 contract("BrightIdFaucet", ([faucetOwner, unusedAccount]) => {
 
-  let token
+  let token, tokenExchange
 
   beforeEach(async () => {
     token = await Token.new("Test Token", "TTN")
@@ -35,7 +36,7 @@ contract("BrightIdFaucet", ([faucetOwner, unusedAccount]) => {
 
     await uniswapFactory.createExchange(token.address)
     const tokenExchangeAddress = await uniswapFactory.getExchange(token.address)
-    const tokenExchange = await UniswapExchange.at(tokenExchangeAddress)
+    tokenExchange = await UniswapExchange.at(tokenExchangeAddress)
 
     const blockTimestamp = (await web3.eth.getBlock('latest')).timestamp
     const futureTimestamp = blockTimestamp + 9999
@@ -62,6 +63,38 @@ contract("BrightIdFaucet", ([faucetOwner, unusedAccount]) => {
     const signingKey = new ethers.utils.SigningKey(VERIFICATIONS_PRIVATE_KEY)
     return signingKey.signDigest(hashedMessage)
   }
+
+  describe.only('constructor(ERC20 _token, uint256 _periodLength, uint256 _percentPerPeriod, bytes32 _brightIdContext,' +
+    ' address _brightIdVerifier, uint256 _minimumEthBalance, UniswapExchange _uniswapExchange)', () => {
+
+    const assertBnEqual = (actualBn, expectedBn, errorMessage = "") => {
+      assert.equal(actualBn.toString(), expectedBn.toString(), errorMessage)
+    }
+
+    it('should set vars correctly', async () => {
+      const brightIdFaucet = await createBrightIdFaucet(100, 10)
+
+      const timestamp = (await web3.eth.getBlock('latest')).timestamp
+      assert.equal(await brightIdFaucet.token(), token.address)
+      assert.equal(await brightIdFaucet.periodLength(), PERIOD_LENGTH)
+      assertBnEqual(await brightIdFaucet.percentPerPeriod(), PERCENT_PER_PERIOD)
+      assert.equal(await brightIdFaucet.brightIdContext(), BRIGHT_ID_CONTEXT)
+      assert.equal(await brightIdFaucet.brightIdVerifier(), faucetOwner)
+      assertBnEqual(await brightIdFaucet.minimumEthBalance(), MIN_ETH_BALANCE)
+      assert.equal(await brightIdFaucet.uniswapExchange(), tokenExchange.address)
+      assert.closeTo((await brightIdFaucet.firstPeriodStart()).toNumber(), timestamp, 3)
+    })
+
+    it('reverts when period length is 0', async () => {
+      const tokenExchange = await createUniswapExchangeForToken(token, toBnWithDecimals(100), toBnWithDecimals(10))
+      await assertRevert(BrightIdFaucet.new(token.address, 0, PERCENT_PER_PERIOD, BRIGHT_ID_CONTEXT, faucetOwner, MIN_ETH_BALANCE, tokenExchange.address))
+    })
+
+    it('reverts when percent per period length is more than 100%', async () => {
+      const tokenExchange = await createUniswapExchangeForToken(token, toBnWithDecimals(100), toBnWithDecimals(10))
+      await assertRevert(BrightIdFaucet.new(token.address, PERIOD_LENGTH, toBnPercent(101), BRIGHT_ID_CONTEXT, faucetOwner, MIN_ETH_BALANCE, tokenExchange.address))
+    })
+  })
 
   it("Should allow claiming when account has less than minimumEthBalance", async () => {
     const addresses = [faucetOwner]

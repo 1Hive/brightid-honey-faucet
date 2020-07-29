@@ -95,7 +95,7 @@ contract BrightIdFaucet is TimeHelpers, Ownable {
     }
 
     function setPercentPerPeriod(uint256 _percentPerPeriod) public onlyOwner {
-        require(_percentPerPeriod < ONE_HUNDRED_PERCENT, ERROR_INVALID_PERIOD_PERCENTAGE);
+        require(_percentPerPeriod <= ONE_HUNDRED_PERCENT, ERROR_INVALID_PERIOD_PERCENTAGE);
 
         percentPerPeriod = _percentPerPeriod;
         emit SetPercentPerPeriod(_percentPerPeriod);
