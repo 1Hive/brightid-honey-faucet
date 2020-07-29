@@ -8,6 +8,7 @@ import SubgraphClient from './SubgraphClient'
 import { WalletProvider } from './providers/Wallet'
 import { AppStateProvider } from './providers/AppState'
 import { ClockProvider } from './providers/Clock'
+import AppLoader from './components/AppLoader'
 
 ReactDOM.render(
   <SubgraphClient>
@@ -17,7 +18,9 @@ ReactDOM.render(
           <Main assetsUrl="/aragon-ui/" layout={false}>
             <HashRouter>
               <MainView>
-                <App />
+                <AppLoader>
+                  <App />
+                </AppLoader>
               </MainView>
             </HashRouter>
           </Main>
