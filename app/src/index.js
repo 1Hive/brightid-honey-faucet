@@ -3,12 +3,12 @@ import ReactDOM from 'react-dom'
 import { Main } from '@1hive/1hive-ui'
 import { HashRouter } from 'react-router-dom'
 import App from './App'
+import AppLoader from './components/AppLoader'
 import MainView from './components/MainView'
 import SubgraphClient from './SubgraphClient'
 import { WalletProvider } from './providers/Wallet'
 import { AppStateProvider } from './providers/AppState'
 import { ClockProvider } from './providers/Clock'
-import AppLoader from './components/AppLoader'
 
 ReactDOM.render(
   <SubgraphClient>
