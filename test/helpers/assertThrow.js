@@ -1,5 +1,5 @@
 const REVERT_CODE = 'revert'
-const THROW_ERROR_PREFIX = 'Returned error: VM Exception while processing transaction:'
+const THROW_ERROR_PREFIX = 'VM Exception while processing transaction:'
 
 function assertError(error, expectedErrorCode) {
   assert(error.message.search(expectedErrorCode) > -1, `Expected error code "${expectedErrorCode}" but failed with "${error}" instead.`)

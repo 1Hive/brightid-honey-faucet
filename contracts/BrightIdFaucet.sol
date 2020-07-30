@@ -176,7 +176,7 @@ contract BrightIdFaucet is TimeHelpers, Ownable {
         }
     }
 
-    function withdraw(address _to) public onlyOwner {
+    function withdrawDeposit(address _to) public onlyOwner {
         token.transfer(_to, token.balanceOf(address(this)));
     }
 
