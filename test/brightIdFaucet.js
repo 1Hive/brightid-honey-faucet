@@ -14,6 +14,7 @@ const toBnPercent = (value) => toBnWithDecimals(value, 16)
 const VERIFICATIONS_PRIVATE_KEY = '0x23c601ae397441f3ef6f1075dcb0031ff17fb079837beadaf3c84d96c6f3e569'
 const PERIOD_LENGTH = 10 * 60 // 10 minutes
 const PERCENT_PER_PERIOD = toBnPercent(20) // 20%
+const ONE_HUNDRED_PERCENT = toBnPercent(100)
 const BRIGHT_ID_CONTEXT = '0x3168697665000000000000000000000000000000000000000000000000000000' // stringToBytes32("1hive")
 const MIN_ETH_BALANCE = toBnWithDecimals(5, 17) // 0.5 ETH
 
@@ -21,7 +22,7 @@ const TOKEN_LIQUIDITY = toBnWithDecimals(10)
 const ETH_LIQUIDITY = toBnWithDecimals(100)
 const FAUCET_INITIAL_BALANCE = toBnWithDecimals(100)
 
-contract('BrightIdFaucet', ([faucetOwner, notFaucetOwner, brightIdVerifier]) => {
+contract('BrightIdFaucet', ([faucetOwner, notFaucetOwner, brightIdVerifier, faucetUser, faucetUserSecondAddress, faucetUserThirdAddress]) => {
 
   let token, tokenExchange
 
@@ -201,6 +202,90 @@ contract('BrightIdFaucet', ([faucetOwner, notFaucetOwner, brightIdVerifier]) => 
     //
     //
     // })
+
+    describe('claimAndOrRegister(bytes32 _brightIdContext, address[] memory _addrs, uint256 _timestamp, uint8 _v,' +
+      ' bytes32 _r, bytes32 _s )', () => {
+
+      let addresses, timestamp, sig
+
+      beforeEach(async () => {
+        addresses = [faucetUser]
+        timestamp = (await web3.eth.getBlock('latest')).timestamp
+        sig = getVerificationsSignature(addresses, timestamp)
+      })
+
+      it('registers user', async () => {
+        await brightIdFaucet.claimAndOrRegister(BRIGHT_ID_CONTEXT, addresses, timestamp, sig.v, sig.r, sig.s, { from: faucetUser })
+
+        const currentPeriod = await brightIdFaucet.getCurrentPeriod()
+        const { registeredForPeriod, latestClaimPeriod, addressVoid } = await brightIdFaucet.claimers(faucetUser)
+        const { totalRegisteredUsers } = await brightIdFaucet.periods(currentPeriod.add(toBn(1)))
+        assertBnEqual(registeredForPeriod, currentPeriod.add(toBn(1)), 'Incorrect registered for period')
+        assertBnEqual(latestClaimPeriod, toBn(0), 'Incorrect latest claim period')
+        assert.isFalse(addressVoid, 'Incorrect address void')
+        assertBnEqual(totalRegisteredUsers, toBn(1))
+      })
+
+      it('voids all previously registered accounts', async () => {
+        addresses = [faucetUserSecondAddress, faucetUser]
+        sig = getVerificationsSignature(addresses, timestamp)
+        await brightIdFaucet.claimAndOrRegister(BRIGHT_ID_CONTEXT, addresses, timestamp, sig.v, sig.r, sig.s, { from: faucetUserSecondAddress })
+
+        const { addressVoid: originalAddressVoid } = await brightIdFaucet.claimers(faucetUser)
+        const { addressVoid: newAddressVoid } = await brightIdFaucet.claimers(faucetUserSecondAddress)
+        assert.isTrue(originalAddressVoid, 'Incorrect original address void')
+        assert.isFalse(newAddressVoid, 'Incorrect new address void')
+      })
+
+      it('voids all previously registered accounts when already voided accounts', async () => {
+        addresses = [faucetUserSecondAddress, faucetUser]
+        sig = getVerificationsSignature(addresses, timestamp)
+        await brightIdFaucet.claimAndOrRegister(BRIGHT_ID_CONTEXT, addresses, timestamp, sig.v, sig.r, sig.s, { from: faucetUserSecondAddress })
+        addresses = [faucetUserThirdAddress, faucetUserSecondAddress, faucetUser]
+        sig = getVerificationsSignature(addresses, timestamp)
+        await brightIdFaucet.mockIncreaseTime(PERIOD_LENGTH)
+
+        await brightIdFaucet.claimAndOrRegister(BRIGHT_ID_CONTEXT, addresses, timestamp, sig.v, sig.r, sig.s, { from: faucetUserThirdAddress })
+
+        const { addressVoid: originalAddressVoid } = await brightIdFaucet.claimers(faucetUser)
+        const { addressVoid: secondAddressVoid } = await brightIdFaucet.claimers(faucetUserSecondAddress)
+        const { addressVoid: thirdAddressVoid } = await brightIdFaucet.claimers(faucetUserThirdAddress)
+        assert.isTrue(originalAddressVoid, 'Incorrect original address void')
+        assert.isTrue(secondAddressVoid, 'Incorrect second address void')
+        assert.isFalse(thirdAddressVoid, 'Incorrect third address void')
+      })
+
+      it('claims faucet return', async () => {
+        await brightIdFaucet.claimAndOrRegister(BRIGHT_ID_CONTEXT, addresses, timestamp, sig.v, sig.r, sig.s, { from: faucetUser })
+        await brightIdFaucet.mockIncreaseTime(PERIOD_LENGTH)
+        const balanceBeforeClaim = await token.balanceOf(faucetUser)
+
+        await brightIdFaucet.claimAndOrRegister(BRIGHT_ID_CONTEXT, addresses, timestamp, sig.v, sig.r, sig.s, { from: faucetUser })
+
+        const claimAmount = FAUCET_INITIAL_BALANCE.mul(PERCENT_PER_PERIOD).div(ONE_HUNDRED_PERCENT)
+        const balanceAfterClaim = await token.balanceOf(faucetUser)
+        assertBnEqual(balanceAfterClaim, balanceBeforeClaim.add(claimAmount), 'Incorrect balance after registration')
+      })
+
+      it('reverts when registering twice in the same period', async () => {
+        await brightIdFaucet.claimAndOrRegister(BRIGHT_ID_CONTEXT, addresses, timestamp, sig.v, sig.r, sig.s, { from: faucetUser })
+        await assertRevert(brightIdFaucet.claimAndOrRegister(BRIGHT_ID_CONTEXT, addresses, timestamp, sig.v, sig.r, sig.s, { from: faucetUser }), 'ALREADY_REGISTERED')
+      })
+
+      it('reverts when incorrect verification signature used', async () => {
+        await assertRevert(brightIdFaucet.claimAndOrRegister(BRIGHT_ID_CONTEXT, addresses, timestamp, sig.v - 1, sig.r, sig.s, { from: faucetUser }), 'INCORRECT_VERIFICATION')
+      })
+
+      it('reverts when verification timestamp too far in the past', async () => {
+        const verificationTimestampVariance = await brightIdFaucet.VERIFICATION_TIMESTAMP_VARIANCE()
+        await brightIdFaucet.mockIncreaseTime(verificationTimestampVariance)
+        await assertRevert(brightIdFaucet.claimAndOrRegister(BRIGHT_ID_CONTEXT, addresses, timestamp, sig.v, sig.r, sig.s, { from: faucetUser }), 'INCORRECT_VERIFICATION')
+      })
+
+      it('reverts when sender not first address in verification contextIds', async () => {
+        await assertRevert(brightIdFaucet.claimAndOrRegister(BRIGHT_ID_CONTEXT, addresses, timestamp, sig.v, sig.r, sig.s, { from: faucetOwner }), 'SENDER_NOT_IN_VERIFICATION')
+      })
+    })
   })
 
   it('Should allow claiming when account has less than minimumEthBalance', async () => {

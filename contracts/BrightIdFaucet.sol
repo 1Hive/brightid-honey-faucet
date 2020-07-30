@@ -16,7 +16,7 @@ contract BrightIdFaucet is TimeHelpers, Ownable {
     string private constant ERROR_INCORRECT_VERIFICATION = "INCORRECT_VERIFICATION";
     string private constant ERROR_INVALID_PERIOD_LENGTH = "INVALID_PERIOD_LENGTH";
     string private constant ERROR_INVALID_PERIOD_PERCENTAGE = "INVALID_PERIOD_PERCENTAGE";
-    string private constant ERROR_SENDER_NOT_VERIFIED = "SENDER_NOT_VERIFIED";
+    string private constant ERROR_SENDER_NOT_IN_VERIFICATION = "SENDER_NOT_IN_VERIFICATION";
 
     uint256 public constant ONE_HUNDRED_PERCENT = 1e18;
     uint256 public constant UNISWAP_DEADLINE_PERIOD = 1 days;
@@ -130,7 +130,7 @@ contract BrightIdFaucet is TimeHelpers, Ownable {
     {
         require(claimers[msg.sender].registeredForPeriod <= getCurrentPeriod(), ERROR_ALREADY_REGISTERED);
         require(_isVerifiedUnique(_brightIdContext, _addrs, _timestamp, _v, _r, _s), ERROR_INCORRECT_VERIFICATION);
-        require(msg.sender == _addrs[0], ERROR_SENDER_NOT_VERIFIED);
+        require(msg.sender == _addrs[0], ERROR_SENDER_NOT_IN_VERIFICATION);
 
         claim();
 
