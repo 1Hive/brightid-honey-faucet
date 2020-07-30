@@ -60,6 +60,15 @@ contract BrightIdFaucet is TimeHelpers, Ownable {
     event Claim(address claimer, uint256 periodNumber, uint256 payoutMinusSold, uint256 claimerPayout);
     event Register(address sender, uint256 periodNumber);
 
+    /**
+    * @param _token Token distributed by the faucet
+    * @param _periodLength Length of each distribution period
+    * @param _percentPerPeriod Percent of total balance distributed each period
+    * @param _brightIdContext BrightId context used for verifying users
+    * @param _brightIdVerifier BrightId verifier address that signs BrightId verifications
+    * @param _minimumEthBalance Claim will top up a users balance to this amount when claiming if it is less
+    * @param _uniswapExchange Uniswap exchange for converting faucet tokens to ETH during claiming if necessary
+    */
     constructor(
         ERC20 _token,
         uint256 _periodLength,
@@ -94,6 +103,10 @@ contract BrightIdFaucet is TimeHelpers, Ownable {
         );
     }
 
+    /**
+    * @notice Set percent per period
+    * @param _percentPerPeriod Percent of total balance distributed each period
+    */
     function setPercentPerPeriod(uint256 _percentPerPeriod) public onlyOwner {
         require(_percentPerPeriod <= ONE_HUNDRED_PERCENT, ERROR_INVALID_PERIOD_PERCENTAGE);
 
@@ -101,23 +114,44 @@ contract BrightIdFaucet is TimeHelpers, Ownable {
         emit SetPercentPerPeriod(_percentPerPeriod);
     }
 
+    /**
+    * @notice Set BrightId settings
+    * @param _brightIdContext BrightId context used for verifying users
+    * @param _brightIdVerifier BrightId verifier address that signs BrightId verifications
+    */
     function setBrightIdSettings(bytes32 _brightIdContext, address _brightIdVerifier) public onlyOwner {
         brightIdContext = _brightIdContext;
         brightIdVerifier = _brightIdVerifier;
         emit SetBrightIdSettings(_brightIdContext, _brightIdVerifier);
     }
 
+    /**
+    * @notice Set the minimum eth balance
+    * @param _minimumEthBalance Claim will top up a users balance to this amount when claiming if it is less
+    */
     function setMinimumEthBalance(uint256 _minimumEthBalance) public onlyOwner {
         minimumEthBalance = _minimumEthBalance;
         emit SetMinimumEthBalance(_minimumEthBalance);
     }
 
+    /**
+    * @notice Set the Uniswap exchange address
+    * @param _uniswapExchange Uniswap exchange for converting faucet tokens to ETH during claiming if necessary
+    */
     function setUniswapExchange(UniswapExchange _uniswapExchange) public onlyOwner {
         uniswapExchange = _uniswapExchange;
         emit SetUniswapExchange(_uniswapExchange);
     }
- 
-    // If you have previously registered then you will claim here and register for the next period.
+
+    /**
+    * @notice Register for the next period and claim if registered for the current period.
+    * @param _brightIdContext The context used in the users verification
+    * @param _addrs The history of addresses, or contextIds, used by this user to register with BrightID for the BrightId context
+    * @param _timestamp The time the verification was created by a BrightId node
+    * @param _v Part of the BrightId nodes signature verifying the users uniqueness
+    * @param _r Part of the BrightId nodes signature verifying the users uniqueness
+    * @param _s Part of the BrightId nodes signature verifying the users uniqueness
+    */
     function claimAndOrRegister(
         bytes32 _brightIdContext,
         address[] memory _addrs,
@@ -142,8 +176,10 @@ contract BrightIdFaucet is TimeHelpers, Ownable {
         emit Register(msg.sender, nextPeriod);
     }
 
-    // If for some reason you cannot register again, lost uniqueness or brightID nodes down, you can still claim for
-    // the previous period if eligible with this function.
+    /**
+    * @notice Claim from the faucet without registering for the next period. Used in case the user cannot register
+    *         again because they have lost uniqueness or the brightID node is down.
+    */
     function claim() public {
         Claimer storage claimer = claimers[msg.sender];
         require(!claimer.addressVoid, ERROR_ADDRESS_VOIDED);
@@ -176,14 +212,26 @@ contract BrightIdFaucet is TimeHelpers, Ownable {
         }
     }
 
+    /**
+    * @notice Withdraw the faucets entire balance of the faucet distributed token
+    * @param _to Address to withdraw to
+    */
     function withdrawDeposit(address _to) public onlyOwner {
         token.transfer(_to, token.balanceOf(address(this)));
     }
 
+    /**
+    * @notice Get the current period number
+    */
     function getCurrentPeriod() public view returns (uint256) {
         return (getTimestamp() - firstPeriodStart) / periodLength;
     }
 
+    /**
+    * @notice Get a specific periods individual payouts. For future and uninitialised periods with 0 registered
+    *         users it will return 0
+    * @param _periodNumber Period number
+    */
     function getPeriodIndividualPayout(uint256 _periodNumber) public view returns (uint256) {
         Period storage period = periods[_periodNumber];
         return _getPeriodIndividualPayout(period);
