@@ -1,7 +1,7 @@
 import gql from 'graphql-tag'
 
 export const Config = gql`
-  subscription Config($id: ID!) {
+  query Config($id: ID!) {
     config(id: $id) {
       firstPeriodStart
       periodLength
@@ -19,7 +19,7 @@ export const Config = gql`
 `
 
 export const Claimer = gql`
-  subscription Claimer($id: ID!) {
+  query Claimer($id: ID!) {
     claimer(id: $id) {
       registeredForPeriod
       latestClaimPeriod
@@ -36,7 +36,7 @@ export const Claimer = gql`
 `
 
 export const Period = gql`
-  subscription Period($id: ID!) {
+  query Period($id: ID!) {
     period(id: $id) {
       totalRegisteredUsers
       individualPayout
@@ -46,7 +46,7 @@ export const Period = gql`
 `
 
 export const Periods = gql`
-  subscription Periods($limit: Int) {
+  query Periods($limit: Int) {
     periods(first: $limit, orderBy: id, orderDirection: asc) {
       id
       totalRegisteredUsers
