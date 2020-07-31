@@ -4,12 +4,12 @@
   "private": true,
   "dependencies": {
     "@1hive/1hive-ui": "^1.0.2",
-    "@1hive/connect-thegraph-conviction-voting": "^0.1.7",
     "@1hive/uniswap-sdk": "^1.0.0",
-    "@aragon/connect": "^0.3.0",
     "clipboard-polyfill": "^2.8.6",
     "dayjs": "^1.8.29",
     "ethers": "4.0.28",
+    "graphql": "^14.5.8",
+    "graphql-tag": "^2.10.1",
     "js-sha256": "^0.9.0",
     "node-fetch": "^2.6.0",
     "qrcode.react": "^1.0.0",
@@ -22,6 +22,7 @@
     "react-spring": "^8.0.27",
     "semver": "^7.2.1",
     "styled-components": "^4.3.2",
+    "subscriptions-transport-ws": "^0.9.17",
     "tweetnacl": "^1.0.3",
     "tweetnacl-util": "^0.15.1",
     "url": "^0.11.0",
@@ -78,7 +79,6 @@
     "husky": "^4.2.5",
     "prettier": "^1.19.1",
     "react-app-rewired": "^2.1.5",
-    "react-dev-utils": "^10.2.1",
-    "subscriptions-transport-ws": "^0.9.17"
+    "react-dev-utils": "^10.2.1"
   }
 }
