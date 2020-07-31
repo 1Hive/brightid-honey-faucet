@@ -21,6 +21,7 @@ const subscriptionClient = new SubscriptionClient(subgraphWsEndpoint, {
 function SubgraphClient({ children }) {
   const client = createClient({
     url: subgraphHttpEndpoint,
+    requestPolicy: 'network-only',
     exchanges: [
       debugExchange,
       devtoolsExchange,
