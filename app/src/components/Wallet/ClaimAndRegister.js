@@ -5,7 +5,7 @@ import LoadingRing from '../LoadingRing'
 import { useAppState } from '../../providers/AppState'
 import { useClock } from '../../providers/Clock'
 import { useIndividualPayout } from '../../hooks/useIndividualPayout'
-import { usePeriod } from '../../hooks/subscription-hooks'
+import { usePeriod } from '../../hooks/polling-hooks'
 
 import { formatTokenAmount } from '../../lib/math-utils'
 import honeySvg from '../../assets/honey.svg'
