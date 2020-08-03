@@ -10,13 +10,14 @@ import "./lib/TimeHelpers.sol";
 contract BrightIdFaucet is TimeHelpers, Ownable {
      using SafeMath for uint256;
 
-    string private constant ERROR_ADDRESS_VOIDED = "ADDRESS_VOIDED";
-    string private constant ERROR_FAUCET_BALANCE_IS_ZERO = "FAUCET_BALANCE_IS_ZERO";
-    string private constant ERROR_ALREADY_REGISTERED = "ALREADY_REGISTERED";
-    string private constant ERROR_INCORRECT_VERIFICATION = "INCORRECT_VERIFICATION";
     string private constant ERROR_INVALID_PERIOD_LENGTH = "INVALID_PERIOD_LENGTH";
     string private constant ERROR_INVALID_PERIOD_PERCENTAGE = "INVALID_PERIOD_PERCENTAGE";
+    string private constant ERROR_ALREADY_REGISTERED = "ALREADY_REGISTERED";
+    string private constant ERROR_INCORRECT_VERIFICATION = "INCORRECT_VERIFICATION";
     string private constant ERROR_SENDER_NOT_IN_VERIFICATION = "SENDER_NOT_IN_VERIFICATION";
+    string private constant ERROR_ADDRESS_VOIDED = "ADDRESS_VOIDED";
+    string private constant ERROR_CANNOT_CLAIM = "CANNOT_CLAIM";
+    string private constant ERROR_FAUCET_BALANCE_IS_ZERO = "FAUCET_BALANCE_IS_ZERO";
 
     uint256 public constant ONE_HUNDRED_PERCENT = 1e18;
     uint256 public constant UNISWAP_DEADLINE_PERIOD = 1 days;
@@ -162,14 +163,19 @@ contract BrightIdFaucet is TimeHelpers, Ownable {
     )
         public
     {
-        require(claimers[msg.sender].registeredForPeriod <= getCurrentPeriod(), ERROR_ALREADY_REGISTERED);
+        Claimer storage claimer = claimers[msg.sender];
+        require(claimer.registeredForPeriod <= getCurrentPeriod(), ERROR_ALREADY_REGISTERED);
         require(_isVerifiedUnique(_brightIdContext, _addrs, _timestamp, _v, _r, _s), ERROR_INCORRECT_VERIFICATION);
         require(msg.sender == _addrs[0], ERROR_SENDER_NOT_IN_VERIFICATION);
+        require(!claimer.addressVoid, ERROR_ADDRESS_VOIDED);
 
-        claim();
+        uint256 currentPeriod = getCurrentPeriod();
+        if (_canClaim(claimer, currentPeriod)) {
+            _claim(claimer, currentPeriod);
+        }
 
         uint256 nextPeriod = getCurrentPeriod() + 1;
-        claimers[msg.sender].registeredForPeriod = nextPeriod;
+        claimer.registeredForPeriod = nextPeriod;
         periods[nextPeriod].totalRegisteredUsers++;
         _voidUserHistory(_addrs);
 
@@ -182,34 +188,36 @@ contract BrightIdFaucet is TimeHelpers, Ownable {
     */
     function claim() public {
         Claimer storage claimer = claimers[msg.sender];
-        require(!claimer.addressVoid, ERROR_ADDRESS_VOIDED);
-
         uint256 currentPeriod = getCurrentPeriod();
+        require(!claimer.addressVoid, ERROR_ADDRESS_VOIDED);
+        require(_canClaim(claimer, currentPeriod), ERROR_CANNOT_CLAIM);
 
-        if (_canClaim(claimer, currentPeriod)) {
-            Period storage period = periods[currentPeriod];
+        _claim(claimer, currentPeriod);
+    }
 
-            // Save maxPayout so every claimer gets the same payout amount.
-            if (period.maxPayout == 0) {
-                uint256 faucetBalance = token.balanceOf(address(this));
-                require(faucetBalance > 0, ERROR_FAUCET_BALANCE_IS_ZERO);
-                period.maxPayout = _getPeriodMaxPayout(faucetBalance);
-            }
+    function _claim(Claimer storage _claimer, uint256 _currentPeriod) internal {
+        Period storage period = periods[_currentPeriod];
+        uint256 faucetBalance = token.balanceOf(address(this));
+        require(faucetBalance > 0, ERROR_FAUCET_BALANCE_IS_ZERO);
 
-            uint256 claimerPayout = _getPeriodIndividualPayout(period);
-            uint256 tokensSoldForEth = 0;
-
-            if (msg.sender.balance < minimumEthBalance) {
-                tokensSoldForEth = _topUpSenderEthBalance(msg.sender, claimerPayout);
-            }
-
-            uint256 payoutMinusSold = claimerPayout.sub(tokensSoldForEth);
-            token.transfer(msg.sender, payoutMinusSold);
-
-            claimer.latestClaimPeriod = currentPeriod;
-
-            emit Claim(msg.sender, currentPeriod, payoutMinusSold, claimerPayout);
+        // Save maxPayout so every claimer gets the same payout amount.
+        if (period.maxPayout == 0) {
+            period.maxPayout = _getPeriodMaxPayout(faucetBalance);
         }
+
+        uint256 claimerPayout = _getPeriodIndividualPayout(period);
+        uint256 tokensSoldForEth = 0;
+
+        if (msg.sender.balance < minimumEthBalance) {
+            tokensSoldForEth = _topUpSenderEthBalance(msg.sender, claimerPayout);
+        }
+
+        uint256 payoutMinusSold = claimerPayout.sub(tokensSoldForEth);
+        token.transfer(msg.sender, payoutMinusSold);
+
+        _claimer.latestClaimPeriod = _currentPeriod;
+
+        emit Claim(msg.sender, _currentPeriod, payoutMinusSold, claimerPayout);
     }
 
     /**
@@ -271,7 +279,7 @@ contract BrightIdFaucet is TimeHelpers, Ownable {
     }
 
     function _canClaim(Claimer storage claimer, uint256 currentPeriod) internal view returns (bool) {
-        bool userRegisteredCurrentPeriod = currentPeriod > 0 && claimer.registeredForPeriod == currentPeriod;
+        bool userRegisteredCurrentPeriod = claimer.registeredForPeriod == currentPeriod;
         bool userYetToClaimCurrentPeriod = claimer.latestClaimPeriod < currentPeriod;
 
         return userRegisteredCurrentPeriod && userYetToClaimCurrentPeriod;
