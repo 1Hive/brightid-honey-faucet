@@ -10,7 +10,7 @@ function CustomLayout({ children }) {
       parentWidth={vw}
       paddingBottom={0}
       css={`
-        min-width: 0;
+        min-width: auto;
       `}
     >
       {children}
