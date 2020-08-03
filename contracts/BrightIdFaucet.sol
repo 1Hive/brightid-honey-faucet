@@ -82,7 +82,7 @@ contract BrightIdFaucet is TimeHelpers, Ownable {
         public
     {
         require(_periodLength > 0, ERROR_INVALID_PERIOD_LENGTH);
-        require(_percentPerPeriod < ONE_HUNDRED_PERCENT, ERROR_INVALID_PERIOD_PERCENTAGE);
+        require(_percentPerPeriod <= ONE_HUNDRED_PERCENT, ERROR_INVALID_PERIOD_PERCENTAGE);
 
         token = _token;
         periodLength = _periodLength;
@@ -183,8 +183,8 @@ contract BrightIdFaucet is TimeHelpers, Ownable {
     }
 
     /**
-    * @notice Claim from the faucet without registering for the next period. Used in case the user cannot register
-    *         again because they have lost uniqueness or the brightID node is down.
+    * @notice Claim from the faucet without registering for the next period. Can be used when the user is no longer
+    *         verified or the brightID node providing verifications is down.
     */
     function claim() public {
         Claimer storage claimer = claimers[msg.sender];
@@ -193,31 +193,6 @@ contract BrightIdFaucet is TimeHelpers, Ownable {
         require(_canClaim(claimer, currentPeriod), ERROR_CANNOT_CLAIM);
 
         _claim(claimer, currentPeriod);
-    }
-
-    function _claim(Claimer storage _claimer, uint256 _currentPeriod) internal {
-        Period storage period = periods[_currentPeriod];
-        uint256 faucetBalance = token.balanceOf(address(this));
-        require(faucetBalance > 0, ERROR_FAUCET_BALANCE_IS_ZERO);
-
-        // Save maxPayout so every claimer gets the same payout amount.
-        if (period.maxPayout == 0) {
-            period.maxPayout = _getPeriodMaxPayout(faucetBalance);
-        }
-
-        uint256 claimerPayout = _getPeriodIndividualPayout(period);
-        uint256 tokensSoldForEth = 0;
-
-        if (msg.sender.balance < minimumEthBalance) {
-            tokensSoldForEth = _topUpSenderEthBalance(msg.sender, claimerPayout);
-        }
-
-        uint256 payoutMinusSold = claimerPayout.sub(tokensSoldForEth);
-        token.transfer(msg.sender, payoutMinusSold);
-
-        _claimer.latestClaimPeriod = _currentPeriod;
-
-        emit Claim(msg.sender, _currentPeriod, payoutMinusSold, claimerPayout);
     }
 
     /**
@@ -285,6 +260,31 @@ contract BrightIdFaucet is TimeHelpers, Ownable {
         return userRegisteredCurrentPeriod && userYetToClaimCurrentPeriod;
     }
 
+    function _claim(Claimer storage _claimer, uint256 _currentPeriod) internal {
+        Period storage period = periods[_currentPeriod];
+        uint256 faucetBalance = token.balanceOf(address(this));
+        require(faucetBalance > 0, ERROR_FAUCET_BALANCE_IS_ZERO);
+
+        // Save maxPayout so every claimer gets the same payout amount.
+        if (period.maxPayout == 0) {
+            period.maxPayout = _getPeriodMaxPayout(faucetBalance);
+        }
+
+        uint256 claimerPayout = _getPeriodIndividualPayout(period);
+        uint256 tokensSoldForEth = 0;
+
+        if (msg.sender.balance < minimumEthBalance) {
+            tokensSoldForEth = _topUpSenderEthBalance(msg.sender, claimerPayout);
+        }
+
+        uint256 payoutMinusSold = claimerPayout.sub(tokensSoldForEth);
+        token.transfer(msg.sender, payoutMinusSold);
+
+        _claimer.latestClaimPeriod = _currentPeriod;
+
+        emit Claim(msg.sender, _currentPeriod, payoutMinusSold, claimerPayout);
+    }
+
     function _topUpSenderEthBalance(address _sender, uint256 _maxTokensToSpend) private returns (uint256 tokensSold) {
         uint256 exchangeAllowance = token.allowance(address(this), address(uniswapExchange));
         if (exchangeAllowance < _maxTokensToSpend) {
@@ -298,13 +298,14 @@ contract BrightIdFaucet is TimeHelpers, Ownable {
 
         uint256 amountToBuy = minimumEthBalance.sub(_sender.balance);
         uint256 tokenPriceForTopUp = uniswapExchange.getTokenToEthOutputPrice(amountToBuy);
-
-        if (_maxTokensToSpend < tokenPriceForTopUp) {
-            uniswapExchange.tokenToEthTransferInput(_maxTokensToSpend, 1, getTimestamp() + UNISWAP_DEADLINE_PERIOD, _sender);
+        uint256 uniswapTransactionDeadline = getTimestamp() + UNISWAP_DEADLINE_PERIOD;
+        
+        if (_maxTokensToSpend <= tokenPriceForTopUp) {
+            uniswapExchange.tokenToEthTransferInput(_maxTokensToSpend, 1, uniswapTransactionDeadline, _sender);
             return _maxTokensToSpend;
         } else {
             return uniswapExchange
-                .tokenToEthTransferOutput(amountToBuy, _maxTokensToSpend, getTimestamp() + UNISWAP_DEADLINE_PERIOD, _sender);
+                .tokenToEthTransferOutput(amountToBuy, _maxTokensToSpend, uniswapTransactionDeadline, _sender);
         }
     }
 
