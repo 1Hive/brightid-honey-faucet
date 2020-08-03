@@ -67,8 +67,7 @@ contract('BrightIdFaucet', ([faucetOwner, notFaucetOwner, brightIdVerifier, fauc
     return signingKey.signDigest(hashedMessage)
   }
 
-  describe('constructor(ERC20 _token, uint256 _periodLength, uint256 _percentPerPeriod, bytes32 _brightIdContext,' +
-    ' address _brightIdVerifier, uint256 _minimumEthBalance, UniswapExchange _uniswapExchange)', () => {
+  describe('constructor(_token, _periodLength, _percentPerPeriod, _brightIdContext, _brightIdVerifier, _minimumEthBalance, _uniswapExchange)', () => {
 
     let brightIdFaucet
 
@@ -104,7 +103,7 @@ contract('BrightIdFaucet', ([faucetOwner, notFaucetOwner, brightIdVerifier, fauc
         'INVALID_PERIOD_PERCENTAGE')
     })
 
-    describe('setPercentPerPeriod(uint256 _percentPerPeriod)', () => {
+    describe('setPercentPerPeriod(_percentPerPeriod)', () => {
       it('sets percent per period', async () => {
         const newPercentPerPeriod = toBnPercent(10)
         await brightIdFaucet.setPercentPerPeriod(newPercentPerPeriod)
@@ -122,7 +121,7 @@ contract('BrightIdFaucet', ([faucetOwner, notFaucetOwner, brightIdVerifier, fauc
       })
     })
 
-    describe('setBrightIdSettings(bytes32 _brightIdContext, address _brightIdVerifier)', async () => {
+    describe('setBrightIdSettings(_brightIdContext, _brightIdVerifier)', async () => {
       it('sets brightId settings', async () => {
         const newContext = '0x3168697665000000000000000000000000000000000000000000000000000001'
         await brightIdFaucet.setBrightIdSettings(newContext, notFaucetOwner)
@@ -136,7 +135,7 @@ contract('BrightIdFaucet', ([faucetOwner, notFaucetOwner, brightIdVerifier, fauc
       })
     })
 
-    describe('setMinimumEthBalance(uint256 _minimumEthBalance)', () => {
+    describe('setMinimumEthBalance(_minimumEthBalance)', () => {
       it('sets the minimum eth balance', async () => {
         const newMinEthBalance = toBnWithDecimals(3, 17) // 0.3 ETH
         await brightIdFaucet.setMinimumEthBalance(newMinEthBalance)
@@ -149,7 +148,7 @@ contract('BrightIdFaucet', ([faucetOwner, notFaucetOwner, brightIdVerifier, fauc
       })
     })
 
-    describe('setUniswapExchange(UniswapExchange _uniswapExchange)', () => {
+    describe('setUniswapExchange(_uniswapExchange)', () => {
       it('sets the uniswap exchange', async () => {
         const newUniswapExchange = await createUniswapExchangeForToken(token, 100, 10)
         await brightIdFaucet.setUniswapExchange(newUniswapExchange.address)
@@ -162,7 +161,7 @@ contract('BrightIdFaucet', ([faucetOwner, notFaucetOwner, brightIdVerifier, fauc
       })
     })
 
-    describe('withdrawDeposit(address _to)', () => {
+    describe('withdrawDeposit(_to)', () => {
       it('withdraws all of the faucets funds to the specified account', async () => {
         const faucetBalanceBefore = await token.balanceOf(brightIdFaucet.address)
         const beneficiaryBalanceBefore = await token.balanceOf(faucetOwner)
@@ -195,8 +194,7 @@ contract('BrightIdFaucet', ([faucetOwner, notFaucetOwner, brightIdVerifier, fauc
       })
     })
 
-    describe('claimAndOrRegister(bytes32 _brightIdContext, address[] memory _addrs, uint256 _timestamp, uint8 _v,' +
-      ' bytes32 _r, bytes32 _s )', () => {
+    describe('claimAndOrRegister(_brightIdContext, _addrs, _timestamp, _v, _r, _s)', () => {
 
       let addresses, timestamp, sig
 
@@ -287,7 +285,7 @@ contract('BrightIdFaucet', ([faucetOwner, notFaucetOwner, brightIdVerifier, fauc
           'ADDRESS_VOIDED')
       })
 
-      describe('claim()', () => {
+      const itClaimsRewardAsExpected = (faucetUserClaimFunction, secondUserClaimFunction) => {
 
         const percentOfValue = (percent, value) => {
           return value.mul(percent).div(ONE_HUNDRED_PERCENT)
@@ -301,7 +299,7 @@ contract('BrightIdFaucet', ([faucetOwner, notFaucetOwner, brightIdVerifier, fauc
           await brightIdFaucet.mockIncreaseTime(PERIOD_LENGTH)
           const balanceBeforeClaim = await token.balanceOf(faucetUser)
 
-          await brightIdFaucet.claim({ from: faucetUser })
+          await faucetUserClaimFunction()
 
           const claimAmount = percentOfValue(PERCENT_PER_PERIOD, FAUCET_INITIAL_BALANCE)
           const balanceAfterClaim = await token.balanceOf(faucetUser)
@@ -317,8 +315,8 @@ contract('BrightIdFaucet', ([faucetOwner, notFaucetOwner, brightIdVerifier, fauc
           const balance1BeforeClaim = await token.balanceOf(faucetUser)
           const balance2BeforeClaim = await token.balanceOf(secondFaucetUser)
 
-          await brightIdFaucet.claim({ from: faucetUser })
-          await brightIdFaucet.claim({ from: secondFaucetUser })
+          await faucetUserClaimFunction()
+          await secondUserClaimFunction()
 
           const claimAmount = percentOfValue(PERCENT_PER_PERIOD, FAUCET_INITIAL_BALANCE).div(toBn(2))
           const balance1AfterClaim = await token.balanceOf(faucetUser)
@@ -331,7 +329,7 @@ contract('BrightIdFaucet', ([faucetOwner, notFaucetOwner, brightIdVerifier, fauc
           const expectedMaxPayout = percentOfValue(PERCENT_PER_PERIOD, FAUCET_INITIAL_BALANCE)
 
           await brightIdFaucet.mockIncreaseTime(PERIOD_LENGTH)
-          await brightIdFaucet.claim({ from: faucetUser })
+          await faucetUserClaimFunction()
 
           const currentPeriod = await brightIdFaucet.getCurrentPeriod()
           const { maxPayout } = await brightIdFaucet.periods(currentPeriod)
@@ -347,7 +345,7 @@ contract('BrightIdFaucet', ([faucetOwner, notFaucetOwner, brightIdVerifier, fauc
           const tokenBalanceBefore = await token.balanceOf(faucetUser)
           assert.isTrue(ethBalanceBefore.lt(MIN_ETH_BALANCE), 'Incorrect original eth balance, too high')
 
-          await brightIdFaucet.claim({ from: faucetUser })
+          await faucetUserClaimFunction()
 
           const ethBalanceAfter = toBn(await web3.eth.getBalance(faucetUser))
           const tokenBalanceAfter = await token.balanceOf(faucetUser)
@@ -377,8 +375,8 @@ contract('BrightIdFaucet', ([faucetOwner, notFaucetOwner, brightIdVerifier, fauc
           const token2BalanceBefore = await token.balanceOf(secondFaucetUser)
           assert.isTrue(eth2BalanceBefore.lt(MIN_ETH_BALANCE), 'Incorrect original eth balance, too high')
 
-          await brightIdFaucet.claim({ from: faucetUser })
-          await brightIdFaucet.claim({ from: secondFaucetUser })
+          await faucetUserClaimFunction()
+          await secondUserClaimFunction()
 
           const eth2BalanceAfter = toBn(await web3.eth.getBalance(secondFaucetUser))
           const token2BalanceAfter = await token.balanceOf(secondFaucetUser)
@@ -403,12 +401,65 @@ contract('BrightIdFaucet', ([faucetOwner, notFaucetOwner, brightIdVerifier, fauc
           const balanceBefore = toBn(await web3.eth.getBalance(faucetUser))
           assert.isTrue(balanceBefore.lt(MIN_ETH_BALANCE), 'Incorrect initial eth balance, too high')
 
-          await brightIdFaucet.claim({ from: faucetUser })
+          await faucetUserClaimFunction()
 
           const balanceAfter = toBn(await web3.eth.getBalance(faucetUser))
           assert.isTrue(balanceAfter.gt(balanceBefore), 'Incorrect final eth balance, too low')
           await web3.eth.sendTransaction({ from: faucetUserSecondAddress, to: faucetUser, value: ethBalanceToRemove })
         })
+      }
+
+      describe('claimAndOrRegister(_brightIdContext, _addrs, _timestamp, _v, _r, _s)', () => {
+
+        let secondUserAddresses, secondUserSig
+
+        beforeEach(async () => {
+          secondUserAddresses = [secondFaucetUser]
+          secondUserSig = getVerificationsSignature(secondUserAddresses, timestamp)
+        })
+
+        itClaimsRewardAsExpected(
+          () => brightIdFaucet.claimAndOrRegister(BRIGHT_ID_CONTEXT, addresses, timestamp, sig.v, sig.r, sig.s, { from: faucetUser }),
+          () => brightIdFaucet.claimAndOrRegister(BRIGHT_ID_CONTEXT, secondUserAddresses, timestamp, secondUserSig.v, secondUserSig.r, secondUserSig.s, { from: secondFaucetUser })
+        )
+
+        it('does not claim when address not registered for current period', async () => {
+          await brightIdFaucet.mockIncreaseTime(PERIOD_LENGTH * 2)
+          const expectedTokenBalance = await token.balanceOf(faucetUser)
+          await brightIdFaucet.claimAndOrRegister(BRIGHT_ID_CONTEXT, addresses, timestamp, sig.v, sig.r, sig.s, { from: faucetUser })
+          assertBnEqual(await token.balanceOf(faucetUser), expectedTokenBalance, 'Incorrect token balance')
+        })
+
+        it('does not claim when address already claimed this period', async () => {
+          await brightIdFaucet.mockIncreaseTime(PERIOD_LENGTH)
+          await brightIdFaucet.claim({ from: faucetUser })
+          const expectedTokenBalance = await token.balanceOf(faucetUser)
+
+          await brightIdFaucet.claimAndOrRegister(BRIGHT_ID_CONTEXT, addresses, timestamp, sig.v, sig.r, sig.s, { from: faucetUser })
+          assertBnEqual(await token.balanceOf(faucetUser), expectedTokenBalance, 'Incorrect token balance')
+        })
+
+        it('does not claim when current period is 0', async () => {
+          const expectedTokenBalance = await token.balanceOf(secondFaucetUser)
+          await brightIdFaucet.claimAndOrRegister(BRIGHT_ID_CONTEXT, secondUserAddresses, timestamp, secondUserSig.v, secondUserSig.r, secondUserSig.s, { from: secondFaucetUser })
+          assertBnEqual(await token.balanceOf(secondFaucetUser), expectedTokenBalance, 'Incorrect token balance')
+        })
+
+        it('reverts when faucet balance is 0', async () => {
+          await brightIdFaucet.withdrawDeposit(faucetOwner)
+          await brightIdFaucet.mockIncreaseTime(PERIOD_LENGTH)
+
+          await assertRevert(brightIdFaucet.claimAndOrRegister(BRIGHT_ID_CONTEXT, addresses, timestamp, sig.v, sig.r, sig.s, { from: faucetUser }),
+            'FAUCET_BALANCE_IS_ZERO')
+        })
+      })
+
+      describe('claim()', () => {
+
+        itClaimsRewardAsExpected(
+          () => brightIdFaucet.claim({ from: faucetUser }),
+          () => brightIdFaucet.claim({ from: secondFaucetUser })
+        )
 
         it('reverts when address void', async () => {
           addresses = [faucetUserSecondAddress, faucetUser]
@@ -434,7 +485,7 @@ contract('BrightIdFaucet', ([faucetOwner, notFaucetOwner, brightIdVerifier, fauc
           await assertRevert(brightIdFaucet.claim({ from: faucetUser }), 'CANNOT_CLAIM')
         })
 
-        it('reverts when fuacet balance is 0', async () => {
+        it('reverts when faucet balance is 0', async () => {
           await brightIdFaucet.withdrawDeposit(faucetOwner)
           await brightIdFaucet.mockIncreaseTime(PERIOD_LENGTH)
 
