@@ -60,7 +60,7 @@ contract('BrightIdFaucet', ([faucetOwner, notFaucetOwner, brightIdVerifier, fauc
     const hashedMessage = web3.utils.soliditySha3(
       BRIGHT_ID_CONTEXT,
       { type: 'address[]', value: contextIds },
-      timestamp
+      timestamp.toNumber()
     )
 
     const signingKey = new ethers.utils.SigningKey(VERIFICATIONS_PRIVATE_KEY)
@@ -69,26 +69,38 @@ contract('BrightIdFaucet', ([faucetOwner, notFaucetOwner, brightIdVerifier, fauc
 
   describe('constructor(_token, _periodLength, _percentPerPeriod, _brightIdContext, _brightIdVerifier, _minimumEthBalance, _uniswapExchange)', () => {
 
-    let brightIdFaucet
+    let brightIdFaucet, addresses, timestamp, sig, secondUserAddresses, secondUserSig
 
     beforeEach(async () => {
       brightIdFaucet = await createBrightIdFaucet(100, 10)
+
+      addresses = [faucetUser]
+      timestamp = await brightIdFaucet.getTimestampPublic()
+      sig = getVerificationsSignature(addresses, timestamp)
+
+      secondUserAddresses = [secondFaucetUser]
+      secondUserSig = getVerificationsSignature(secondUserAddresses, timestamp)
     })
 
     const assertBnEqual = (actualBn, expectedBn, errorMessage = '') => {
       assert.equal(actualBn.toString(), expectedBn.toString(), errorMessage)
     }
 
+    const assertBnCloseTo = (actualBn, expectedBn, errorMargin) => {
+      assert.closeTo(actualBn.toNumber(), expectedBn.toNumber(), errorMargin)
+    }
+
     it('sets vars correctly', async () => {
-      const timestamp = (await web3.eth.getBlock('latest')).timestamp
       assert.equal(await brightIdFaucet.token(), token.address)
       assert.equal(await brightIdFaucet.periodLength(), PERIOD_LENGTH)
+      assertBnEqual(await brightIdFaucet.pendingPeriodLength(), toBn(0))
       assertBnEqual(await brightIdFaucet.percentPerPeriod(), PERCENT_PER_PERIOD)
       assert.equal(await brightIdFaucet.brightIdContext(), BRIGHT_ID_CONTEXT)
       assert.equal(await brightIdFaucet.brightIdVerifier(), brightIdVerifier)
       assertBnEqual(await brightIdFaucet.minimumEthBalance(), MIN_ETH_BALANCE)
       assert.equal(await brightIdFaucet.uniswapExchange(), tokenExchange.address)
-      assert.closeTo((await brightIdFaucet.firstPeriodStart()).toNumber(), timestamp, 3)
+      assertBnEqual(await brightIdFaucet.periodLengthChangePeriod(), toBn(0))
+      assertBnCloseTo(await brightIdFaucet.periodLengthChangeStart(), timestamp, 3)
     })
 
     it('reverts when period length is 0', async () => {
@@ -101,6 +113,35 @@ contract('BrightIdFaucet', ([faucetOwner, notFaucetOwner, brightIdVerifier, fauc
       const tokenExchange = await createUniswapExchangeForToken(token, 100, 10)
       await assertRevert(BrightIdFaucet.new(token.address, PERIOD_LENGTH, toBnPercent(101), BRIGHT_ID_CONTEXT, faucetOwner, MIN_ETH_BALANCE, tokenExchange.address),
         'INVALID_PERIOD_PERCENTAGE')
+    })
+
+    describe('setPeriodLength(_periodLength)', () => {
+      it('sets pending period length', async () => {
+        const newPeriodLength = toBn(60)
+        await brightIdFaucet.setPeriodLength(newPeriodLength)
+        assertBnEqual(await brightIdFaucet.pendingPeriodLength(), newPeriodLength, 'Incorrect pending period length')
+        assertBnEqual(await brightIdFaucet.periodLength(), toBn(PERIOD_LENGTH), 'Incorrect period length')
+      })
+
+      it('reverts when period length is 0', async () => {
+        await assertRevert(brightIdFaucet.setPeriodLength(toBn(0)), 'INVALID_PERIOD_LENGTH')
+      })
+
+      describe('claimAndOrRegister(_brightIdContext, _addrs, _timestamp, _v, _r, _s)', () => {
+
+        it('updates the period length before claim or register is called', async () => {
+          const newPeriodLength = toBn(60)
+          await brightIdFaucet.setPeriodLength(newPeriodLength)
+          const currentPeriod = await brightIdFaucet.getCurrentPeriod()
+
+          await brightIdFaucet.claimAndOrRegister(BRIGHT_ID_CONTEXT, addresses, timestamp, sig.v, sig.r, sig.s, { from: faucetUser })
+
+          assertBnEqual(await brightIdFaucet.periodLength(), toBn(newPeriodLength), 'Incorrect period length')
+          assertBnEqual(await brightIdFaucet.pendingPeriodLength(), toBn(0), 'Incorrect pending period length')
+          assertBnEqual(await brightIdFaucet.periodLengthChangePeriod(), currentPeriod, 'Incorrect period length change period')
+          assertBnCloseTo(await brightIdFaucet.periodLengthChangeStart(), timestamp, 3)
+        })
+      })
     })
 
     describe('setPercentPerPeriod(_percentPerPeriod)', () => {
@@ -195,14 +236,6 @@ contract('BrightIdFaucet', ([faucetOwner, notFaucetOwner, brightIdVerifier, fauc
     })
 
     describe('claimAndOrRegister(_brightIdContext, _addrs, _timestamp, _v, _r, _s)', () => {
-
-      let addresses, timestamp, sig
-
-      beforeEach(async () => {
-        addresses = [faucetUser]
-        timestamp = (await web3.eth.getBlock('latest')).timestamp
-        sig = getVerificationsSignature(addresses, timestamp)
-      })
 
       it('registers user', async () => {
         await brightIdFaucet.claimAndOrRegister(BRIGHT_ID_CONTEXT, addresses, timestamp, sig.v, sig.r, sig.s, { from: faucetUser })
@@ -411,13 +444,6 @@ contract('BrightIdFaucet', ([faucetOwner, notFaucetOwner, brightIdVerifier, fauc
 
       describe('claimAndOrRegister(_brightIdContext, _addrs, _timestamp, _v, _r, _s)', () => {
 
-        let secondUserAddresses, secondUserSig
-
-        beforeEach(async () => {
-          secondUserAddresses = [secondFaucetUser]
-          secondUserSig = getVerificationsSignature(secondUserAddresses, timestamp)
-        })
-
         itClaimsRewardAsExpected(
           () => brightIdFaucet.claimAndOrRegister(BRIGHT_ID_CONTEXT, addresses, timestamp, sig.v, sig.r, sig.s, { from: faucetUser }),
           () => brightIdFaucet.claimAndOrRegister(BRIGHT_ID_CONTEXT, secondUserAddresses, timestamp, secondUserSig.v, secondUserSig.r, secondUserSig.s, { from: secondFaucetUser })
@@ -492,6 +518,88 @@ contract('BrightIdFaucet', ([faucetOwner, notFaucetOwner, brightIdVerifier, fauc
           await assertRevert(brightIdFaucet.claim({ from: faucetUser }), 'FAUCET_BALANCE_IS_ZERO')
         })
       })
+
+      const itCorrectlySetsPeriodLengthAfterMultiplePeriods = (periods) => {
+
+        describe(`setPeriodLength(_periodLength) after ${periods} periods`, () => {
+
+          const itUpdatesPeriodLengthAsExpected = (useClaimAndOrRegister) => {
+
+            const faucetUserClaimFunction = useClaimAndOrRegister
+              ? () => brightIdFaucet.claimAndOrRegister(BRIGHT_ID_CONTEXT, secondUserAddresses, timestamp, secondUserSig.v, secondUserSig.r, secondUserSig.s, { from: secondFaucetUser })
+              : () => brightIdFaucet.claim({ from: faucetUser })
+
+            const newPeriodLength = toBn(60)
+            let originalPeriodId
+
+            beforeEach(async () => {
+              await brightIdFaucet.claimAndOrRegister(BRIGHT_ID_CONTEXT, addresses, timestamp, sig.v, sig.r, sig.s, { from: faucetUser })
+              await brightIdFaucet.mockIncreaseTime(PERIOD_LENGTH * periods)
+              await brightIdFaucet.claimAndOrRegister(BRIGHT_ID_CONTEXT, addresses, timestamp, sig.v, sig.r, sig.s, { from: faucetUser })
+
+              originalPeriodId = (await brightIdFaucet.getCurrentPeriod()).toNumber()
+              await brightIdFaucet.setPeriodLength(newPeriodLength)
+            })
+
+            it('updates the period length at the start of the next period', async () => {
+              await brightIdFaucet.mockIncreaseTime(PERIOD_LENGTH)
+              const expectedPeriodLengthChangeStart = await brightIdFaucet.getTimestampPublic()
+              const currentPeriod = await brightIdFaucet.getCurrentPeriod()
+
+              await faucetUserClaimFunction()
+
+              assertBnEqual(await brightIdFaucet.periodLength(), toBn(newPeriodLength), 'Incorrect period length')
+              assertBnEqual(await brightIdFaucet.pendingPeriodLength(), toBn(0), 'Incorrect pending period length')
+              assertBnEqual(await brightIdFaucet.periodLengthChangePeriod(), currentPeriod, 'Incorrect period length change period')
+              assertBnEqual(await brightIdFaucet.periodLengthChangeStart(), expectedPeriodLengthChangeStart, 'Incorrect period length change start')
+            })
+
+            useClaimAndOrRegister && it('does not update the period length before start of next period', async () => {
+              await faucetUserClaimFunction()
+
+              assertBnEqual(await brightIdFaucet.periodLength(), toBn(PERIOD_LENGTH), 'Incorrect period length')
+              assertBnEqual(await brightIdFaucet.pendingPeriodLength(), toBn(newPeriodLength), 'Incorrect pending period length')
+              assertBnEqual(await brightIdFaucet.periodLengthChangePeriod(), toBn(0), 'Incorrect period length change period')
+              assertBnCloseTo(await brightIdFaucet.periodLengthChangeStart(), timestamp, 3)
+            })
+
+            describe('getCurrentPeriod()', () => {
+
+              beforeEach(async () => {
+                await brightIdFaucet.mockIncreaseTime(PERIOD_LENGTH)
+                await faucetUserClaimFunction()
+              })
+
+              it('returns correct period number', async () => {
+                assertBnEqual(await brightIdFaucet.getCurrentPeriod(), toBn(originalPeriodId + 1), 'Incorrect current period')
+              })
+
+              it('returns correct period number after new period length', async () => {
+                await brightIdFaucet.mockIncreaseTime(newPeriodLength)
+                assertBnEqual(await brightIdFaucet.getCurrentPeriod(), toBn(originalPeriodId + 2), 'Incorrect current period')
+              })
+
+              it('returns correct period number after multiple new period lengths', async () => {
+                const periodsSkipped = 3
+                await brightIdFaucet.mockIncreaseTime(newPeriodLength * periodsSkipped)
+                assertBnEqual(await brightIdFaucet.getCurrentPeriod(), toBn(originalPeriodId + periodsSkipped + 1), 'Incorrect current period')
+              })
+            })
+          }
+
+          describe('claimAndOrRegister(_brightIdContext, _addrs, _timestamp, _v, _r, _s)', () => {
+            itUpdatesPeriodLengthAsExpected(true)
+          })
+
+          describe('claim()', () => {
+            itUpdatesPeriodLengthAsExpected(false)
+          })
+        })
+      }
+
+      itCorrectlySetsPeriodLengthAfterMultiplePeriods(1)
+
+      itCorrectlySetsPeriodLengthAfterMultiplePeriods(7)
     })
   })
 })

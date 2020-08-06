@@ -115,10 +115,8 @@ contract BrightIdFaucet is TimeHelpers, Ownable {
     */
     function setPeriodLength(uint256 _periodLength) public onlyOwner {
         require(_periodLength > 0, ERROR_INVALID_PERIOD_LENGTH);
-        require(_periodLength > periodLength / 2, ERROR_INVALID_PERIOD_LENGTH);
 
         pendingPeriodLength = _periodLength;
-
         emit SetPeriodLength(_periodLength);
     }
 
@@ -276,20 +274,17 @@ contract BrightIdFaucet is TimeHelpers, Ownable {
     }
 
     function _updatePeriodLengthIfChanged(uint256 _currentPeriodId) internal {
-        Period currentPeriod = periods[_currentPeriodId];
+        Period storage currentPeriod = periods[_currentPeriodId];
+        bool claimNotCalledThisPeriod = currentPeriod.maxPayout == 0;
 
-        if (currentPeriod.maxPayout == 0 && pendingPeriodLength > 0) {
-            uint256 periodsSinceChange = _currentPeriodId - periodLengthChangePeriod;
-            periodLengthChangeStart = (periodsSinceChange * periodLength) + periodLengthChangeStart;
+        Period storage nextPeriod = periods[_currentPeriodId + 1];
+        bool registerNotCalledThisPeriod = nextPeriod.totalRegisteredUsers == 0;
 
-            if (getTimestamp() - periodLengthChangeStart > pendingPeriodLength) {
-                periodLengthChangeStart = periodLengthChangeStart + pendingPeriodLength;
-            }
-
-            periodLengthChangePeriod = _currentPeriodId;
-
+        if (claimNotCalledThisPeriod && registerNotCalledThisPeriod && pendingPeriodLength > 0) {
             periodLength = pendingPeriodLength;
             pendingPeriodLength = 0;
+            periodLengthChangePeriod = _currentPeriodId;
+            periodLengthChangeStart = getTimestamp();
         }
     }
 
