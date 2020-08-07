@@ -31,8 +31,6 @@ contract('BrightIdFaucet', ([faucetOwner, notFaucetOwner, brightIdVerifier, fauc
   })
 
   const createUniswapExchangeForToken = async (token, tokenLiquidity, ethLiquidity) => {
-    const tokenLiquidityBn = toBnWithDecimals(tokenLiquidity)
-    const ethLiquidityBn = toBnWithDecimals(ethLiquidity)
     const uniswapFactory = await UniswapFactory.new()
     const uniswapExchange = await UniswapExchange.new()
     await uniswapFactory.initializeFactory(uniswapExchange.address)
@@ -43,8 +41,8 @@ contract('BrightIdFaucet', ([faucetOwner, notFaucetOwner, brightIdVerifier, fauc
 
     const blockTimestamp = (await web3.eth.getBlock('latest')).timestamp
     const futureTimestamp = blockTimestamp + 9999
-    await token.approve(tokenExchangeAddress, tokenLiquidityBn)
-    await tokenExchange.addLiquidity(0, tokenLiquidityBn, futureTimestamp, { value: ethLiquidityBn })
+    await token.approve(tokenExchangeAddress, tokenLiquidity)
+    await tokenExchange.addLiquidity(0, tokenLiquidity, futureTimestamp, { value: ethLiquidity })
 
     return tokenExchange
   }
@@ -72,7 +70,7 @@ contract('BrightIdFaucet', ([faucetOwner, notFaucetOwner, brightIdVerifier, fauc
     let brightIdFaucet, addresses, timestamp, sig, secondUserAddresses, secondUserSig
 
     beforeEach(async () => {
-      brightIdFaucet = await createBrightIdFaucet(100, 10)
+      brightIdFaucet = await createBrightIdFaucet(TOKEN_LIQUIDITY, ETH_LIQUIDITY)
 
       addresses = [faucetUser]
       timestamp = await brightIdFaucet.getTimestampPublic()
@@ -104,13 +102,13 @@ contract('BrightIdFaucet', ([faucetOwner, notFaucetOwner, brightIdVerifier, fauc
     })
 
     it('reverts when period length is 0', async () => {
-      const tokenExchange = await createUniswapExchangeForToken(token, 100, 10)
+      const tokenExchange = await createUniswapExchangeForToken(token, TOKEN_LIQUIDITY, ETH_LIQUIDITY)
       await assertRevert(BrightIdFaucet.new(token.address, 0, PERCENT_PER_PERIOD, BRIGHT_ID_CONTEXT, faucetOwner, MIN_ETH_BALANCE, tokenExchange.address),
         'INVALID_PERIOD_LENGTH')
     })
 
     it('reverts when percent per period length is more than 100%', async () => {
-      const tokenExchange = await createUniswapExchangeForToken(token, 100, 10)
+      const tokenExchange = await createUniswapExchangeForToken(token, TOKEN_LIQUIDITY, ETH_LIQUIDITY)
       await assertRevert(BrightIdFaucet.new(token.address, PERIOD_LENGTH, toBnPercent(101), BRIGHT_ID_CONTEXT, faucetOwner, MIN_ETH_BALANCE, tokenExchange.address),
         'INVALID_PERIOD_PERCENTAGE')
     })
@@ -191,13 +189,13 @@ contract('BrightIdFaucet', ([faucetOwner, notFaucetOwner, brightIdVerifier, fauc
 
     describe('setUniswapExchange(_uniswapExchange)', () => {
       it('sets the uniswap exchange', async () => {
-        const newUniswapExchange = await createUniswapExchangeForToken(token, 100, 10)
+        const newUniswapExchange = await createUniswapExchangeForToken(token, TOKEN_LIQUIDITY, ETH_LIQUIDITY)
         await brightIdFaucet.setUniswapExchange(newUniswapExchange.address)
         assert.equal(await brightIdFaucet.uniswapExchange(), newUniswapExchange.address, 'Incorrect uniswap exchange')
       })
 
       it('reverts when sender is not the owner', async () => {
-        const newUniswapExchange = await createUniswapExchangeForToken(token, 100, 10)
+        const newUniswapExchange = await createUniswapExchangeForToken(token, TOKEN_LIQUIDITY, ETH_LIQUIDITY)
         await assertRevert(brightIdFaucet.setUniswapExchange(newUniswapExchange.address, { from: notFaucetOwner }), 'Ownable: caller is not the owner')
       })
     })
@@ -264,7 +262,7 @@ contract('BrightIdFaucet', ([faucetOwner, notFaucetOwner, brightIdVerifier, fauc
         addresses = [faucetUserSecondAddress, faucetUser]
         sig = getVerificationsSignature(addresses, timestamp)
         await brightIdFaucet.claimAndOrRegister(BRIGHT_ID_CONTEXT, addresses, timestamp, sig.v, sig.r, sig.s, { from: faucetUserSecondAddress })
-        addresses = [faucetUserThirdAddress, faucetUserSecondAddress, faucetUser]
+        addresses = [faucetUserThirdAddress, ...addresses]
         sig = getVerificationsSignature(addresses, timestamp)
         await brightIdFaucet.mockIncreaseTime(PERIOD_LENGTH)
 
@@ -423,9 +421,9 @@ contract('BrightIdFaucet', ([faucetOwner, notFaucetOwner, brightIdVerifier, fauc
           })
         })
 
-        it('converts faucet token to eth when exchange will cost more than faucet payment', async () => {
+        it('converts full faucet token payment to eth when exchange will cost more than faucet payment', async () => {
           // Note the exchange liquidity determines the cost of exchanging the token for ETH, in this case
-          brightIdFaucet = await createBrightIdFaucet(100, 1) // 0.01 ETH costs 1 token
+          brightIdFaucet = await createBrightIdFaucet(toBnWithDecimals(100), toBnWithDecimals(1)) // 0.01 ETH costs 1 token
           await brightIdFaucet.claimAndOrRegister(BRIGHT_ID_CONTEXT, addresses, timestamp, sig.v, sig.r, sig.s, { from: faucetUser })
           await brightIdFaucet.mockIncreaseTime(PERIOD_LENGTH)
           const ethBalance = toBn(await web3.eth.getBalance(faucetUser))
