@@ -1,20 +1,23 @@
 pragma solidity ^0.6.11;
 
+import "@nomiclabs/buidler/console.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "./lib/UniswapExchange.sol";
+import "./lib/TimeHelpers.sol";
 
-contract BrightIdFaucet is Ownable {
+contract BrightIdFaucet is TimeHelpers, Ownable {
      using SafeMath for uint256;
 
-    string private constant ERROR_ADDRESS_VOIDED = "ADDRESS_VOIDED";
-    string private constant ERROR_FAUCET_BALANCE_IS_ZERO = "FAUCET_BALANCE_IS_ZERO";
-    string private constant ERROR_ALREADY_REGISTERED = "ALREADY_REGISTERED";
-    string private constant ERROR_INCORRECT_VERIFICATION = "INCORRECT_VERIFICATION";
     string private constant ERROR_INVALID_PERIOD_LENGTH = "INVALID_PERIOD_LENGTH";
     string private constant ERROR_INVALID_PERIOD_PERCENTAGE = "INVALID_PERIOD_PERCENTAGE";
-    string private constant ERROR_SENDER_NOT_VERIFIED = "SENDER_NOT_VERIFIED";
+    string private constant ERROR_ALREADY_REGISTERED = "ALREADY_REGISTERED";
+    string private constant ERROR_INCORRECT_VERIFICATION = "INCORRECT_VERIFICATION";
+    string private constant ERROR_SENDER_NOT_IN_VERIFICATION = "SENDER_NOT_IN_VERIFICATION";
+    string private constant ERROR_ADDRESS_VOIDED = "ADDRESS_VOIDED";
+    string private constant ERROR_CANNOT_CLAIM = "CANNOT_CLAIM";
+    string private constant ERROR_FAUCET_BALANCE_IS_ZERO = "FAUCET_BALANCE_IS_ZERO";
 
     uint256 public constant ONE_HUNDRED_PERCENT = 1e18;
     uint256 public constant UNISWAP_DEADLINE_PERIOD = 1 days;
@@ -58,6 +61,15 @@ contract BrightIdFaucet is Ownable {
     event Claim(address claimer, uint256 periodNumber, uint256 payoutMinusSold, uint256 claimerPayout);
     event Register(address sender, uint256 periodNumber);
 
+    /**
+    * @param _token Token distributed by the faucet
+    * @param _periodLength Length of each distribution period
+    * @param _percentPerPeriod Percent of total balance distributed each period
+    * @param _brightIdContext BrightId context used for verifying users
+    * @param _brightIdVerifier BrightId verifier address that signs BrightId verifications
+    * @param _minimumEthBalance Claim will top up a users balance to this amount when claiming if it is less
+    * @param _uniswapExchange Uniswap exchange for converting faucet tokens to ETH during claiming if necessary
+    */
     constructor(
         ERC20 _token,
         uint256 _periodLength,
@@ -70,7 +82,7 @@ contract BrightIdFaucet is Ownable {
         public
     {
         require(_periodLength > 0, ERROR_INVALID_PERIOD_LENGTH);
-        require(_percentPerPeriod < ONE_HUNDRED_PERCENT, ERROR_INVALID_PERIOD_PERCENTAGE);
+        require(_percentPerPeriod <= ONE_HUNDRED_PERCENT, ERROR_INVALID_PERIOD_PERCENTAGE);
 
         token = _token;
         periodLength = _periodLength;
@@ -79,7 +91,7 @@ contract BrightIdFaucet is Ownable {
         brightIdVerifier = _brightIdVerifier;
         minimumEthBalance = _minimumEthBalance;
         uniswapExchange = _uniswapExchange;
-        firstPeriodStart = now;
+        firstPeriodStart = getTimestamp();
 
         emit Initialize(
             address(_token),
@@ -92,30 +104,55 @@ contract BrightIdFaucet is Ownable {
         );
     }
 
+    /**
+    * @notice Set percent per period
+    * @param _percentPerPeriod Percent of total balance distributed each period
+    */
     function setPercentPerPeriod(uint256 _percentPerPeriod) public onlyOwner {
-        require(_percentPerPeriod < ONE_HUNDRED_PERCENT, ERROR_INVALID_PERIOD_PERCENTAGE);
+        require(_percentPerPeriod <= ONE_HUNDRED_PERCENT, ERROR_INVALID_PERIOD_PERCENTAGE);
 
         percentPerPeriod = _percentPerPeriod;
         emit SetPercentPerPeriod(_percentPerPeriod);
     }
 
+    /**
+    * @notice Set BrightId settings
+    * @param _brightIdContext BrightId context used for verifying users
+    * @param _brightIdVerifier BrightId verifier address that signs BrightId verifications
+    */
     function setBrightIdSettings(bytes32 _brightIdContext, address _brightIdVerifier) public onlyOwner {
         brightIdContext = _brightIdContext;
         brightIdVerifier = _brightIdVerifier;
         emit SetBrightIdSettings(_brightIdContext, _brightIdVerifier);
     }
 
+    /**
+    * @notice Set the minimum eth balance
+    * @param _minimumEthBalance Claim will top up a users balance to this amount when claiming if it is less
+    */
     function setMinimumEthBalance(uint256 _minimumEthBalance) public onlyOwner {
         minimumEthBalance = _minimumEthBalance;
         emit SetMinimumEthBalance(_minimumEthBalance);
     }
 
+    /**
+    * @notice Set the Uniswap exchange address
+    * @param _uniswapExchange Uniswap exchange for converting faucet tokens to ETH during claiming if necessary
+    */
     function setUniswapExchange(UniswapExchange _uniswapExchange) public onlyOwner {
         uniswapExchange = _uniswapExchange;
         emit SetUniswapExchange(_uniswapExchange);
     }
- 
-    // If you have previously registered then you will claim here and register for the next period.
+
+    /**
+    * @notice Register for the next period and claim if registered for the current period.
+    * @param _brightIdContext The context used in the users verification
+    * @param _addrs The history of addresses, or contextIds, used by this user to register with BrightID for the BrightId context
+    * @param _timestamp The time the verification was created by a BrightId node
+    * @param _v Part of the BrightId nodes signature verifying the users uniqueness
+    * @param _r Part of the BrightId nodes signature verifying the users uniqueness
+    * @param _s Part of the BrightId nodes signature verifying the users uniqueness
+    */
     function claimAndOrRegister(
         bytes32 _brightIdContext,
         address[] memory _addrs,
@@ -126,68 +163,65 @@ contract BrightIdFaucet is Ownable {
     )
         public
     {
-        require(claimers[msg.sender].registeredForPeriod <= getCurrentPeriod(), ERROR_ALREADY_REGISTERED);
+        Claimer storage claimer = claimers[msg.sender];
+        require(claimer.registeredForPeriod <= getCurrentPeriod(), ERROR_ALREADY_REGISTERED);
         require(_isVerifiedUnique(_brightIdContext, _addrs, _timestamp, _v, _r, _s), ERROR_INCORRECT_VERIFICATION);
-        require(msg.sender == _addrs[0], ERROR_SENDER_NOT_VERIFIED);
+        require(msg.sender == _addrs[0], ERROR_SENDER_NOT_IN_VERIFICATION);
+        require(!claimer.addressVoid, ERROR_ADDRESS_VOIDED);
 
-        claim();
+        uint256 currentPeriod = getCurrentPeriod();
+        if (_canClaim(claimer, currentPeriod)) {
+            _claim(claimer, currentPeriod);
+        }
 
         uint256 nextPeriod = getCurrentPeriod() + 1;
-        claimers[msg.sender].registeredForPeriod = nextPeriod;
+        claimer.registeredForPeriod = nextPeriod;
         periods[nextPeriod].totalRegisteredUsers++;
         _voidUserHistory(_addrs);
 
         emit Register(msg.sender, nextPeriod);
     }
 
-    // If for some reason you cannot register again, lost uniqueness or brightID nodes down, you can still claim for
-    // the previous period if eligible with this function.
+    /**
+    * @notice Claim from the faucet without registering for the next period. Can be used when the user is no longer
+    *         verified or the brightID node providing verifications is down.
+    */
     function claim() public {
         Claimer storage claimer = claimers[msg.sender];
-        require(!claimer.addressVoid, ERROR_ADDRESS_VOIDED);
-
         uint256 currentPeriod = getCurrentPeriod();
+        require(!claimer.addressVoid, ERROR_ADDRESS_VOIDED);
+        require(_canClaim(claimer, currentPeriod), ERROR_CANNOT_CLAIM);
 
-        if (_canClaim(claimer, currentPeriod)) {
-            Period storage period = periods[currentPeriod];
-
-            // Save maxPayout so every claimer gets the same payout amount.
-            if (period.maxPayout == 0) {
-                uint256 faucetBalance = token.balanceOf(address(this));
-                require(faucetBalance > 0, ERROR_FAUCET_BALANCE_IS_ZERO);
-                period.maxPayout = _getPeriodMaxPayout(faucetBalance);
-            }
-
-            uint256 claimerPayout = _getPeriodIndividualPayout(period);
-            uint256 tokensSoldForEth = 0;
-
-            if (msg.sender.balance < minimumEthBalance) {
-                tokensSoldForEth = _topUpSenderEthBalance(msg.sender, claimerPayout);
-            }
-
-            uint256 payoutMinusSold = claimerPayout.sub(tokensSoldForEth);
-            token.transfer(msg.sender, payoutMinusSold);
-
-            claimer.latestClaimPeriod = currentPeriod;
-
-            emit Claim(msg.sender, currentPeriod, payoutMinusSold, claimerPayout);
-        }
+        _claim(claimer, currentPeriod);
     }
 
-    function withdraw(address _to) public onlyOwner {
+    /**
+    * @notice Withdraw the faucets entire balance of the faucet distributed token
+    * @param _to Address to withdraw to
+    */
+    function withdrawDeposit(address _to) public onlyOwner {
         token.transfer(_to, token.balanceOf(address(this)));
     }
 
+    /**
+    * @notice Get the current period number
+    */
     function getCurrentPeriod() public view returns (uint256) {
-        return (now - firstPeriodStart) / periodLength;
+        return (getTimestamp() - firstPeriodStart) / periodLength;
     }
 
+    /**
+    * @notice Get a specific periods individual payouts. For future and uninitialised periods with 0 registered
+    *         users it will return 0
+    * @param _periodNumber Period number
+    */
     function getPeriodIndividualPayout(uint256 _periodNumber) public view returns (uint256) {
         Period storage period = periods[_periodNumber];
         return _getPeriodIndividualPayout(period);
     }
 
-    function _isVerifiedUnique(bytes32 _brightIdContext,
+    function _isVerifiedUnique(
+        bytes32 _brightIdContext,
         address[] memory _addrs,
         uint256 _timestamp,
         uint8 _v,
@@ -201,7 +235,7 @@ contract BrightIdFaucet is Ownable {
 
         bool correctVerifier = brightIdVerifier == verifierAddress;
         bool correctContext = brightIdContext == _brightIdContext;
-        bool acceptableTimestamp = now < _timestamp.add(VERIFICATION_TIMESTAMP_VARIANCE);
+        bool acceptableTimestamp = getTimestamp() < _timestamp.add(VERIFICATION_TIMESTAMP_VARIANCE);
 
         return correctVerifier && correctContext && acceptableTimestamp;
     }
@@ -220,13 +254,38 @@ contract BrightIdFaucet is Ownable {
     }
 
     function _canClaim(Claimer storage claimer, uint256 currentPeriod) internal view returns (bool) {
-        bool userRegisteredCurrentPeriod = currentPeriod > 0 && claimer.registeredForPeriod == currentPeriod;
+        bool userRegisteredCurrentPeriod = claimer.registeredForPeriod == currentPeriod;
         bool userYetToClaimCurrentPeriod = claimer.latestClaimPeriod < currentPeriod;
 
         return userRegisteredCurrentPeriod && userYetToClaimCurrentPeriod;
     }
 
-    function _topUpSenderEthBalance(address _sender, uint256 _maxTokensToSpend) private returns (uint256 tokensSold){
+    function _claim(Claimer storage _claimer, uint256 _currentPeriod) internal {
+        Period storage period = periods[_currentPeriod];
+        uint256 faucetBalance = token.balanceOf(address(this));
+        require(faucetBalance > 0, ERROR_FAUCET_BALANCE_IS_ZERO);
+
+        // Save maxPayout so every claimer gets the same payout amount.
+        if (period.maxPayout == 0) {
+            period.maxPayout = _getPeriodMaxPayout(faucetBalance);
+        }
+
+        uint256 claimerPayout = _getPeriodIndividualPayout(period);
+        uint256 tokensSoldForEth = 0;
+
+        if (msg.sender.balance < minimumEthBalance) {
+            tokensSoldForEth = _topUpSenderEthBalance(msg.sender, claimerPayout);
+        }
+
+        uint256 payoutMinusSold = claimerPayout.sub(tokensSoldForEth);
+        token.transfer(msg.sender, payoutMinusSold);
+
+        _claimer.latestClaimPeriod = _currentPeriod;
+
+        emit Claim(msg.sender, _currentPeriod, payoutMinusSold, claimerPayout);
+    }
+
+    function _topUpSenderEthBalance(address _sender, uint256 _maxTokensToSpend) private returns (uint256 tokensSold) {
         uint256 exchangeAllowance = token.allowance(address(this), address(uniswapExchange));
         if (exchangeAllowance < _maxTokensToSpend) {
             // Some ERC20 tokens fail if allowance is not 0 before calling approve
@@ -238,8 +297,16 @@ contract BrightIdFaucet is Ownable {
         }
 
         uint256 amountToBuy = minimumEthBalance.sub(_sender.balance);
-        tokensSold = uniswapExchange
-            .tokenToEthTransferOutput(amountToBuy, _maxTokensToSpend, now + UNISWAP_DEADLINE_PERIOD, _sender);
+        uint256 tokenPriceForTopUp = uniswapExchange.getTokenToEthOutputPrice(amountToBuy);
+        uint256 uniswapTransactionDeadline = getTimestamp() + UNISWAP_DEADLINE_PERIOD;
+        
+        if (_maxTokensToSpend <= tokenPriceForTopUp) {
+            uniswapExchange.tokenToEthTransferInput(_maxTokensToSpend, 1, uniswapTransactionDeadline, _sender);
+            return _maxTokensToSpend;
+        } else {
+            return uniswapExchange
+                .tokenToEthTransferOutput(amountToBuy, _maxTokensToSpend, uniswapTransactionDeadline, _sender);
+        }
     }
 
     function _getPeriodMaxPayout(uint256 _faucetBalance) internal view returns (uint256) {
