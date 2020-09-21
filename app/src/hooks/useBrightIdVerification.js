@@ -48,8 +48,7 @@ export function useBrightIdVerification(account) {
           timeout: REQUEST_TIMEOUT,
         })
 
-        let response = await rawResponse.json()
-        response = { ...response, code: NOT_SPONSORED_CODE }
+        const response = await rawResponse.json()
 
         if (!cancelled) {
           switch (response.code) {
