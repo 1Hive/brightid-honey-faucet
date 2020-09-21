@@ -7,14 +7,13 @@ import {
   transformPeriodData,
 } from '../utils/data-utils'
 
-const POLLING_INTERVAL = 2000
+const POLLING_INTERVAL = 4000
 
 export function useConfig(appAddress) {
   const [{ data, error }] = useQuery({
     query: Config,
     variables: { id: appAddress?.toLowerCase() },
     pause: !appAddress,
-    pollInterval: POLLING_INTERVAL,
   })
 
   const config = useMemo(
