@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { useSubscription } from 'urql'
+import { useQuery } from 'urql'
 import { Claimer, Periods, Period, Config } from '../queries'
 import {
   transformConfigData,
@@ -7,8 +7,10 @@ import {
   transformPeriodData,
 } from '../utils/data-utils'
 
+const POLLING_INTERVAL = 4000
+
 export function useConfig(appAddress) {
-  const [{ data, error }] = useSubscription({
+  const [{ data, error }] = useQuery({
     query: Config,
     variables: { id: appAddress?.toLowerCase() },
     pause: !appAddress,
@@ -23,10 +25,11 @@ export function useConfig(appAddress) {
 }
 
 export function useClaimer(claimerAddress) {
-  const [{ data, error }] = useSubscription({
+  const [{ data, error }] = useQuery({
     query: Claimer,
     variables: { id: claimerAddress?.toLowerCase() },
     pause: !claimerAddress,
+    pollInterval: POLLING_INTERVAL,
   })
 
   const claimer = useMemo(
@@ -38,9 +41,10 @@ export function useClaimer(claimerAddress) {
 }
 
 export function usePeriod(periodNumber) {
-  const [{ data, error }] = useSubscription({
+  const [{ data, error }] = useQuery({
     query: Period,
     variables: { id: periodNumber },
+    pollInterval: POLLING_INTERVAL,
   })
 
   const period = useMemo(
@@ -52,8 +56,9 @@ export function usePeriod(periodNumber) {
 }
 
 export function usePeriods() {
-  const [{ data, error }] = useSubscription({
+  const [{ data, error }] = useQuery({
     query: Periods,
+    pollInterval: POLLING_INTERVAL,
   })
 
   const periods = useMemo(

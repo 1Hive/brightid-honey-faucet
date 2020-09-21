@@ -4,7 +4,7 @@ import FaucetInfo from './FaucetInfo'
 
 import { useAppState } from '../providers/AppState'
 import { useClock } from '../providers/Clock'
-import { usePeriod } from '../hooks/subscription-hooks'
+import { usePeriod } from '../hooks/polling-hooks'
 import { getNetwork } from '../networks'
 import { useTokenBalance } from '../hooks/useTokenBalance'
 

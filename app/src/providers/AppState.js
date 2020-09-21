@@ -1,5 +1,5 @@
 import React, { useContext } from 'react'
-import { useClaimer, useConfig } from '../hooks/subscription-hooks'
+import { useClaimer, useConfig } from '../hooks/polling-hooks'
 import { useWallet } from '../providers/Wallet'
 import { getNetwork } from '../networks'
 
@@ -11,7 +11,6 @@ function AppStateProvider({ children }) {
   const { config, fetching: fetchingConfig, error: errorConfig } = useConfig(
     faucetAddress
   )
-
   const {
     claimer,
     fetching: fetchingClaimer,
