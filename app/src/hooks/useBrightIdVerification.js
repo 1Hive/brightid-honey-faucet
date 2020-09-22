@@ -27,6 +27,28 @@ export function useBrightIdVerification(account) {
   const [verificationInfo, setVerificationInfo] = useState(
     VERIFICATION_INFO_DEFAULT
   )
+  const [availableSponsorships, setAvailableSponsorships] = useState(0)
+
+  useEffect(() => {
+    let cancelled = false
+    let retryTimer
+
+    const fetchSponsorshipInfo = async () => {
+      if (!cancelled) {
+        retryTimer = setTimeout(
+          fetchSponsorshipInfo,
+          VERIFICATION_POLLING_EVERY
+        )
+      }
+    }
+
+    fetchSponsorshipInfo()
+
+    return () => {
+      cancelled = true
+      clearTimeout(retryTimer)
+    }
+  }, [])
 
   useEffect(() => {
     let cancelled = false
@@ -37,6 +59,10 @@ export function useBrightIdVerification(account) {
     }
 
     const fetchVerificationInfo = async () => {
+      if (availableSponsorships === 0) {
+        return
+      }
+
       const endpoint = `${BRIGHTID_VERIFICATION_ENDPOINT}/${CONTEXT_ID}/${account}?signed=eth&timestamp=seconds`
       try {
         const rawResponse = await fetch(endpoint, {
@@ -116,7 +142,7 @@ export function useBrightIdVerification(account) {
       cancelled = true
       clearTimeout(retryTimer)
     }
-  }, [account])
+  }, [account, availableSponsorships])
 
   return verificationInfo
 }
