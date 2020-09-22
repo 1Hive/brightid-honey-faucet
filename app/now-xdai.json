@@ -1,0 +1,12 @@
+{
+  "version": 2,
+  "public": true,
+  "scope": "1hive",
+  "build": {
+    "env": {
+      "REACT_APP_CHAIN_ID": "100",
+      "REACT_APP_NODE_PK": "@REACT_APP_NODE_PK"
+    }
+  }
+}
+  
