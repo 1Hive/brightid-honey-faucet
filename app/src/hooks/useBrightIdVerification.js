@@ -34,6 +34,10 @@ export function useBrightIdVerification(account) {
     let retryTimer
 
     const fetchSponsorshipInfo = async () => {
+      if (!account) {
+        return
+      }
+
       if (!cancelled) {
         retryTimer = setTimeout(
           fetchSponsorshipInfo,
@@ -48,7 +52,7 @@ export function useBrightIdVerification(account) {
       cancelled = true
       clearTimeout(retryTimer)
     }
-  }, [])
+  }, [account])
 
   useEffect(() => {
     let cancelled = false
