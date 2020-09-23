@@ -25,7 +25,7 @@ export async function sponsorUser(account) {
     }
     const message = getMessage(op)
     const messageUint8Array = tweetNaclUtils.decodeUTF8(message)
-    const privateKeyUint8Array = tweetNaclUtils.decodeBase64(privateKey)
+    const privateKeyUint8Array = tweetNaclUtils.decodeUTF8(privateKey)
     op.sig = uInt8ArrayToB64(
       Object.values(
         tweetNacl.sign.detached(messageUint8Array, privateKeyUint8Array)
