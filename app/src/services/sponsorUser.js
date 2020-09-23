@@ -25,12 +25,17 @@ export async function sponsorUser(account) {
     }
     const message = getMessage(op)
     const messageUint8Array = tweetNaclUtils.decodeUTF8(message)
-    const privateKeyUint8Array = tweetNaclUtils.decodeUTF8(privateKey)
-    op.sig = uInt8ArrayToB64(
-      Object.values(
-        tweetNacl.sign.detached(messageUint8Array, privateKeyUint8Array)
-      )
+
+    const privateKeyUint8Array = tweetNaclUtils.decodeBase64(privateKey)
+
+    console.log('PK exists', privateKey.length)
+
+    const signedMessageUint8Array = tweetNacl.sign.detached(
+      messageUint8Array,
+      privateKeyUint8Array
     )
+
+    op.sig = tweetNaclUtils.encodeBase64(signedMessageUint8Array)
 
     const endpoint = `${BRIGHTID_SUBSCRIPTION_ENDPOINT}`
     const rawResponse = await fetch(endpoint, {
