@@ -11,8 +11,6 @@ export async function sponsorUser(account) {
   try {
     const privateKey = env('NODE_PK')
 
-    console.log('privateKey length ', privateKey.length)
-
     if (!privateKey) {
       return { error: 'No private key found for the node' }
     }
@@ -47,8 +45,6 @@ export async function sponsorUser(account) {
       },
       body: JSON.stringify(op),
     })
-
-    console.log('raw response ', rawResponse)
 
     if (rawResponse.ok) {
       return {
