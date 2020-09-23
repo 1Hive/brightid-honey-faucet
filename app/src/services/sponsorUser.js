@@ -72,11 +72,6 @@ export async function sponsorUser(account) {
   }
 }
 
-function uInt8ArrayToB64(array) {
-  const b = Buffer.from(array)
-  return b.toString('base64')
-}
-
 function getMessage(op) {
   const signedOp = {}
   for (const k in op) {
