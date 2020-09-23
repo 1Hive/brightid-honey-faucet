@@ -1,4 +1,5 @@
 import tweetNacl from 'tweetnacl'
+import tweetNaclUtils from 'tweetnacl-util'
 import stringify from 'fast-json-stable-stringify'
 
 import { CONTEXT_ID } from '../constants'
@@ -22,14 +23,18 @@ export async function sponsorUser(account) {
       timestamp,
       contextId: account,
     }
+
     const message = getMessage(op)
-    console.log('message ', message)
-    console.log('typof message!!! ', typeof message)
     const messageUint8Array = Buffer.from(message)
-    console.log(messageUint8Array, messageUint8Array)
-    op.sig = uInt8ArrayToB64(
-      Object.values(tweetNacl.sign.detached(messageUint8Array, privateKey))
+
+    const privateKeyUint8Array = tweetNaclUtils.decodeBase64(privateKey)
+
+    const signedMessageUint8Array = tweetNacl.sign.detached(
+      messageUint8Array,
+      privateKeyUint8Array
     )
+
+    op.sig = tweetNaclUtils.encodeBase64(signedMessageUint8Array)
 
     const endpoint = `${BRIGHTID_SUBSCRIPTION_ENDPOINT}`
     const rawResponse = await fetch(endpoint, {
@@ -38,10 +43,8 @@ export async function sponsorUser(account) {
         Accept: 'application/json',
         'Content-Type': 'application/json',
       },
-      body: op,
+      body: JSON.stringify(op),
     })
-
-    console.log('raw response ', rawResponse)
 
     if (rawResponse.ok) {
       return {
@@ -66,11 +69,6 @@ export async function sponsorUser(account) {
   }
 }
 
-function uInt8ArrayToB64(array) {
-  const b = Buffer.from(array)
-  return b.toString('base64')
-}
-
 function getMessage(op) {
   const signedOp = {}
   for (const k in op) {
@@ -81,16 +79,3 @@ function getMessage(op) {
   }
   return stringify(signedOp)
 }
-
-
-TypeError: unexpected type, use Uint8Array
-    at fe (nacl-fast.js:2165)
-    at Object.e.sign (nacl-fast.js:2269)
-    at Function.e.sign.detached (nacl-fast.js:2290)
-    at sponsorUser.js:28
-    at c (runtime.js:63)
-    at Generator._invoke (runtime.js:293)
-    at Generator.next (runtime.js:118)
-    at n (asyncToGenerator.js:3)
-    at s (asyncToGenerator.js:25)
-    at asyncToGenerator.js:32
