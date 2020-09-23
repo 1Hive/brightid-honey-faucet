@@ -1,4 +1,5 @@
 import tweetNacl from 'tweetnacl'
+import tweetNaclUtils from 'tweetnacl-util'
 import stringify from 'fast-json-stable-stringify'
 
 import { CONTEXT_ID } from '../constants'
@@ -23,10 +24,7 @@ export async function sponsorUser(account) {
       contextId: account,
     }
     const message = getMessage(op)
-    console.log('message ', message)
-    console.log('typof message!!! ', typeof message)
-    const messageUint8Array = Buffer.from(message)
-    console.log(messageUint8Array, messageUint8Array)
+    const messageUint8Array = tweetNaclUtils.decodeUTF8(message)
     op.sig = uInt8ArrayToB64(
       Object.values(tweetNacl.sign.detached(messageUint8Array, privateKey))
     )
