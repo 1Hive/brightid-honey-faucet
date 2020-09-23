@@ -23,7 +23,10 @@ export async function sponsorUser(account) {
       contextId: account,
     }
     const message = getMessage(op)
+    console.log('message ', message)
+    console.log('typof message!!! ', typeof message)
     const messageUint8Array = Buffer.from(message)
+    console.log(messageUint8Array, messageUint8Array)
     op.sig = uInt8ArrayToB64(
       Object.values(tweetNacl.sign.detached(messageUint8Array, privateKey))
     )
@@ -78,3 +81,16 @@ function getMessage(op) {
   }
   return stringify(signedOp)
 }
+
+
+TypeError: unexpected type, use Uint8Array
+    at fe (nacl-fast.js:2165)
+    at Object.e.sign (nacl-fast.js:2269)
+    at Function.e.sign.detached (nacl-fast.js:2290)
+    at sponsorUser.js:28
+    at c (runtime.js:63)
+    at Generator._invoke (runtime.js:293)
+    at Generator.next (runtime.js:118)
+    at n (asyncToGenerator.js:3)
+    at s (asyncToGenerator.js:25)
+    at asyncToGenerator.js:32
