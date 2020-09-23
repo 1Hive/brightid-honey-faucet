@@ -23,12 +23,12 @@ export async function sponsorUser(account) {
       timestamp,
       contextId: account,
     }
+
+    console.log('PK exists', privateKey.length)
     const message = getMessage(op)
     const messageUint8Array = tweetNaclUtils.decodeUTF8(message)
 
     const privateKeyUint8Array = tweetNaclUtils.decodeBase64(privateKey)
-
-    console.log('PK exists', privateKey.length)
 
     const signedMessageUint8Array = tweetNacl.sign.detached(
       messageUint8Array,
@@ -82,3 +82,20 @@ function getMessage(op) {
   }
   return stringify(signedOp)
 }
+
+
+
+sponsorUser.js:70 TypeError: invalid encoding
+    at r (nacl-util.js:18)
+    at Object.e.decodeBase64 (nacl-util.js:71)
+    at sponsorUser.js:29
+    at c (runtime.js:63)
+    at Generator._invoke (runtime.js:293)
+    at Generator.next (runtime.js:118)
+    at n (asyncToGenerator.js:3)
+    at s (asyncToGenerator.js:25)
+    at asyncToGenerator.js:32
+    at new Promise (<anonymous>)
+
+
+C0BO/Hg4gqYtQbtdoGjnlBSYjISaVIE8EYiNmRdPWGKE7KX9HJzShVg1Ih6eh9lTgPT/oDWDxOum4hThbV/BXg==
