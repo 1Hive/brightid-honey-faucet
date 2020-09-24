@@ -80,7 +80,16 @@ function ClaimAndRegister({
             <IconCheck />
             <span>Registered for next period</span>
           </div>
-          <Disclaimer />
+
+          <Info
+            mode="warning"
+            css={`
+              margin-top: ${2 * GU}px;
+            `}
+          >
+            To receive tokens, you must return and claim them in the period
+            after registering.
+          </Info>
         </div>
       )}
     </div>
@@ -178,22 +187,19 @@ function Claim({ currentPeriod, onClaim }) {
               margin-top: ${2 * GU}px;
             `}
           />
-          <Disclaimer />
+          <Info
+            mode="warning"
+            css={`
+              margin-top: ${2 * GU}px;
+            `}
+          >
+            If you fail to claim before this period ends, you will forfeit the
+            claim amount.
+          </Info>
         </form>
       )}
     </div>
   )
 }
-
-const Disclaimer = () => (
-  <Info
-    mode="warning"
-    css={`
-      margin-top: ${2 * GU}px;
-    `}
-  >
-    If you don't claim on a period you will forfeit the unclaimed amount
-  </Info>
-)
 
 export default ClaimAndRegister
