@@ -1,5 +1,12 @@
 import React, { useCallback, useMemo } from 'react'
-import { Button, GU, IconCheck, textStyle, useTheme } from '@1hive/1hive-ui'
+import {
+  Button,
+  GU,
+  IconCheck,
+  Info,
+  textStyle,
+  useTheme,
+} from '@1hive/1hive-ui'
 import LoadingRing from '../LoadingRing'
 
 import { useAppState } from '../../providers/AppState'
@@ -61,13 +68,23 @@ function ClaimAndRegister({
         <div
           css={`
             padding: ${3 * GU}px;
-            display: flex;
-            align-items: flex-start;
-            color: ${theme.positive};
           `}
         >
-          <IconCheck />
-          <span>Registered for next period</span>
+          <div
+            css={`
+              display: flex;
+              align-items: flex-start;
+              color: ${theme.positive};
+            `}
+          >
+            <IconCheck />
+            <span>Registered for next period</span>
+          </div>
+
+          <Disclaimer
+            text="To receive tokens, you must return and claim them in the period
+            after registering."
+          />
         </div>
       )}
     </div>
@@ -165,10 +182,26 @@ function Claim({ currentPeriod, onClaim }) {
               margin-top: ${2 * GU}px;
             `}
           />
+          <Disclaimer
+            text=" If you fail to claim before this period ends, you will forfeit the
+            claim amount."
+            mode="warning"
+          />
         </form>
       )}
     </div>
   )
 }
+
+const Disclaimer = ({ text, mode = 'info' }) => (
+  <Info
+    mode={mode}
+    css={`
+      margin-top: ${2 * GU}px;
+    `}
+  >
+    {text}
+  </Info>
+)
 
 export default ClaimAndRegister
