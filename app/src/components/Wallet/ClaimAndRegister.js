@@ -1,5 +1,12 @@
 import React, { useCallback, useMemo } from 'react'
-import { Button, GU, IconCheck, textStyle, useTheme } from '@1hive/1hive-ui'
+import {
+  Button,
+  GU,
+  IconCheck,
+  Info,
+  textStyle,
+  useTheme,
+} from '@1hive/1hive-ui'
 import LoadingRing from '../LoadingRing'
 
 import { useAppState } from '../../providers/AppState'
@@ -165,6 +172,14 @@ function Claim({ currentPeriod, onClaim }) {
               margin-top: ${2 * GU}px;
             `}
           />
+          <Info
+            mode="warning"
+            css={`
+              margin-top: ${2 * GU}px;
+            `}
+          >
+            If you don't claim on a period you will forfeit the unclaimed amount
+          </Info>
         </form>
       )}
     </div>
