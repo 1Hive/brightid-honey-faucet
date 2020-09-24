@@ -25,7 +25,9 @@ export const Claimer = gql`
       latestClaimPeriod
       addressVoid
       claims {
-        claimer
+        claimer {
+          id
+        }
         amount
         period {
           id
