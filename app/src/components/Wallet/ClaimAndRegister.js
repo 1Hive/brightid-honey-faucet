@@ -1,9 +1,11 @@
-import React, { useCallback, useMemo } from 'react'
+import React, { useCallback, useMemo, useState } from 'react'
 import {
   Button,
   GU,
   IconCheck,
+  IconCross,
   Info,
+  Modal,
   textStyle,
   useTheme,
 } from '@1hive/1hive-ui'
@@ -26,11 +28,23 @@ function ClaimAndRegister({
   const theme = useTheme()
   const { claimer } = useAppState()
   const { currentPeriod } = useClock()
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(null)
+
+  const handleModalClose = useCallback(() => setError(null), [])
 
   const handleSubmit = useCallback(
-    event => {
+    async event => {
       event.preventDefault()
-      onClaimAndOrRegister(addrs, timestamp, signature)
+
+      try {
+        setLoading(true)
+        const tx = await onClaimAndOrRegister(addrs, timestamp, signature)
+        await tx.wait()
+      } catch (err) {
+        setError(err)
+      }
+      setLoading(false)
     },
     [addrs, onClaimAndOrRegister, signature, timestamp]
   )
@@ -56,13 +70,24 @@ function ClaimAndRegister({
   const canClaim = registeredCurrentPeriod && !claimedCurrentPeriod
 
   if (!registeredNextPeriod && !canClaim) {
-    return <Register onRegister={handleSubmit} />
+    return (
+      <Register
+        error={error}
+        loading={loading}
+        onCloseModal={handleModalClose}
+        onRegister={handleSubmit}
+      />
+    )
   }
 
   return (
     <div>
       {canClaim && (
-        <Claim currentPeriod={currentPeriod} onClaim={handleSubmit} />
+        <Claim
+          currentPeriod={currentPeriod}
+          loading={loading}
+          onClaim={handleSubmit}
+        />
       )}
       {registeredNextPeriod && (
         <div
@@ -87,43 +112,48 @@ function ClaimAndRegister({
           />
         </div>
       )}
+      <ErrorModal error={error} onClose={handleModalClose} />
     </div>
   )
 }
 
-function Register({ onRegister }) {
+function Register({ error, loading, onCloseModal, onRegister }) {
   const theme = useTheme()
   return (
-    <form onSubmit={onRegister}>
-      <div
-        css={`
-          text-align: center;
-          padding: ${3 * GU}px;
-        `}
-      >
-        <span
+    <>
+      <form onSubmit={onRegister}>
+        <div
           css={`
-            color: ${theme.contentSecondary};
-            display: block;
+            text-align: center;
+            padding: ${3 * GU}px;
           `}
         >
-          Register your account, allowing you to claim in the next period
-        </span>
-        <Button
-          mode="strong"
-          label="Register"
-          type="submit"
-          wide
-          css={`
-            margin-top: ${3 * GU}px;
-          `}
-        />
-      </div>
-    </form>
+          <span
+            css={`
+              color: ${theme.contentSecondary};
+              display: block;
+            `}
+          >
+            Register your account, allowing you to claim in the next period
+          </span>
+          <Button
+            mode="strong"
+            label={loading ? 'Registering…' : 'Register'}
+            type="submit"
+            disabled={loading}
+            wide
+            css={`
+              margin-top: ${3 * GU}px;
+            `}
+          />
+        </div>
+      </form>
+      <ErrorModal error={error} onClose={onCloseModal} />
+    </>
   )
 }
 
-function Claim({ currentPeriod, onClaim }) {
+function Claim({ currentPeriod, loading, onClaim }) {
   const theme = useTheme()
   const { config } = useAppState()
   const { period, fetching } = usePeriod(currentPeriod)
@@ -176,8 +206,9 @@ function Claim({ currentPeriod, onClaim }) {
           <Button
             mode="strong"
             wide
-            label="Claim"
+            label={loading ? 'Claiming…' : 'Claim'}
             type="submit"
+            disabled={loading}
             css={`
               margin-top: ${2 * GU}px;
             `}
@@ -203,5 +234,30 @@ const Disclaimer = ({ text, mode = 'info' }) => (
     {text}
   </Info>
 )
+
+const ErrorModal = ({ error, onClose }) => {
+  const theme = useTheme()
+  return (
+    <Modal visible={Boolean(error)} onClose={onClose}>
+      <div
+        css={`
+          display: flex;
+          align-items: center;
+          margin-bottom: ${1.5 * GU}px;
+        `}
+      >
+        <IconCross color={theme.negative} />
+        <span
+          css={`
+            ${textStyle('title4')}
+          `}
+        >
+          Something went wrong
+        </span>
+      </div>
+      <p>{error?.message}</p>
+    </Modal>
+  )
+}
 
 export default ClaimAndRegister
