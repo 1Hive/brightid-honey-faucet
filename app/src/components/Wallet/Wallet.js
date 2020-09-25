@@ -14,6 +14,7 @@ import ClaimAndRegister from './ClaimAndRegister'
 import LoadingRing from '../LoadingRing'
 import NotVerified from './NotVerified'
 import TokenBalance from './TokenBalance'
+import NoSponsorshipsAvailable from './NoSponsorshipsAvailable'
 
 import { useWallet } from '../../providers/Wallet'
 import { useBrightIdVerification } from '../../hooks/useBrightIdVerification'
@@ -69,7 +70,8 @@ function Wallet({ onClaimAndOrRegister }) {
 
 function AccountConnected({ account, onClaimAndOrRegister }) {
   const theme = useTheme()
-  // TODO - error handling on this api call
+  const { verificationInfo, sponsorshipInfo } = useBrightIdVerification(account)
+
   const {
     addressExist,
     addressUnique,
@@ -79,7 +81,7 @@ function AccountConnected({ account, onClaimAndOrRegister }) {
     userSponsored,
     userVerified,
     fetching,
-  } = useBrightIdVerification(account)
+  } = verificationInfo
 
   return (
     <div>
@@ -124,6 +126,12 @@ function AccountConnected({ account, onClaimAndOrRegister }) {
         ) : (
           <div>
             {(() => {
+              if (
+                !sponsorshipInfo.availableSponsorships ||
+                sponsorshipInfo.error
+              ) {
+                return <NoSponsorshipsAvailable error={sponsorshipInfo.error} />
+              }
               if (!userSponsored) {
                 return (
                   <BrightIdConnect
@@ -150,6 +158,32 @@ function AccountConnected({ account, onClaimAndOrRegister }) {
                 />
               )
             })()}
+            <div
+              css={`
+                display: flex;
+                align-items: center;
+                flex-direction: column;
+                padding: 0 ${3 * GU}px ${3 * GU}px ${3 * GU}px;
+              `}
+            >
+              <span
+                css={`
+                  color: ${theme.contentSecondary};
+                  ${textStyle('body2')};
+                `}
+              >
+                Remaining sponsorships:
+              </span>
+              <span
+                css={`
+                  ${textStyle('body2')};
+                  font-weight: 500;
+                  margin-top: ${1 * GU}px;
+                `}
+              >
+                {sponsorshipInfo.availableSponsorships}
+              </span>
+            </div>
           </div>
         )}
       </div>
