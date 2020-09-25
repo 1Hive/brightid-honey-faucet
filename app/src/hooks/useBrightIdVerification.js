@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react'
 import { CONTEXT_ID } from '../constants'
-import { BRIGHTID_VERIFICATION_ENDPOINT } from '../endpoints'
+import {
+  BRIGHTID_1HIVE_INFO_ENDPOINT,
+  BRIGHTID_VERIFICATION_ENDPOINT,
+} from '../endpoints'
 import {
   ERROR_CODE,
   NOT_FOUND_CODE,
@@ -27,7 +30,10 @@ export function useBrightIdVerification(account) {
   const [verificationInfo, setVerificationInfo] = useState(
     VERIFICATION_INFO_DEFAULT
   )
-  const [availableSponsorships, setAvailableSponsorships] = useState(0)
+  const [sponsorshipInfo, setSponsorshipInfo] = useState({
+    availableSponsorships: 0,
+    error: false,
+  })
 
   useEffect(() => {
     let cancelled = false
@@ -36,6 +42,34 @@ export function useBrightIdVerification(account) {
     const fetchSponsorshipInfo = async () => {
       if (!account) {
         return
+      }
+
+      try {
+        const rawResponse = await fetch(BRIGHTID_1HIVE_INFO_ENDPOINT, {
+          method: 'GET',
+          headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+          },
+          timeout: REQUEST_TIMEOUT,
+        })
+
+        if (!rawResponse.ok) {
+          setSponsorshipInfo({
+            error: true,
+          })
+        }
+
+        const response = await rawResponse.json()
+
+        setSponsorshipInfo({
+          availableSponsorships: response?.data?.unusedSponsorships,
+          error: false,
+        })
+      } catch (err) {
+        setSponsorshipInfo({
+          error: true,
+        })
       }
 
       if (!cancelled) {
@@ -63,7 +97,7 @@ export function useBrightIdVerification(account) {
     }
 
     const fetchVerificationInfo = async () => {
-      if (availableSponsorships === 0) {
+      if (sponsorshipInfo.availableSponsorships === 0) {
         return
       }
 
@@ -146,7 +180,7 @@ export function useBrightIdVerification(account) {
       cancelled = true
       clearTimeout(retryTimer)
     }
-  }, [account, availableSponsorships])
+  }, [account, sponsorshipInfo.availableSponsorships])
 
-  return verificationInfo
+  return { verificationInfo, sponsorshipInfo }
 }
