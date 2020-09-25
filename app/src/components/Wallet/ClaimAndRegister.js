@@ -42,7 +42,6 @@ function ClaimAndRegister({
         const tx = await onClaimAndOrRegister(addrs, timestamp, signature)
         await tx.wait()
       } catch (err) {
-        console.error(err)
         setError(err)
       }
       setLoading(false)
