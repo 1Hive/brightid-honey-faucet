@@ -1,10 +1,9 @@
 import React from 'react'
-import { GU, textStyle, useTheme } from '@1hive/1hive-ui'
+import { formatTokenAmount, GU, textStyle, useTheme } from '@1hive/1hive-ui'
 import { useTokenBalance } from '../../hooks/useTokenBalance'
 import { useAppState } from '../../providers/AppState'
 import { useWallet } from '../../providers/Wallet'
 
-import { formatTokenAmount } from '../../lib/math-utils'
 import honeySvg from '../../assets/honey.svg'
 
 function TokenBalance() {
