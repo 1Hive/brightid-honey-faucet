@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react'
 import { CONTEXT_ID } from '../constants'
-import { BRIGHTID_VERIFICATION_ENDPOINT } from '../endpoints'
+import {
+  BRIGHTID_1HIVE_INFO_ENDPOINT,
+  BRIGHTID_VERIFICATION_ENDPOINT,
+} from '../endpoints'
 import {
   ERROR_CODE,
   NOT_FOUND_CODE,
@@ -27,6 +30,64 @@ export function useBrightIdVerification(account) {
   const [verificationInfo, setVerificationInfo] = useState(
     VERIFICATION_INFO_DEFAULT
   )
+  const [sponsorshipInfo, setSponsorshipInfo] = useState({
+    availableSponsorships: 0,
+    error: false,
+  })
+
+  useEffect(() => {
+    let cancelled = false
+    let retryTimer
+
+    const fetchSponsorshipInfo = async () => {
+      if (!account) {
+        return
+      }
+
+      try {
+        const rawResponse = await fetch(BRIGHTID_1HIVE_INFO_ENDPOINT, {
+          method: 'GET',
+          headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+          },
+          timeout: REQUEST_TIMEOUT,
+        })
+
+        if (!rawResponse.ok) {
+          setSponsorshipInfo({
+            error: true,
+          })
+        }
+
+        const response = await rawResponse.json()
+        if (!cancelled) {
+          setSponsorshipInfo({
+            availableSponsorships: response?.data?.unusedSponsorships,
+            error: false,
+          })
+        }
+      } catch (err) {
+        setSponsorshipInfo({
+          error: true,
+        })
+      }
+
+      if (!cancelled) {
+        retryTimer = setTimeout(
+          fetchSponsorshipInfo,
+          VERIFICATION_POLLING_EVERY
+        )
+      }
+    }
+
+    fetchSponsorshipInfo()
+
+    return () => {
+      cancelled = true
+      clearTimeout(retryTimer)
+    }
+  }, [account])
 
   useEffect(() => {
     let cancelled = false
@@ -37,6 +98,10 @@ export function useBrightIdVerification(account) {
     }
 
     const fetchVerificationInfo = async () => {
+      if (sponsorshipInfo.availableSponsorships === 0) {
+        return
+      }
+
       const endpoint = `${BRIGHTID_VERIFICATION_ENDPOINT}/${CONTEXT_ID}/${account}?signed=eth&timestamp=seconds`
       try {
         const rawResponse = await fetch(endpoint, {
@@ -116,7 +181,7 @@ export function useBrightIdVerification(account) {
       cancelled = true
       clearTimeout(retryTimer)
     }
-  }, [account])
+  }, [account, sponsorshipInfo.availableSponsorships])
 
-  return verificationInfo
+  return { sponsorshipInfo, verificationInfo }
 }
