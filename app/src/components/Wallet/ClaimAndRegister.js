@@ -1,6 +1,7 @@
 import React, { useCallback, useMemo, useState } from 'react'
 import {
   Button,
+  formatTokenAmount,
   GU,
   IconCheck,
   IconCross,
@@ -16,7 +17,6 @@ import { useClock } from '../../providers/Clock'
 import { useIndividualPayout } from '../../hooks/useIndividualPayout'
 import { usePeriod } from '../../hooks/polling-hooks'
 
-import { formatTokenAmount } from '../../lib/math-utils'
 import honeySvg from '../../assets/honey.svg'
 
 function ClaimAndRegister({
@@ -198,7 +198,8 @@ function Claim({ currentPeriod, loading, onClaim }) {
               >
                 {formatTokenAmount(
                   individualPayout || period.individualPayout,
-                  config.token.decimals
+                  config.token.decimals,
+                  { digits: 4 }
                 )}
               </span>
             </div>
