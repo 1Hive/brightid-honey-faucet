@@ -61,11 +61,12 @@ export function useBrightIdVerification(account) {
         }
 
         const response = await rawResponse.json()
-
-        setSponsorshipInfo({
-          availableSponsorships: response?.data?.unusedSponsorships,
-          error: false,
-        })
+        if (!cancelled) {
+          setSponsorshipInfo({
+            availableSponsorships: response?.data?.unusedSponsorships,
+            error: false,
+          })
+        }
       } catch (err) {
         setSponsorshipInfo({
           error: true,
@@ -182,5 +183,5 @@ export function useBrightIdVerification(account) {
     }
   }, [account, sponsorshipInfo.availableSponsorships])
 
-  return { verificationInfo, sponsorshipInfo }
+  return { sponsorshipInfo, verificationInfo }
 }

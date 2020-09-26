@@ -12,9 +12,9 @@ import AddressReplaced from './AddressReplaced'
 import BrightIdConnect from './BrightIdConnect'
 import ClaimAndRegister from './ClaimAndRegister'
 import LoadingRing from '../LoadingRing'
+import NoSponsorshipsAvailable from './NoSponsorshipsAvailable'
 import NotVerified from './NotVerified'
 import TokenBalance from './TokenBalance'
-import NoSponsorshipsAvailable from './NoSponsorshipsAvailable'
 
 import { useWallet } from '../../providers/Wallet'
 import { useBrightIdVerification } from '../../hooks/useBrightIdVerification'
@@ -70,7 +70,7 @@ function Wallet({ onClaimAndOrRegister }) {
 
 function AccountConnected({ account, onClaimAndOrRegister }) {
   const theme = useTheme()
-  const { verificationInfo, sponsorshipInfo } = useBrightIdVerification(account)
+  const { sponsorshipInfo, verificationInfo } = useBrightIdVerification(account)
 
   const {
     addressExist,

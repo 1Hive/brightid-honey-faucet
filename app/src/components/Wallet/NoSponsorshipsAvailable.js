@@ -1,7 +1,7 @@
 import React from 'react'
 import { GU, Link, textStyle, useTheme } from '@1hive/1hive-ui'
 
-function NotSponsorshipsAvailable({ error }) {
+function NoSponsorshipsAvailable({ error }) {
   const theme = useTheme()
   return (
     <div
@@ -50,4 +50,4 @@ function NotSponsorshipsAvailable({ error }) {
   )
 }
 
-export default NotSponsorshipsAvailable
+export default NoSponsorshipsAvailable
