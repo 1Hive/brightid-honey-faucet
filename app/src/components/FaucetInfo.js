@@ -8,7 +8,15 @@ import {
 } from '@1hive/1hive-ui'
 import LoadingRing from './LoadingRing'
 
-function FaucetInfo({ amount, decimals, text, icon, loading, compact }) {
+function FaucetInfo({
+  amount,
+  decimals,
+  digits = 2,
+  text,
+  icon,
+  loading,
+  compact,
+}) {
   const theme = useTheme()
 
   const Container = compact ? 'div' : Box
@@ -56,7 +64,7 @@ function FaucetInfo({ amount, decimals, text, icon, loading, compact }) {
                   color: ${theme.content};
                 `}
               >
-                {formatTokenAmount(amount, decimals)}
+                {formatTokenAmount(amount, decimals, { digits })}
               </h5>
               <span
                 css={`

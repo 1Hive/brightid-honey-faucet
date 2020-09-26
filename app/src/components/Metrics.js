@@ -68,6 +68,7 @@ function Metrics() {
         <FaucetInfo
           amount={individualPayout}
           decimals={config.token.decimals}
+          digits={3}
           text="Amount paid per user this period"
           icon={tokenIcon}
           loading={fetchingPeriodData}
