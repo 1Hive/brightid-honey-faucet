@@ -1,7 +1,12 @@
 import React from 'react'
-import { Box, GU, useTheme, textStyle } from '@1hive/1hive-ui'
+import {
+  Box,
+  formatTokenAmount,
+  GU,
+  useTheme,
+  textStyle,
+} from '@1hive/1hive-ui'
 import LoadingRing from './LoadingRing'
-import { formatTokenAmount } from '../lib/math-utils'
 
 function FaucetInfo({ amount, decimals, text, icon, loading, compact }) {
   const theme = useTheme()
