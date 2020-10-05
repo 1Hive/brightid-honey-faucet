@@ -8,7 +8,7 @@ const networks = {
     name: 'Mainnet',
     type: 'main',
     defaultEthNode: 'https://mainnet.eth.aragon.network/',
-    faucet: '', // TODO: Add facuet address
+    faucet: '', // TODO: Add faucet address
   },
   rinkeby: {
     chainId: 4,
