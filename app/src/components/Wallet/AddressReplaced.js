@@ -21,7 +21,7 @@ function AddressReplaced({ addrs }) {
         `}
       >
         You must use <IdentityBadge entity={primaryAddress} /> to interact with
-        the facuet
+        the faucet
       </div>
     </div>
   )
