@@ -41,7 +41,7 @@ function TokenBalance() {
             ${textStyle('title4')};
           `}
         >
-          {formatTokenAmount(balance, config.token.decimals)}
+          {formatTokenAmount(balance, config.token.decimals, { digits: 4 })}
         </span>
       </div>
     </div>
