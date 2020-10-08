@@ -3,19 +3,37 @@ import tweetNaclUtils from 'tweetnacl-util'
 import stringify from 'fast-json-stable-stringify'
 
 import { CONTEXT_ID } from '../constants'
-import { BRIGHTID_SUBSCRIPTION_ENDPOINT } from '../endpoints'
+import { BRIGHTID_SUBSCRIPTION_ENDPOINT, UTC_API_ENDPOINT } from '../endpoints'
 import { NO_CONTENT } from './responseCodes'
 import env from '../environment'
 
 export async function sponsorUser(account) {
   try {
+    let timestamp
     const privateKey = env('NODE_PK')
 
     if (!privateKey) {
       return { error: 'No private key found for the node' }
     }
 
-    const timestamp = Date.now()
+    try {
+      const dateResponse = await fetch(UTC_API_ENDPOINT, {
+        method: 'GET',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+        },
+      })
+
+      const dateResponseJson = await dateResponse.json()
+      const dateString = dateResponseJson.currentDateTime
+      const currentDate = new Date(dateString)
+      timestamp = currentDate.getTime()
+    } catch (error) {
+      // fallback to system time in case something went wrong with the utc time api
+      timestamp = Date.now()
+    }
+
     const op = {
       v: 5,
       name: 'Sponsor',
