@@ -11,6 +11,8 @@ export const BRIGHTID_SUBSCRIPTION_ENDPOINT = `${BRIGHT_ID_ENDPOINT_V5}/operatio
 
 export const BRIGHT_ID_APP_DEEPLINK = `brightid://link-verification/${NODE_URL}/${CONTEXT_ID}`
 
+export const UTC_API_ENDPOINT = `http://worldclockapi.com/api/json/utc/now`
+
 // The graph endpoints
 const GRAPH_API_BASE_HTTP_LOCAL = 'http://127.0.0.1:8000'
 const GRAPH_API_BASE_WS_LOCAL = 'ws://127.0.0.1:8001'
