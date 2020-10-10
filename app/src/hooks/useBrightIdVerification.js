@@ -98,10 +98,6 @@ export function useBrightIdVerification(account) {
     }
 
     const fetchVerificationInfo = async () => {
-      if (sponsorshipInfo.availableSponsorships === 0) {
-        return
-      }
-
       const endpoint = `${BRIGHTID_VERIFICATION_ENDPOINT}/${CONTEXT_ID}/${account}?signed=eth&timestamp=seconds`
       try {
         const rawResponse = await fetch(endpoint, {
