@@ -12,8 +12,9 @@ import Helmet from 'react-helmet'
 function SEO({ description, lang, title, path }) {
   const site = {
     siteMetadata: {
-      siteUrl: 'https://1hive.org',
+      siteUrl: 'https://faucet.1hive.org',
       title: '1hive',
+      path: '/#/',
       description:
         '1Hive is a DAO that issues and distributes a digital currency called Honey.',
     },
@@ -21,6 +22,7 @@ function SEO({ description, lang, title, path }) {
 
   const metaDescription = description || site.siteMetadata.description
   const uniTitle = '1hive | ' + title
+  const metaPath = path || site.siteMetadata.path
 
   return (
     <Helmet
@@ -38,7 +40,7 @@ function SEO({ description, lang, title, path }) {
       <meta property="og:title" content={uniTitle} />
       <meta property="og:description" content={metaDescription} />
       <meta property="og:type" content="website" />
-      <meta property="og:url" content={site.siteMetadata.siteUrl + path} />
+      <meta property="og:url" content={site.siteMetadata.siteUrl + metaPath} />
       <meta
         property="og:image"
         content={site.siteMetadata.siteUrl + '/twitter-card_logo.webp'}
