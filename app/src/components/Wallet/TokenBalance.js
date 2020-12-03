@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useCallback } from 'react'
 import {
   Button,
   formatTokenAmount,
@@ -6,7 +6,7 @@ import {
   textStyle,
   useTheme,
 } from '@1hive/1hive-ui'
-import { useAddTokenToMetamask } from '../../hooks/useAddTokenToMetamask'
+import { addTokenToMetamask } from '../../utils/addTokenToMetamask'
 import { useTokenBalance } from '../../hooks/useTokenBalance'
 import { useAppState } from '../../providers/AppState'
 import { useWallet } from '../../providers/Wallet'
@@ -18,7 +18,10 @@ function TokenBalance() {
   const { config } = useAppState()
   const { account, ethereum } = useWallet()
   const balance = useTokenBalance(account, config.token)
-  const addTokenToMM = useAddTokenToMetamask()
+  const handleOnAddTokenToMetaMask = useCallback(
+    () => addTokenToMetamask(ethereum, config.token),
+    []
+  )
 
   return (
     <div
@@ -65,7 +68,7 @@ function TokenBalance() {
         wide
         label="Add HNY to MetaMask"
         type="submit"
-        onClick={() => addTokenToMM(ethereum)}
+        onClick={handleOnAddTokenToMetaMask}
         css={`
           margin-top: ${2 * GU}px;
         `}
