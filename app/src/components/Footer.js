@@ -58,6 +58,9 @@ export default function Footer({ compact }) {
             <Link href="https://twitter.com/1HiveOrg" external>
               Twitter
             </Link>
+            <Link href="https://t.me/honeyswapdex" external>
+              Telegram
+            </Link>
             <Link
               css={`
                 margin-bottom: 0px;
