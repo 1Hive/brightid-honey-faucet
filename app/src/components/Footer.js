@@ -49,8 +49,8 @@ export default function Footer({ compact }) {
             >
               Community
             </h5>
-            <Link href="https://keybase.io/team/1hive" external>
-              Keybase
+            <Link href="https://discord.com/invite/4fm7pgB" external>
+              Discord
             </Link>
             <Link href="https://github.com/1Hive" external>
               Github
@@ -82,6 +82,12 @@ export default function Footer({ compact }) {
               external
             >
               Handbook
+            </Link>
+            <Link
+              href="https://1hive.gitbook.io/1hive/"
+              external
+            >
+              GitBook
             </Link>
           </div>
         </div>
