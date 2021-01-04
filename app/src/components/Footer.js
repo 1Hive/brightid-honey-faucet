@@ -81,12 +81,6 @@ export default function Footer({ compact }) {
               Tools
             </h5>
             <Link
-              href="https://www.notion.so/1Hive-Community-Handbook-f66d489df85a4011bac681963bfee796"
-              external
-            >
-              Handbook
-            </Link>
-            <Link
               href="https://1hive.gitbook.io/1hive/"
               external
             >
