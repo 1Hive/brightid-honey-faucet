@@ -90,7 +90,7 @@ export default function Footer({ compact }) {
               href="https://1hive.gitbook.io/1hive/"
               external
             >
-              GitBook
+              Wiki
             </Link>
           </div>
         </div>
