@@ -80,10 +80,7 @@ export default function Footer({ compact }) {
             >
               Tools
             </h5>
-            <Link
-              href="https://1hive.gitbook.io/1hive/"
-              external
-            >
+            <Link href="https://1hive.gitbook.io/1hive/" external>
               Wiki
             </Link>
           </div>
