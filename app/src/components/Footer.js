@@ -49,14 +49,17 @@ export default function Footer({ compact }) {
             >
               Community
             </h5>
-            <Link href="https://keybase.io/team/1hive" external>
-              Keybase
+            <Link href="https://discord.com/invite/4fm7pgB" external>
+              Discord
             </Link>
             <Link href="https://github.com/1Hive" external>
               Github
             </Link>
             <Link href="https://twitter.com/1HiveOrg" external>
               Twitter
+            </Link>
+            <Link href="https://t.me/honeyswapdex" external>
+              Telegram
             </Link>
             <Link
               css={`
@@ -77,11 +80,8 @@ export default function Footer({ compact }) {
             >
               Tools
             </h5>
-            <Link
-              href="https://www.notion.so/1Hive-Community-Handbook-f66d489df85a4011bac681963bfee796"
-              external
-            >
-              Handbook
+            <Link href="https://1hive.gitbook.io/1hive/" external>
+              Wiki
             </Link>
           </div>
         </div>
