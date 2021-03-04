@@ -25,6 +25,16 @@ const networks = {
     type: 'xdai',
     defaultEthNode: 'https://xdai.poanetwork.dev/',
     faucet: '0x967ebb4343c442d19a47b9196d121bd600600911',
+    eip3085: {
+      chainId: '0x64',
+      chainName: 'xDai',
+      rpcUrls: ['https://xdai.poanetwork.dev/'],
+      iconUrls: [
+        'https://gblobscdn.gitbook.com/spaces%2F-Lpi9AHj62wscNlQjI-l%2Favatar.png',
+      ],
+      nativeCurrency: { name: 'xDAI', symbol: 'xDAI', decimals: 18 },
+      blockExplorerUrls: ['https://blockscout.com/poa/xdai/'],
+    },
   },
 }
 
@@ -42,4 +52,12 @@ export function getAvailableNetworks() {
     name,
     type,
   }))
+}
+
+export function addEthereumChain() {
+  const { eip3085 } = getNetwork()
+  window.ethereum.request({
+    method: 'wallet_addEthereumChain',
+    params: [eip3085],
+  })
 }
