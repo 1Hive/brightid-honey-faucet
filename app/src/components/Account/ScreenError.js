@@ -4,6 +4,7 @@ import { GU, Link, textStyle, useTheme } from '@1hive/1hive-ui'
 import { UnsupportedChainError } from 'use-wallet'
 import { getNetworkName } from '../../lib/web3-utils'
 import connectionError from './assets/connection-error.png'
+import { addEthereumChain } from '../../networks'
 
 function AccountModuleErrorScreen({ error, onBack }) {
   const theme = useTheme()
@@ -11,6 +12,7 @@ function AccountModuleErrorScreen({ error, onBack }) {
 
   const [title, secondary] = useMemo(() => {
     if (error instanceof UnsupportedChainError) {
+      addEthereumChain()
       return [
         'Wrong network',
         `Please select the ${getNetworkName()} network in your wallet and try again.`,
