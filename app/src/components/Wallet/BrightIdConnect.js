@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { GU, Info, textStyle, useTheme } from '@1hive/1hive-ui'
+import { Button, GU, Info, textStyle, useTheme } from '@1hive/1hive-ui'
 import QRCode from 'qrcode.react'
 import LoadingRing from '../LoadingRing'
 import { sponsorUser } from '../../services/sponsorUser'
@@ -9,6 +9,7 @@ import { BRIGHT_ID_APP_DEEPLINK } from '../../endpoints'
 function BrightIdConnect({ account, addressExist }) {
   const theme = useTheme()
   const [error, setError] = useState(null)
+  const [hasScannedQr, setHasScannedQr] = useState(false)
   const deepLink = `${BRIGHT_ID_APP_DEEPLINK}/${account}`
 
   useEffect(() => {
@@ -56,7 +57,7 @@ function BrightIdConnect({ account, addressExist }) {
       >
         Connect with BrightID
       </h5>
-      {addressExist ? (
+      {hasScannedQr ? (
         <div
           css={`
             display: flex;
@@ -101,6 +102,14 @@ function BrightIdConnect({ account, addressExist }) {
             Scanning this code will prevent any previously connected addresses
             from registering, claiming or connecting to BrightID
           </Info>
+          <Button
+            onClick={() => setHasScannedQr(true)}
+            css={`
+              margin-top: ${3 * GU}px;
+            `}
+          >
+            Continue after Scanning QR Code
+          </Button>
         </>
       )}
     </div>
