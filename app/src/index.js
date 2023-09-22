@@ -5,6 +5,7 @@ import { HashRouter } from 'react-router-dom'
 import App from './App'
 import AppLoader from './components/AppLoader'
 import MainView from './components/MainView'
+import MetaTags from './components/seo'
 import SubgraphClient from './SubgraphClient'
 import { WalletProvider } from './providers/Wallet'
 import { AppStateProvider } from './providers/AppState'
@@ -15,6 +16,10 @@ ReactDOM.render(
     <WalletProvider>
       <AppStateProvider>
         <ClockProvider>
+          <MetaTags
+            title="Honey Faucet"
+            description="1Hive is a DAO that issues and distributes a digital currency called Honey."
+          />
           <Main assetsUrl="/aragon-ui/" layout={false}>
             <HashRouter>
               <MainView>
